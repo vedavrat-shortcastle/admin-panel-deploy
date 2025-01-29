@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Admin Panel
+
+Internal admin panel built with Next.js 15, Prisma, tRPC, and shadcn/ui.
+
+## Prerequisites
+
+- Node.js 20+
+- pnpm
+- Git
+
+## Tech Stack
+
+- **Framework:** Next.js 15 (App Router)
+- **Database:** PostgreSQL
+- **ORM:** Prisma
+- **Authentication:** Next-Auth + 2FA
+- **UI:** shadcn/ui
+- **Forms:** React Hook Form + Zod
+- **API:** tRPC
+- **Charts:** Recharts
+- **Deployment:** Vercel
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   git clone https://github.com/subscription-shortcastle/admin-panel.git
+   cd admin-panel
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install Node.js 20.15.0 using nvm:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   nvm install 20.15.0
+   nvm use
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Install pnpm if you don't have it:
 
-## Learn More
+   - **macOS/Linux**:
 
-To learn more about Next.js, take a look at the following resources:
+     ```bash
+     curl -fsSL https://get.pnpm.io/install.sh | sh -
+     ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   - **Windows**:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+     ```powershell
+     iwr https://get.pnpm.io/install.ps1 -useb | iex
+     ```
 
-## Deploy on Vercel
+4. Install dependencies:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   pnpm install
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Setup husky:
+
+   ```bash
+   pnpm prepare
+   ```
+
+6. Start the development server:
+
+   ```bash
+   pnpm dev
+   ```
+
+## Notes
+
+1. Make sure to follow conventional commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+2. Use Prettier for code formatting.
+3. We are using ESLint for lint checks.
+4. Do not disable/ignore the pre-commit hook while creating commits.
+5. Ensure your code passes all linting and formatting checks before pushing changes.

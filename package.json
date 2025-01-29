@@ -8,8 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "prepare": "husky",
-    "pre-commit": "lint-staged",
+    "prepare": "husky init",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
