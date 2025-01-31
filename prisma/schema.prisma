@@ -1,0 +1,1012 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//
+//***************************************************    USER    ***************************************************
+//
+model User {
+  uuid                      String                      @id
+  username                  String                      @unique
+  password                  String
+  role                      Int
+  firstname                 String
+  lastname                  String
+  dateOfBirth               Int
+  email                     String                      @unique
+  gender                    String
+  emailVerified             Boolean                     @default(false)
+  disabled                  Boolean                     @default(false)
+  isLead                    Boolean                     @default(false) @map("is_lead")
+  preferences               Json                        @default("{}")
+  gameCollectionUuid        String?                     @map("game_collection_uuid")
+  phoneNumber               String?                     @map("phone_number")
+  shouldResetPassword       Boolean?                    @default(false) @map("should_reset_password")
+  createdAt                 DateTime                    @default(now())
+  deletedAt                 DateTime?                   @map("deleted_at")
+  onBoarded                 Boolean                     @default(true) @map("on_boarded")
+  // Coach Student
+  coachFor                  CoachStudent[]              @relation("coach_user")
+  studentFor                CoachStudent[]              @relation("student_user")
+  // Academy
+  joinedAcademies           AcademyUser[]
+  // Classroom
+  participatedClassrooms    ClassroomParticipant[]
+  // Simul
+  createdSimuls             Simul[]
+  invitedToSimuls           SimulInvitee[]
+  participatedSimuls        SimulParticipant[]
+  // Tournament
+  createdTournaments        Tournament[]
+  participatedTournaments   TournamentParticipant[]
+  // Study
+  createdStudies            Study[]
+  accessibleStudies         StudyAccess[]
+  // Quiz
+  createdQuizzes            Quiz[]
+  invitedToQuizzes          QuizInvitee[]
+  // Waiting Rooms
+  createdWaitingRooms       WaitingRoom[]
+  // StudyCollection
+  createdCollections        Collection[]
+  accessibleCollections     CollectionAccess[]
+  // PaymentGateways 
+  UserPaymentGateway        UserPaymentGateway?
+  //Course
+  createdCourses            Course[]
+  attendedTheCourses        CourseAttendee[]
+  courseActivitySubmission2 CourseActivitySubmission2[]
+  paymentGatewayKeys        PaymentGateway[]
+  InvoicesCreated           Invoice[]                   @relation("created_by_user")
+  InvoicesRecieved          Invoice[]                   @relation("recipient_user")
+
+  @@map("cl_user")
+}
+
+model UserPaymentGateway {
+  id                     String    @default(dbgenerated())
+  userId                 String    @unique
+  stripeSecretKey        String?
+  stripePublishableKey   String?
+  createdAt              DateTime? @default(now())
+  updatedAt              DateTime? @default(now())
+  user                   User   @relation(fields: [userId], references: [uuid])
+}
+
+model UnregisteredUser {
+  id        String   @id @default(dbgenerated())
+  firstname String?
+  lastname  String?
+  email     String   @unique
+  phone     String?
+  isDeleted Boolean  @default(false) @map("is_deleted")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("cl_unregistered_user")
+}
+
+model CoachStudent {
+  id        String   @id @default(dbgenerated())
+  coachId   String   @map("coach_id")
+  studentId String   @map("student_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  coach     User     @relation("coach_user", fields: [coachId], references: [uuid])
+  student   User     @relation("student_user", fields: [studentId], references: [uuid])
+
+  @@unique([coachId, studentId], name: "coachStudent_coachId_studentId_idx")
+  @@map("cp_coach_student")
+}
+
+//
+//**************************************************    ACADEMY    **************************************************
+//
+model Academy {
+  id            String             @id @default(dbgenerated())
+  name          String
+  shortName     String             @map("short_name")
+  description   String             @default("")
+  timezone      String
+  domain        String             @default("")
+  ratingSystems RatingSystemType[] @map("rating_systems")
+  facebook      String?
+  twitter       String?
+  instagram     String?
+  youtube       String?
+  info          String?
+  logo          String?
+  createdAt     DateTime?          @default(now()) @map("created_at")
+  updatedAt     DateTime?          @default(now()) @map("updated_at")
+  users         AcademyUser[]
+  flags         Json               @default("{}")
+  preferences   Json               @default("{}")
+  courses       Course[]
+
+  @@map("cp_academy")
+}
+
+model AcademyUser {
+  id        String          @id @default(dbgenerated())
+  academyId String          @map("academy_id")
+  userId    String          @map("user_id")
+  role      AcademyUserRole
+  createdAt DateTime?       @default(now()) @map("created_at")
+  updatedAt DateTime?       @default(now()) @map("updated_at")
+  academy   Academy         @relation(fields: [academyId], references: [id])
+  user      User            @relation(fields: [userId], references: [uuid])
+
+  @@unique([academyId, userId], name: "cp_academy_user_academy_id_user_id_key")
+  @@map("cp_academy_user")
+}
+
+//
+//************************************************** CLASSROOM **************************************************
+//
+
+model Classroom {
+  id           String                 @id @default(dbgenerated())
+  name         String?
+  mode         String                 @default("ONLINE")
+  ownerId      String                 @map("owner_id")
+  type         ClassroomType
+  createdAt    DateTime?              @default(now()) @map("created_at")
+  updatedAt    DateTime?              @default(now()) @map("updated_at")
+  startedAt    DateTime?              @map("started_at")
+  endedAt      DateTime?              @map("ended_at")
+  scheduledAt  DateTime?              @map("scheduled_at")
+  deletedAt    DateTime?              @map("deleted_at")
+  isOpen       Boolean?               @default(false) @map("is_open")
+  version      Int?                   @default(1)
+  isPublic     Boolean?               @default(false) @map("is_public")
+  passcode     String?                @default("")
+  planType     String                 @default("FREE") @map("plan_type")
+  participants ClassroomParticipant[]
+
+  @@map("cl_session")
+}
+
+model ClassroomParticipant {
+  id          String    @id @default(dbgenerated())
+  classroomId String    @map("session_id")
+  userId      String    @map("user_id")
+  user        User      @relation(fields: [userId], references: [uuid])
+  classroom   Classroom @relation(fields: [classroomId], references: [id])
+
+  @@unique([classroomId, userId], name: "cl_participant_session_id_user_id_key")
+  @@map("cl_participant")
+}
+
+//
+//************************************************** STUDY **************************************************
+//
+model Study {
+  id                        String                      @id @default(dbgenerated())
+  title                     String
+  description               String
+  ownerId                   String                      @map("owner_id")
+  isDeleted                 Boolean                     @default(false) @map("is_deleted")
+  level                     StudyLevel                  @default(dbgenerated())
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @default(now()) @map("updated_at")
+  owner                     User                        @relation(fields: [ownerId], references: [uuid])
+  accesses                  StudyAccess[]
+  activities                Activity[]
+  includedInQuizzes         QuizStudy[]
+  CollectionStudy           CollectionStudy[]
+  courseActivitySubmission2 CourseActivitySubmission2[]
+
+  @@map("cl_study")
+}
+
+model Activity {
+  id                        String                      @id @default(dbgenerated())
+  no                        Int                         @default(1)
+  studyId                   String                      @map("study_id")
+  type                      ActivityType
+  title                     String
+  points                    Int
+  timeToSolve               Int                         @map("time_to_solve")
+  maxAttempts               Int                         @map("max_attempts")
+  data                      Json
+  hasTimeLimit              Boolean                     @default(false) @map("has_time_limit")
+  isDeleted                 Boolean                     @default(false) @map("is_deleted")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @default(now()) @map("updated_at")
+  study                     Study                       @relation(fields: [studyId], references: [id])
+  includedInQuizzes         QuizActivity[]
+  courseActivitySubmission2 CourseActivitySubmission2[]
+  quizActivitySubmissions   QuizActivitySubmission[]
+
+  @@index([studyId], name: "cl_question_questionnaire_id")
+  @@map("cl_activity")
+}
+
+model StudyAccess {
+  studyId   String          @map("study_id")
+  userId    String          @map("user_id")
+  privilege AccessPrivilege @default(READ)
+  study     Study           @relation(fields: [studyId], references: [id])
+  user      User            @relation(fields: [userId], references: [uuid])
+
+  @@id([studyId, userId])
+  @@map("cl_study_access")
+}
+
+//
+//************************************************** QUIZ **************************************************
+//
+model Quiz {
+  id                      String                   @id @default(dbgenerated())
+  ownerId                 String                   @map("owner_id")
+  name                    String
+  isPublic                Boolean                  @default(true) @map("is_public")
+  isOpenToAll             Boolean                  @default(false) @map("is_open_to_all")
+  collectName             Boolean                  @default(false) @map("collect_name")
+  collectEmail            Boolean                  @default(false) @map("collect_email")
+  collectPhone            Boolean                  @default(false) @map("collect_phone")
+  askAtBeginning          Boolean                  @default(false) @map("ask_at_beginning")
+  startTime               DateTime                 @default(now()) @map("start_time")
+  endTime                 DateTime?                @map("end_time")
+  level                   QuizLevel                @default(dbgenerated())
+  isDeleted               Boolean                  @default(false) @map("is_deleted")
+  createdAt               DateTime                 @default(now()) @map("created_at")
+  updatedAt               DateTime                 @default(now()) @map("updated_at")
+  owner                   User                     @relation(fields: [ownerId], references: [uuid])
+  studies                 QuizStudy[]
+  invitees                QuizInvitee[]
+  attendees               QuizAttendee[]
+  activities              QuizActivity[]
+  quizActivitySubmissions QuizActivitySubmission[]
+
+  @@map("cl_quiz")
+}
+
+model QuizStudy {
+  quizId    String   @map("quiz_id")
+  studyId   String   @map("study_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+  study     Study    @relation(fields: [studyId], references: [id])
+
+  @@id([quizId, studyId])
+  @@index([quizId], name: "cl_assessment_questionnaire_assessment_id")
+  @@index([studyId], name: "cl_assessment_questionnaire_questionnaire_id")
+  @@map("cl_quiz_study")
+}
+
+model QuizActivity {
+  quizId     String   @map("quiz_id")
+  activityId String   @map("activity_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @map("updated_at")
+  activity   Activity @relation(fields: [activityId], references: [id])
+  quiz       Quiz     @relation(fields: [quizId], references: [id])
+
+  @@unique([quizId, activityId], name: "cl_quiz_activity_quiz_id_activity_id")
+  @@index([activityId], name: "cl_quiz_activity_activity_id")
+  @@index([quizId], name: "cl_quiz_activity_quiz_id")
+  @@map("cl_quiz_activity")
+}
+
+model QuizInvitee {
+  userId    String    @map("user_id")
+  quizId    String    @map("quiz_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @default(now()) @map("updated_at")
+  quiz      Quiz      @relation(fields: [quizId], references: [id])
+  user      User      @relation(fields: [userId], references: [uuid])
+  startTime DateTime  @default(now()) @map("start_time")
+  endTime   DateTime? @map("end_time")
+
+  @@id([quizId, userId])
+  @@map("cl_quiz_invitee")
+}
+
+model QuizAttendee {
+  id          String    @id @default(dbgenerated())
+  quizId      String    @map("quiz_id")
+  userId      String?   @map("user_id")
+  userType    UserType? @default(UNREGISTERED) @map("user_type")
+  totalPoints Int?      @map("total_points")
+  points      Int?
+  answers     Json?
+  ipAddress   String?   @map("ip_address")
+  country     String?
+  attentedAt  DateTime? @default(now()) @map("attented_at")
+  isDeleted   Boolean   @default(false) @map("is_deleted")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @map("updated_at")
+  quiz        Quiz      @relation(fields: [quizId], references: [id])
+
+  @@index([quizId], name: "cl_assessment_attendee_assessment_id")
+  @@map("cl_quiz_attendee")
+}
+
+//
+//***************************************************    SIMUL    ***************************************************
+//
+model Simul {
+  id                  String                @id @default(dbgenerated())
+  name                String
+  description         String
+  mode                SimulMode
+  passcode            String?
+  gameType            SimulGameType         @map("game_type")
+  timeControl         Int                   @map("time_control")
+  timeIncrement       Int                   @map("time_increment")
+  hostExtraTime       Int                   @map("host_extra_time")
+  hostColorPreference PlayerColorPreference @map("host_color_preference")
+  initialFen          String                @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") @map("initial_fen")
+  allowDraw           Boolean               @default(true) @map("allow_draw")
+  allowResign         Boolean               @default(true) @map("allow_resign")
+  scheduledAt         DateTime              @map("scheduled_at")
+  startedAt           DateTime?             @map("started_at")
+  endedAt             DateTime?             @map("ended_at")
+  status              SimulStatus
+  ownerId             String                @map("owner_id")
+  isDeleted           Boolean               @default(false) @map("is_deleted")
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @default(now()) @map("updated_at")
+  owner               User                  @relation(fields: [ownerId], references: [uuid])
+  invitees            SimulInvitee[]
+  participants        SimulParticipant[]
+
+  @@map("cl_simul")
+}
+
+model SimulInvitee {
+  simulId   String   @map("simul_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  simul     Simul    @relation(fields: [simulId], references: [id])
+  user      User     @relation(fields: [userId], references: [uuid])
+
+  @@id([simulId, userId])
+  @@map("cl_simul_invitee")
+}
+
+model SimulParticipant {
+  simulId        String               @map("simul_id")
+  userId         String               @map("user_id")
+  platformGameId String?              @map("platform_game_id")
+  type           SimulParticipantType
+  createdAt      DateTime             @default(now()) @map("created_at")
+  updatedAt      DateTime             @default(now()) @map("updated_at")
+  simul          Simul                @relation(fields: [simulId], references: [id])
+  user           User                 @relation(fields: [userId], references: [uuid])
+  game           PlatformGame?        @relation(fields: [platformGameId], references: [uuid])
+
+  @@id([simulId, userId])
+  @@map("cl_simul_participant")
+}
+
+//
+//*************************************************** TOURNAMENT ***************************************************
+//
+model Tournament {
+  uuid           String                  @id @default(dbgenerated())
+  waitingRoomId  String?                 @map("waiting_room_id")
+  name           String
+  description    String?
+  startDate      DateTime                @map("start_date")
+  startTime      String?                 @map("start_time")
+  endDate        DateTime?               @map("end_date")
+  timeControl    Int                     @default(5) @map("time_control")
+  timeIncrement  Int                     @default(0) @map("time_increment")
+  rounds         Int
+  schedule       Json
+  status         TournamentStatus        @default(UPCOMING)
+  initialFen     String?                 @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") @map("initial_fen")
+  format         TournamentFormat?       @default(SWISS)
+  ratingSystemId String?                 @map("rating_system_id")
+  dbfUrl         String?                 @map("dbf_url")
+  allowDraw      Boolean?                @default(true) @map("allow_draw")
+  allowResign    Boolean?                @default(true) @map("allow_resign")
+  timezone       String?
+  seeded         Boolean?                @default(false)
+  topPlayerCount Int?                    @map("top_player_count")
+  teams          String[]
+  passcode       String?
+  isPublic       Boolean?                @default(false) @map("is_public")
+  isRestricted   Boolean?                @default(false) @map("is_restricted")
+  ownerUuid      String                  @map("owner_uuid")
+  controlType    TournamentControlType   @default(MANUAL) @map("control_type")
+  intervalTime   Int                     @default(0) @map("interval_time")
+  isDeleted      Boolean?                @default(false) @map("is_deleted")
+  createdAt      DateTime                @default(now()) @map("created_at")
+  updatedAt      DateTime                @default(now()) @map("updated_at")
+  owner          User                    @relation(fields: [ownerUuid], references: [uuid])
+  waitingRoom    WaitingRoom?            @relation(fields: [waitingRoomId], references: [id])
+  participants   TournamentParticipant[]
+
+  @@map("tournament")
+}
+
+model TournamentParticipant {
+  uuid            String                  @id @default(dbgenerated())
+  sno             Int?
+  tournamentUuid  String                  @map("tournament_uuid")
+  userUuid        String                  @map("user_uuid")
+  status          TournamentPlayerStatus? @default(INVITED)
+  standings       Json?                   @default("{}")
+  groupNo         Int?                    @map("group_no")
+  teamUuid        String?                 @map("team_uuid")
+  ratingInitial   Int?                    @map("rating_initial")
+  ratingEnd       Int?                    @map("rating_end")
+  createdAt       DateTime                @default(now()) @map("created_at")
+  updatedAt       DateTime                @default(now()) @map("updated_at")
+  user            User                    @relation(fields: [userUuid], references: [uuid])
+  tournament      Tournament              @relation(fields: [tournamentUuid], references: [uuid])
+  pairingsAsWhite TournamentPairing[]     @relation("pairing_participant_white")
+  pairingsAsBlack TournamentPairing[]     @relation("pairing_participant_black")
+
+  @@unique([tournamentUuid, userUuid], name: "tournamentParticipant_uuid_userUuid")
+  @@map("player")
+}
+
+model TournamentPairing {
+  uuid             String                    @id @default(dbgenerated())
+  boardNo          Int?                      @map("board_no")
+  tournamentUuid   String                    @map("tournament_uuid")
+  round            Int
+  whiteUuid        String?                   @map("white_uuid")
+  blackUuid        String?                   @map("black_uuid")
+  platformGameUuid String?                   @map("platform_game_uuid")
+  resultLegacy     Json?                     @map("result_legacy")
+  gameUuid         String?                   @map("game_uuid")
+  bye              TournamentPairingByeType?
+  gameNo           Int?                      @default(1) @map("game_no")
+  createdAt        DateTime                  @default(now()) @map("created_at")
+  updatedAt        DateTime                  @default(now()) @map("updated_at")
+  whiteParticipant TournamentParticipant?    @relation("pairing_participant_white", fields: [whiteUuid], references: [uuid])
+  blackParticipant TournamentParticipant?    @relation("pairing_participant_black", fields: [blackUuid], references: [uuid])
+  game             PlatformGame?             @relation(fields: [platformGameUuid], references: [uuid])
+
+  @@map("pairing")
+}
+
+//
+//***************************************************    GAME    ***************************************************
+//
+model PlatformGame {
+  uuid               String                    @id @default(dbgenerated())
+  whiteUuid          String?                   @map("white_uuid")
+  blackUuid          String?                   @map("black_uuid")
+  whiteScore         Float?                    @map("white_score")
+  blackScore         Float?                    @map("black_score")
+  whiteTime          Int?                      @map("white_time")
+  blackTime          Int?                      @map("black_time")
+  resultStatus       PlatformGameResultStatus? @map("result_status")
+  fen                String?
+  turn               String?
+  whiteName          String?                   @map("white_name")
+  blackName          String?                   @map("black_name")
+  gameUuid           String?                   @map("game_uuid")
+  pgn                String?
+  time               Int?
+  increment          Int?
+  initialFen         String?                   @default("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") @map("initial_fen")
+  allowDraw          Boolean?                  @default(true) @map("allow_draw")
+  allowResign        Boolean?                  @default(true) @map("allow_resign")
+  analysisJobUuid    String?                   @map("analysis_job_uuid")
+  createdAt          DateTime?                 @default(now()) @map("created_at")
+  updatedAt          DateTime?                 @default(now()) @map("updated_at")
+  simulParticipants  SimulParticipant[]
+  tournamentPairings TournamentPairing[]
+
+  @@map("platform_game")
+}
+
+model Game {
+  id         String    @id @default(dbgenerated()) @map("uuid")
+  databaseId String?   @map("database_uuid")
+  tags       String[]
+  meta       Json      @default("{}")
+  content    Json      @default("{}")
+  jsonSynced Boolean   @default(false) @map("json_synced")
+  createdAt  DateTime? @default(now()) @map("created_at")
+  isPublic   Boolean?  @default(false) @map("is_public")
+
+  @@map("game")
+}
+
+//
+//***************************************************   WAITING ROOM   ***************************************************
+//
+
+model WaitingRoom {
+  id             String       @id @default(dbgenerated())
+  ownerId        String       @map("owner_id")
+  name           String
+  bannerUrl      String?      @map("banner_url")
+  logoUrl        String?      @map("logo_url")
+  content        String?
+  isDeleted      Boolean      @default(false) @map("is_deleted")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @default(now()) @map("updated_at")
+  contentType    ContentType  @default(TEXT) @map("content_type")
+  owner          User         @relation(fields: [ownerId], references: [uuid])
+  forTournaments Tournament[]
+
+  @@map("cl_waiting_room")
+}
+
+//
+//***************************************************   STUDY  COLLECTION   ***************************************************
+//
+
+model Collection {
+  id                        String                      @id @default(dbgenerated())
+  ownerId                   String                      @map("owner_id")
+  name                      String
+  level                     DifficultyLevel?            @default(BEGINNER)
+  description               String
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  updatedAt                 DateTime                    @default(now()) @map("updated_at")
+  owner                     User                        @relation(fields: [ownerId], references: [uuid])
+  studies                   CollectionStudy[]
+  isDeleted                 Boolean                     @default(false) @map("is_deleted")
+  accesses                  CollectionAccess[]
+  CourseCollection          CourseCollection[]
+  courseActivitySubmission2 CourseActivitySubmission2[]
+
+  @@map("cl_collection")
+}
+
+model CollectionStudy {
+  studyId      String     @map("study_id")
+  collectionId String     @map("collection_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @map("updated_at")
+  order        Int
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  study        Study      @relation(fields: [studyId], references: [id])
+
+  @@id([collectionId, studyId])
+  @@map("cl_collection_study")
+}
+
+model CollectionAccess {
+  collectionId String          @map("collection_id")
+  userId       String          @map("user_id")
+  privilege    AccessPrivilege @default(READ)
+  collection   Collection      @relation(fields: [collectionId], references: [id])
+  user         User            @relation(fields: [userId], references: [uuid])
+
+  @@id([collectionId, userId])
+  @@map("cl_collection_access")
+}
+
+//
+//***************************************************   COURSE   ***************************************************
+//
+model Course {
+  id                        String                      @id @default(dbgenerated())
+  name                      String
+  description               String?
+  imageSrc                  String?                     @map("image_src")
+  level                     DifficultyLevel?            @default(BEGINNER)
+  category                  courseCategory?             @default(OPENING)
+  tags                      String[]
+  ownerId                   String                      @map("owner_id")
+  academyId                 String                      @map("academy_id")
+  isLocked                  Boolean?                    @default(false) @map("is_locked")
+  isOpenForAcademy          Boolean?                    @default(true) @map("is_open_for_academy")
+  updatedAt                 DateTime?                   @default(now()) @map("updated_at")
+  createdAt                 DateTime?                   @default(now()) @map("created_at")
+  isDraft                   Boolean?                    @default(true) @map("is_draft")
+  isDeleted                 Boolean?                    @default(false) @map("is_deleted")
+  courseActivitySubmission2 CourseActivitySubmission2[]
+  academy                   Academy                     @relation(fields: [academyId], references: [id])
+  owner                     User                        @relation(fields: [ownerId], references: [uuid])
+  collections               CourseCollection[]
+  invitees                  CourseInvitee[]
+  attendees                 CourseAttendee[]
+  memberPermissions         Json                        @default("{}") @map("member_permissions")
+  nonmemberPermissions      Json                        @default("{}") @map("nonmember_permissions")
+  isOpenForMembers          Boolean                     @default(true) @map("is_open_for_members")
+  isOpenForNonmembers       Boolean                     @default(true) @map("is_open_for_nonmembers")
+  isPaid                    Boolean?                    @default(false) @map("is_paid")
+  courseFee                 Float?                      @default(0.0) @map("course_fee")
+  courseCurrency            String?                     @default("USD") @map("course_currency")
+  @@map("cl_course")
+}
+
+model CourseCollection {
+  courseId     String     @map("course_id")
+  collectionId String     @map("collection_id")
+  no           Int?
+  updatedAt    DateTime?  @default(now()) @map("updated_at")
+  createdAt    DateTime?  @default(now()) @map("created_at")
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  course       Course     @relation(fields: [courseId], references: [id])
+
+  @@id([courseId, collectionId])
+  @@map("cl_course_collection")
+}
+
+model CourseInvitee {
+  userId      String      @map("user_id") // Need to be removed after migration
+  courseId    String      @map("course_id")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @default(now()) @map("updated_at")
+  inviteeId   String      @map("invitee_id")
+  permissions Json        @default("{}")
+  type        inviteeType @default(USER)
+  course      Course      @relation(fields: [courseId], references: [id])
+
+  @@id([courseId, inviteeId])
+  @@map("cl_course_invitee")
+}
+
+model CourseAttendee {
+  userId    String   @map("user_id")
+  courseId  String   @map("course_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+  course    Course   @relation(fields: [courseId], references: [id])
+  user      User     @relation(fields: [userId], references: [uuid])
+
+  @@id([courseId, userId])
+  @@map("cl_course_attendee")
+}
+
+model CourseActivitySubmission2 {
+  id                       String                 @id @default(dbgenerated())
+  courseId                 String                 @map("course_id")
+  activityId               String                 @map("activity_id")
+  studyId                  String                 @map("study_id")
+  collectionId             String                 @map("collection_id")
+  userId                   String                 @map("user_id")
+  activitySubmissionDataId String                 @map("activity_submission_data_id")
+  createdAt                DateTime               @default(now()) @map("created_at")
+  updatedAt                DateTime               @default(now()) @map("updated_at")
+  activity                 Activity               @relation(fields: [activityId], references: [id])
+  collection               Collection             @relation(fields: [collectionId], references: [id])
+  course                   Course                 @relation(fields: [courseId], references: [id])
+  study                    Study                  @relation(fields: [studyId], references: [id])
+  user                     User                   @relation(fields: [userId], references: [uuid])
+  activitySubmissionData   ActivitySubmissionData @relation(fields: [activitySubmissionDataId], references: [id])
+
+  @@unique([courseId, activityId, studyId, collectionId, userId], name: "cl_course_activity_submission_course_id_activity_id_study_i_key1")
+  @@map("cl_course_activity_submission")
+}
+
+model ActivitySubmissionData {
+  id                        String                      @id @default(dbgenerated())
+  attempts                  Json                        @default("[]")
+  state                     Json                        @default("{}")
+  timeTaken                 Int                         @default(0) @map("time_taken")
+  isSolved                  Boolean                     @default(false) @map("is_solved")
+  hintUsed                  Boolean                     @default(false) @map("hint_used")
+  points                    Int                         @default(0)
+  updatedAt                 DateTime                    @default(now()) @map("updated_at")
+  createdAt                 DateTime                    @default(now()) @map("created_at")
+  courseActivitySubmission2 CourseActivitySubmission2[]
+  quizActivitySubmissions   QuizActivitySubmission[]
+
+  @@map("cl_activity_submission_data")
+}
+
+model QuizActivitySubmission {
+  id                       String                 @default(dbgenerated())
+  userType                 UserType               @default(REGISTERED) @map("user_type")
+  userId                   String                 @map("user_id")
+  quizId                   String                 @map("quiz_id")
+  activityId               String                 @map("activity_id")
+  activitySubmissionDataId String                 @map("activity_submission_data_id")
+  updatedAt                DateTime               @default(now()) @map("updated_at")
+  createdAt                DateTime               @default(now()) @map("created_at")
+  quiz                     Quiz                   @relation(fields: [quizId], references: [id])
+  activity                 Activity               @relation(fields: [activityId], references: [id])
+  activitySubmissionData   ActivitySubmissionData @relation(fields: [activitySubmissionDataId], references: [id])
+
+  @@unique([userId, quizId, activityId], name: "cl_quiz_activity_submission_user_id_fkey")
+  @@map("cl_quiz_activity_submission")
+}
+
+model Invoice {
+  id          String            @id @default(dbgenerated())
+  invoiceNo   String            @map("invoice_no")
+  description String?           @default("")
+  recipientId String            @map("recipient_id")
+  paymentLink String            @map("payment_link")
+  issueDate   DateTime          @default(now()) @map("issue_date")
+  dueDate     DateTime          @default(now()) @map("due_date")
+  items       Json              @default("{}")
+  remarks     String?           @default("")
+  paymentId   String            @unique @map("payment_id")
+  status      paymentStatusType
+  createdById String            @map("created_by_id")
+  isDeleted   Boolean           @default(false) @map("is_deleted")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @default(now()) @map("updated_at")
+  createdBy   User              @relation("created_by_user", fields: [createdById], references: [uuid])
+  recipient   User              @relation("recipient_user", fields: [recipientId], references: [uuid])
+
+  @@index([createdById], name: "cl_invoice_created_by_id")
+  @@index([recipientId], name: "cl_invoice_recipient_id")
+  @@map("cl_invoice")
+}
+
+model PaymentGateway {
+  id          String             @id @default(dbgenerated())
+  userId      String             @map("user_id")
+  credentials Json               @default("{}") @map("credentials")
+  type        paymentGatewayType
+  user        User               @relation(fields: [userId], references: [uuid])
+
+  @@map("cl_payment_gateway")
+}
+
+model Schedulers {
+  id                  String    @id @default(dbgenerated())
+  students            String[]
+  start_study_index   Int
+  current_study_index Int
+  study_sequence      String[]
+  cron_expression     String
+  expiry_date         DateTime?
+  qstash_id           String
+  status              String    @default("active")
+  created_at          DateTime? @default(now())
+  updated_at          DateTime? @default(now())
+  coach_id            String
+  scheduler_name      String?
+
+  @@map("cl_schedulers")
+} 
+
+model PaymentDetail {
+  id        String  @id @default(dbgenerated())
+  data      Json    @default("{}")
+  paymentId String? @unique @map("payment_id")
+
+  @@map("cl_payment_detail")
+}
+
+//
+//***************************************************   TYPES   ***************************************************
+//
+enum RatingSystemType {
+  FIDE_BLITZ
+  FIDE_RAPID
+  FIDE_STANDARD
+  USCF_BLITZ
+  USCF_QUICK
+  USCF_RAPID
+  USCF_STANDARD
+
+  @@map("cl_rating_t")
+}
+
+enum AcademyUserRole {
+  ADMIN
+  COACH
+  CP_STUDENT
+  GUEST
+  PARENT
+  STUDENT
+
+  @@map("cp_user_role_t")
+}
+
+enum ActivityType {
+  MCQ
+  PUZZLE
+  EXPLAINER
+  COMPUTER
+  CAPTURE
+  VIDEO
+
+  @@map("activity_type")
+}
+
+enum SimulGameType {
+  STANDARD
+  BOOK_OPENING
+  RANDOM
+
+  @@map("simul_game_type")
+}
+
+enum SimulMode {
+  OPEN_TO_ALL
+  OPEN_TO_ACADEMY
+  CLOSED_TO_ACADEMY
+  RESTRICTED_OPEN
+  INVITE_ONLY
+
+  @@map("simul_mode")
+}
+
+enum SimulParticipantType {
+  HOST
+  PLAYER
+
+  @@map("simul_participant_type")
+}
+
+enum PlayerColorPreference {
+  W
+  B
+  NONE
+
+  @@map("player_color_preference")
+}
+
+enum SimulStatus {
+  COMPLETED
+  IN_PROGRESS
+  PREPARING_GAMES
+  UPCOMING
+
+  @@map("simul_status")
+}
+
+enum UserType {
+  REGISTERED
+  UNREGISTERED
+
+  @@map("user_type")
+}
+
+enum TournamentStatus {
+  CURRENT
+  PAST
+  UPCOMING
+
+  @@map("tournament_status")
+}
+
+enum TournamentFormat {
+  ARENA
+  LEGACY
+  QUAD
+  ROUND_ROBIN
+  SWISS
+  SWISS_TEAM
+
+  @@map("cl_tournament_t")
+}
+
+enum TournamentPlayerStatus {
+  EXITED
+  INVITED
+  JOINED
+
+  @@map("player_status")
+}
+
+enum TournamentPairingByeType {
+  F
+  H
+  U
+  Z
+
+  @@map("cl_bye_t")
+}
+
+enum QuizLevel {
+  ADVANCED
+  BEGINNER
+  INTERMEDIATE
+
+  @@map("quiz_level")
+}
+
+enum StudyLevel {
+  ADVANCED
+  BEGINNER
+  INTERMEDIATE
+
+  @@map("study_level")
+}
+
+enum ContentType {
+  IMAGE
+  TEXT
+  VIDEO
+
+  @@map("content_type")
+}
+
+enum AccessPrivilege {
+  READ
+  READ_WRITE
+
+  @@map("access_privilege")
+}
+
+enum ClassroomType {
+  JITSI
+  ONE_TO_MANY
+  ONE_TO_ONE
+  ZOOM
+
+  @@map("cl_session_t")
+}
+
+enum PlatformGameResultStatus {
+  ABANDONED
+  BYE
+  CHECKMATE
+  DRAW
+  GENERATED
+  IN_PROGRESS
+  INSUFFICIENT_MATERIAL
+  MUTUAL_AGREEMENT
+  NO_CONTEST
+  RESIGNATION
+  STALEMATE
+  THREE_FOLD_REPETITION
+  TIMEOUT
+  UPDATED_BY_COACH
+
+  @@map("platform_game_result_status")
+}
+
+enum DifficultyLevel {
+  ADVANCED
+  BEGINNER
+  INTERMEDIATE
+
+  @@map("difficulty_level")
+}
+
+enum Currency {
+  CAD
+  EUR
+  INR
+  USD
+
+  @@map("cl_currency")
+}
+
+enum courseCategory {
+  ENDGAME
+  MIDDLEGAME
+  OPENING
+
+  @@map("course_category")
+}
+
+enum paymentGatewayType {
+  INSTAMOJO
+  STRIPE
+
+  @@map("payment_gateway_type")
+}
+
+enum inviteeType {
+  USER
+  GROUP
+
+  @@map("invitee_type")
+}
+
+enum paymentStatusType {
+  FAILED
+  PAID
+  PENDING
+  REFUNDED
+
+  @@map("payment_status_type")
+}
+
+enum TournamentControlType {
+  AUTO
+  MANUAL
+  AUTO_SCHEDULE
+  AUTO_ROUND_COMPLETION
+
+  @@map("tournament_control_type")
+}
