@@ -1,3 +1,6 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -8,20 +11,38 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-const users = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', role: 'Student' },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'Teacher' },
-  { id: 3, name: 'Bob Johnson', email: 'bob@example.com', role: 'Admin' },
-  { id: 4, name: 'Alice Brown', email: 'alice@example.com', role: 'Student' },
-  {
-    id: 5,
-    name: 'Charlie Davis',
-    email: 'charlie@example.com',
-    role: 'Teacher',
-  },
-];
+interface User {
+  uuid: string;
+  firstname: string;
+  lastname: string;
+  email: string;
+  role: number;
+}
 
 export function UserTable() {
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUsers() {
+      try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error('Failed to fetch users:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUsers();
+  }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Table>
       <TableCaption>A list of users in the system.</TableCaption>
@@ -34,8 +55,8 @@ export function UserTable() {
       </TableHeader>
       <TableBody>
         {users.map((user) => (
-          <TableRow key={user.id}>
-            <TableCell>{user.name}</TableCell>
+          <TableRow key={user.uuid}>
+            <TableCell>{`${user.firstname} ${user.lastname}`}</TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.role}</TableCell>
           </TableRow>
