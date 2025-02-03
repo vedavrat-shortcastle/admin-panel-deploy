@@ -1,5 +1,10 @@
-import Image from 'next/image';
+import { DashboardShell } from '@/components/dashboard/DashboardShell';
+import { UserTable } from '@/components/dashboard/UserTable';
 
-export default function Home() {
-  return <div>Dashboard</div>;
+export default function DashboardPage() {
+  return (
+    <DashboardShell>
+      <UserTable />
+    </DashboardShell>
+  );
 }
