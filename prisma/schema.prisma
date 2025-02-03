@@ -64,18 +64,19 @@ model User {
   paymentGatewayKeys        PaymentGateway[]
   InvoicesCreated           Invoice[]                   @relation("created_by_user")
   InvoicesRecieved          Invoice[]                   @relation("recipient_user")
+  Contact                   Contact[]
 
   @@map("cl_user")
 }
 
 model UserPaymentGateway {
-  id                     String    @default(dbgenerated())
-  userId                 String    @unique
-  stripeSecretKey        String?
-  stripePublishableKey   String?
-  createdAt              DateTime? @default(now())
-  updatedAt              DateTime? @default(now())
-  user                   User   @relation(fields: [userId], references: [uuid])
+  id                   String    @default(dbgenerated())
+  userId               String    @unique
+  stripeSecretKey      String?
+  stripePublishableKey String?
+  createdAt            DateTime? @default(now())
+  updatedAt            DateTime? @default(now())
+  user                 User      @relation(fields: [userId], references: [uuid])
 }
 
 model UnregisteredUser {
@@ -108,25 +109,26 @@ model CoachStudent {
 //**************************************************    ACADEMY    **************************************************
 //
 model Academy {
-  id            String             @id @default(dbgenerated())
-  name          String
-  shortName     String             @map("short_name")
-  description   String             @default("")
-  timezone      String
-  domain        String             @default("")
-  ratingSystems RatingSystemType[] @map("rating_systems")
-  facebook      String?
-  twitter       String?
-  instagram     String?
-  youtube       String?
-  info          String?
-  logo          String?
-  createdAt     DateTime?          @default(now()) @map("created_at")
-  updatedAt     DateTime?          @default(now()) @map("updated_at")
-  users         AcademyUser[]
-  flags         Json               @default("{}")
-  preferences   Json               @default("{}")
-  courses       Course[]
+  id             String             @id @default(dbgenerated())
+  name           String
+  shortName      String             @map("short_name")
+  description    String             @default("")
+  timezone       String
+  domain         String             @default("")
+  ratingSystems  RatingSystemType[] @map("rating_systems")
+  facebook       String?
+  twitter        String?
+  instagram      String?
+  youtube        String?
+  info           String?
+  logo           String?
+  createdAt      DateTime?          @default(now()) @map("created_at")
+  updatedAt      DateTime?          @default(now()) @map("updated_at")
+  users          AcademyUser[]
+  flags          Json               @default("{}")
+  preferences    Json               @default("{}")
+  courses        Course[]
+  ContactAcademy ContactAcademy[]
 
   @@map("cp_academy")
 }
@@ -617,6 +619,7 @@ model Course {
   isPaid                    Boolean?                    @default(false) @map("is_paid")
   courseFee                 Float?                      @default(0.0) @map("course_fee")
   courseCurrency            String?                     @default("USD") @map("course_currency")
+
   @@map("cl_course")
 }
 
@@ -763,7 +766,7 @@ model Schedulers {
   scheduler_name      String?
 
   @@map("cl_schedulers")
-} 
+}
 
 model PaymentDetail {
   id        String  @id @default(dbgenerated())
@@ -774,8 +777,142 @@ model PaymentDetail {
 }
 
 //
+//***************************************************    ADMIN PANEL    ***************************************************
+//
+
+model Location {
+  id        Int      @id @default(autoincrement())
+  country   String?  @db.VarChar(100)
+  state     String?  @db.VarChar(100)
+  city      String   @unique @db.VarChar(100)
+  address   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  contacts ContactLocation[]
+}
+
+model Tag {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  contacts ContactTag[]
+}
+
+model Contact {
+  id                Int           @id @default(autoincrement())
+  userId            String?       @map("user_id")
+  firstName         String?       @map("first_name") @db.VarChar(100)
+  lastName          String?       @map("last_name") @db.VarChar(100)
+  email             String?       @db.VarChar(255)
+  phone             String?       @db.VarChar(20)
+  dateOfBirth       DateTime?     @map("date_of_birth") @db.Date
+  gender            GenderType?
+  languagesSpoken   String[]      @map("languages_spoken")
+  website           String?       @db.VarChar(255)
+  teachingMode      TeachingMode? @map("teaching_mode")
+  onlinePercentage  Int?          @map("online_percentage")
+  offlinePercentage Int?          @map("offline_percentage")
+  yearsInOperation  Int?          @map("years_in_operation")
+  numberOfCoaches   Int?          @map("number_of_coaches")
+  linkedinUrl       String?       @map("linkedin_url") @db.VarChar(255)
+  facebookUrl       String?       @map("facebook_url") @db.VarChar(255)
+  instagramUrl      String?       @map("instagram_url") @db.VarChar(255)
+  twitterUrl        String?       @map("twitter_url") @db.VarChar(255)
+  fideId            String?       @map("fide_id") @db.VarChar(50)
+  currentStatus     ContactStatus @default(new) @map("current_status")
+  lastContacted     DateTime?     @map("last_contacted")
+  notes             String?
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @default(now()) @updatedAt @map("updated_at")
+
+  // Relations
+  user          User?                  @relation(fields: [userId], references: [uuid], map: "cl_user")
+  locations     ContactLocation[]
+  academies     ContactAcademy[]
+  tags          ContactTag[]
+  statusHistory ContactStatusHistory[]
+
+  @@map("contacts")
+}
+
+model ContactLocation {
+  contactId  Int      @map("contact_id")
+  locationId Int      @map("location_id")
+  isCurrent  Boolean  @default(true) @map("is_current")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  contact  Contact  @relation(fields: [contactId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@id([contactId, locationId])
+}
+
+model ContactAcademy {
+  contactId Int      @map("contact_id")
+  academyId String   @map("academy_id")
+  isCurrent Boolean  @default(false) @map("is_current")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  contact Contact @relation(fields: [contactId], references: [id])
+  academy Academy @relation(fields: [academyId], references: [id], map: "cp_academy")
+
+  @@id([contactId, academyId])
+  @@map("contact_academies")
+}
+
+model ContactTag {
+  contactId Int      @map("contact_id")
+  tagId     Int      @map("tag_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  contact Contact @relation(fields: [contactId], references: [id])
+  tag     Tag     @relation(fields: [tagId], references: [id])
+
+  @@id([contactId, tagId])
+}
+
+model ContactStatusHistory {
+  id        Int           @id @default(autoincrement())
+  contactId Int           @map("contact_id")
+  status    ContactStatus
+  changedAt DateTime      @default(now()) @map("changed_at")
+  notes     String?
+
+  // Relations
+  contact Contact @relation(fields: [contactId], references: [id])
+}
+
+//
 //***************************************************   TYPES   ***************************************************
 //
+
+enum GenderType {
+  male
+  female
+  other
+}
+
+enum TeachingMode {
+  online
+  offline
+  hybrid
+}
+
+enum ContactStatus {
+  new
+  lead
+  prospect
+  customer
+  churned
+  high_prospect
+}
+
 enum RatingSystemType {
   FIDE_BLITZ
   FIDE_RAPID
