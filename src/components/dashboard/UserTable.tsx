@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -10,36 +9,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-interface User {
-  uuid: string;
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: number;
-}
+import { trpc } from '@/hooks/trpc-provider';
 
 export function UserTable() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchUsers() {
-      try {
-        const response = await fetch('/api/users');
-        const data = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchUsers();
-  }, []);
-
-  if (loading) {
+  const { data, isLoading } = trpc.users.getAll.useQuery();
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -54,7 +28,7 @@ export function UserTable() {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {users.map((user) => (
+        {data?.map((user) => (
           <TableRow key={user.uuid}>
             <TableCell>{`${user.firstname} ${user.lastname}`}</TableCell>
             <TableCell>{user.email}</TableCell>
