@@ -61,9 +61,6 @@ importers:
       date-fns:
         specifier: ^4.1.0
         version: 4.1.0
-      jose:
-        specifier: ^5.9.6
-        version: 5.9.6
       lodash:
         specifier: ^4.17.21
         version: 4.17.21
@@ -3551,12 +3548,6 @@ packages:
         integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==,
       }
     hasBin: true
-
-  jose@5.9.6:
-    resolution:
-      {
-        integrity: sha512-AMlnetc9+CV9asI19zHmrgS/WYsWUwCn2R7RzlbJWD7F9eWYUTGyBmU9o6PxngtLGOiDGPRu+Uc4fhKzbpteZQ==,
-      }
 
   js-cookie@3.0.5:
     resolution:
@@ -7700,8 +7691,6 @@ snapshots:
   jiti@1.21.7: {}
 
   jiti@2.4.2: {}
-
-  jose@5.9.6: {}
 
   js-cookie@3.0.5: {}
 
