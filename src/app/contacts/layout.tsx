@@ -1,5 +1,6 @@
 import { AdminSidebar } from '@/components/Sidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function ContactsLayout({
   children,
@@ -11,6 +12,7 @@ export default function ContactsLayout({
       <SidebarProvider>
         <AdminSidebar />
         {children}
+        <Toaster />
       </SidebarProvider>
     </section>
   );

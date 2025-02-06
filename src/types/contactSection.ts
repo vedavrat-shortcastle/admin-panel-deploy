@@ -1,3 +1,6 @@
+import { formSchema } from '@/schemas/contacts';
+import { z } from 'zod';
+
 export type ContactsTable = {
   firstname: string;
   lastname: string;
@@ -6,3 +9,5 @@ export type ContactsTable = {
   title: 'GM' | 'IM' | 'FM' | 'CM' | 'NM';
   status: 'active' | 'lead' | 'churned' | 'prospect' | 'new';
 };
+
+export type FormValues = z.infer<typeof formSchema>;
