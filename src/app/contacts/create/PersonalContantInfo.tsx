@@ -161,8 +161,26 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
           />
         </div>
       </div>
-
-      <FormField
+      <div className="col-span-12">
+        <FormField
+          control={form.control}
+          name="profilePhoto"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Profile Photo</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+      {/* <FormField
         control={form.control}
         name="address"
         render={({ field }) => (
@@ -222,7 +240,7 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
             )}
           />
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

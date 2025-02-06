@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { PersonalContactInfo } from '@/app/contacts/create/PersonalContantInfo';
 import { ProfessionalChessInfo } from '@/app/contacts/create/ProfessionalInfo';
+import { ContactAddressInfo } from '@/app/contacts/create/ContactAddressInfo';
 
 const formSchema = z.object({
   firstName: z
@@ -77,8 +78,8 @@ export default function ChessCoachForm() {
     console.log(data);
   }
 
-  const nextStep = () => setStep(2);
-  const prevStep = () => setStep(1);
+  const nextStep = () => setStep((prevStep) => Math.min(prevStep + 1, 3));
+  const prevStep = () => setStep((prevStep) => Math.max(prevStep - 1, 1));
 
   return (
     <div className="mx-40">
@@ -86,6 +87,7 @@ export default function ChessCoachForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {step === 1 && <PersonalContactInfo form={form} />}
           {step === 2 && <ProfessionalChessInfo form={form} />}
+          {step === 3 && <ContactAddressInfo form={form} />}
 
           <div className="flex justify-between">
             {step > 1 && (
@@ -93,7 +95,7 @@ export default function ChessCoachForm() {
                 Previous
               </Button>
             )}
-            {step < 2 ? (
+            {step < 3 ? (
               <Button type="button" onClick={nextStep}>
                 Next
               </Button>

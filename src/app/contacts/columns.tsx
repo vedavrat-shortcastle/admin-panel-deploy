@@ -3,20 +3,10 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
-export type Contact = {
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: 'Coach' | 'Subcoach' | 'Admin';
-  title: 'GM' | 'IM' | 'FM' | 'CM' | 'NM';
-  status: 'active' | 'lead' | 'churned' | 'prospect' | 'new';
-};
-
 import { PencilIcon, TrashIcon } from 'lucide-react';
+import { ContactsTable } from '@/types/contactSection';
 
-export const columns: ColumnDef<Contact>[] = [
+export const columns: ColumnDef<ContactsTable>[] = [
   {
     accessorKey: 'firstname',
     header: 'First Name',
@@ -60,7 +50,7 @@ export const columns: ColumnDef<Contact>[] = [
           variant = 'blue';
           break;
         default:
-          variant = 'outline';
+          variant = 'green';
       }
       return <Badge variant={variant}>{row.getValue('status')}</Badge>;
     },
@@ -82,12 +72,12 @@ export const columns: ColumnDef<Contact>[] = [
   },
 ];
 
-const handleEdit = (contact: Contact) => {
+const handleEdit = (contact: ContactsTable) => {
   // Implement edit functionality here
   console.log('Edit contact', contact);
 };
 
-const handleDelete = (contact: Contact) => {
+const handleDelete = (contact: ContactsTable) => {
   // Implement delete functionality here
   console.log('Delete contact', contact);
 };

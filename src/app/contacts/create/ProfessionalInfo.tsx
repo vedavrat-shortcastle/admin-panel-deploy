@@ -7,7 +7,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+
 import {
   Select,
   SelectContent,
@@ -283,44 +283,7 @@ export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
           )}
         />
       </div>
-      <div className="col-span-6">
-        <FormField
-          control={form.control}
-          name="lastContacted"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Contacted</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split('T')[0]
-                      : ''
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="col-span-12">
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+
       <div className="col-span-12">
         <FormField
           control={form.control}
@@ -393,25 +356,6 @@ export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
                   <SelectItem value="pending">Pending</SelectItem>
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-      <div className="col-span-12">
-        <FormField
-          control={form.control}
-          name="profilePhoto"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profile Photo</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
-                />
-              </FormControl>
               <FormMessage />
             </FormItem>
           )}
