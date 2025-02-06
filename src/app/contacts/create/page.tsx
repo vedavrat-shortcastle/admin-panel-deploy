@@ -13,6 +13,7 @@ import { PersonalContactInfo } from '@/components/contacts/PersonalContantInfo';
 import { ProfessionalChessInfo } from '@/components/contacts/ProfessionalInfo';
 import { ContactAddressInfo } from '@/components/contacts/ContactAddressInfo';
 import { Contact } from 'lucide-react';
+import { defaultFormValues } from '@/utils/contactFormDefaults';
 
 export default function ChessCoachForm() {
   const [step, setStep] = useState(1);
@@ -21,6 +22,7 @@ export default function ChessCoachForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     mode: 'onSubmit',
+    defaultValues: defaultFormValues,
   });
 
   const onSubmit = (data: FormValues) => {
@@ -113,6 +115,7 @@ export default function ChessCoachForm() {
                       });
                       handleSubmit();
                     } else {
+                      console.log('Form validation failed:', form.getValues()); // Log form data if validation fails
                       toast({
                         title: 'Validation Error',
                         description: 'Invalid or Incomplete field',

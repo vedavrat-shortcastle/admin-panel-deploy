@@ -26,7 +26,7 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
         <div className="col-span-6">
           <FormField
             control={form.control}
-            name="firstname"
+            name="firstName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Firstname</FormLabel>
@@ -42,7 +42,7 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
         <div className="col-span-6">
           <FormField
             control={form.control}
-            name="lastname"
+            name="lastName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Lastname</FormLabel>
@@ -121,7 +121,7 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
         <div className="col-span-6">
           <FormField
             control={form.control}
-            name="dob"
+            name="dateOfBirth"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Date Of Birth</FormLabel>
@@ -172,9 +172,15 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
                 <Input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      field.onChange(file);
+                    }
+                  }}
                 />
               </FormControl>
+              {field.value && <p>Selected file: {field.value.name}</p>}
               <FormMessage />
             </FormItem>
           )}

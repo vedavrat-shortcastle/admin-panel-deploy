@@ -54,7 +54,7 @@ export function ContactAddressInfo({ form }: { form: UseFormReturn<any> }) {
         <div className="col-span-6">
           <FormField
             control={form.control}
-            name="state"
+            name="stateRegion"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>State</FormLabel>
