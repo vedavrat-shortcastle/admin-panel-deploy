@@ -7,7 +7,7 @@ export default function ContactsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <section className="py-5 mx-10">
+    <section className=" h-full flex ">
       <SidebarProvider>
         <AdminSidebar />
         {children}
