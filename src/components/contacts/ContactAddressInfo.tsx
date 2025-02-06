@@ -114,7 +114,7 @@ export function ContactAddressInfo({ form }: { form: UseFormReturn<any> }) {
                         selected={
                           field.value ? new Date(field.value) : undefined
                         }
-                        onSelect={(date) => field.onChange(date?.toISOString())}
+                        onSelect={(date) => field.onChange(date)}
                         initialFocus
                       />
                     </PopoverContent>

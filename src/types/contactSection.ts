@@ -10,4 +10,13 @@ export type ContactsTable = {
   status: 'active' | 'lead' | 'churned' | 'prospect' | 'new';
 };
 
+export type Academy = {
+  id: string;
+  name: string;
+  shortName: string;
+  timezone: string;
+  domain: string;
+  createdAt: Date;
+};
+
 export type FormValues = z.infer<typeof formSchema>;

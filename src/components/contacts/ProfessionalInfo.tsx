@@ -7,7 +7,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -17,8 +18,73 @@ import {
 } from '@/components/ui/select';
 
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { academies } from '@/app/contacts/dummyAcademyData';
+import { useState } from 'react';
 
 export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
+  const [filteredAcademies, setFilteredAcademies] = useState<string[]>([]);
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [selectedAcademies, setSelectedAcademies] = useState<string[]>([]);
+  const [selectedFromDropdown, setSelectedFromDropdown] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+
+  const handleAcademySearch = (value: string) => {
+    const searchValue = value.trim().toLowerCase();
+    if (searchValue === '') {
+      setFilteredAcademies([]);
+      setShowDropdown(false);
+      return;
+    }
+
+    const filtered = academies
+      .filter(
+        (academy) =>
+          academy.name.toLowerCase().includes(searchValue) &&
+          !selectedAcademies.includes(academy.name) // Exclude selected ones
+      )
+      .map((academy) => academy.name);
+
+    setFilteredAcademies(filtered);
+    setShowDropdown(filtered.length > 0);
+  };
+
+  const handleSelectAcademy = (academy: string) => {
+    form.setValue('academyNames', academy);
+    setSelectedFromDropdown(true);
+    setShowDropdown(false);
+  };
+
+  const handleAddAcademy = () => {
+    const selectedValue = form.watch('academyNames')?.trim();
+    if (
+      selectedValue &&
+      selectedFromDropdown &&
+      !selectedAcademies.includes(selectedValue)
+    ) {
+      setSelectedAcademies([...selectedAcademies, selectedValue]);
+      form.setValue('academyNames', '');
+      setSelectedFromDropdown(false);
+    }
+  };
+
+  const handleRemoveAcademy = (academyName: string) => {
+    setSelectedAcademies(
+      selectedAcademies.filter((name) => name != academyName)
+    );
+  };
+
+  const handleAddTag = () => {
+    const tagValue = form.watch('customTags')?.trim();
+    if (tagValue && !selectedTags.includes(tagValue)) {
+      setSelectedTags([...selectedTags, tagValue]);
+      form.setValue('customTags', '');
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    setSelectedTags(selectedTags.filter((t) => t !== tag));
+  };
+
   return (
     <div className="grid grid-cols-12 gap-4">
       <div className="col-span-6">
@@ -60,24 +126,66 @@ export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
           )}
         />
       </div>
-      <div className="col-span-12">
+
+      <div className="col-span-12 flex items-end space-x-2 relative">
         <FormField
           control={form.control}
           name="academyNames"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex-grow relative">
               <FormLabel>Academy Names (Multiple)</FormLabel>
               <FormControl>
                 <Input
                   {...field}
-                  placeholder="Separate academy names with commas"
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    handleAcademySearch(e.target.value);
+                  }}
+                  onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                 />
               </FormControl>
+              {showDropdown && (
+                <div className="absolute left-0 right-0 bg-white border border-gray-300 shadow-lg mt-1 rounded-md max-h-40 overflow-y-auto z-10">
+                  {filteredAcademies.map((academy, index) => (
+                    <div
+                      key={index}
+                      className="p-2 cursor-pointer hover:bg-gray-100"
+                      onMouseDown={() => handleSelectAcademy(academy)}
+                    >
+                      {academy}
+                    </div>
+                  ))}
+                </div>
+              )}
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <Button type="button" onClick={handleAddAcademy} variant="accent">
+          Add
+        </Button>
       </div>
+
+      <div className="col-span-12 flex justify-start">
+        <div className="bg-white p-2 rounded-md min-w-fit w-auto">
+          {selectedAcademies.map((academy, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
+            >
+              <span className="whitespace-nowrap">{academy}</span>
+              <button
+                onClick={() => handleRemoveAcademy(academy)}
+                className="text-gray-500 hover:text-red-500 transition"
+              >
+                <X className=" ml-3" size={14} strokeWidth={4} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="col-span-12">
         <FormField
           control={form.control}
@@ -284,21 +392,53 @@ export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
         />
       </div>
 
-      <div className="col-span-12">
+      <div className="col-span-12 flex items-end space-x-2">
         <FormField
           control={form.control}
           name="customTags"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex-grow">
               <FormLabel>Custom Tags</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Separate tags with commas" />
+                <Input
+                  {...field}
+                  value={field.value ?? ''}
+                  placeholder="Type a tag and press Add"
+                  onChange={(e) => field.onChange(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' && (e.preventDefault(), handleAddTag())
+                  }
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        <Button type="button" variant="accent" onClick={handleAddTag}>
+          Add
+        </Button>
       </div>
+
+      {/* Display Selected Tags */}
+      <div className="col-span-12 flex justify-start ">
+        <div className="bg-white p-2 rounded-md min-w-fit w-auto">
+          {selectedTags.map((tag, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
+            >
+              <span className="whitespace-nowrap">{tag}</span>
+              <button
+                onClick={() => handleRemoveTag(tag)}
+                className="text-gray-500 hover:text-red-500 transition"
+              >
+                <X className="ml-3" size={14} strokeWidth={4} />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="col-span-6">
         <FormField
           control={form.control}
