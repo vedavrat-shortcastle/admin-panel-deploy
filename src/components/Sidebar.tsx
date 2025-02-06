@@ -72,7 +72,7 @@ export function AdminSidebar() {
   return (
     <aside
       className={cn(
-        'flex h-full flex-col bg-[rgb(75,75,75)] text-white transition-all duration-300 mr-3',
+        'flex h-screen sticky top-0 flex-col bg-[rgb(75,75,75)] text-white transition-all duration-300 mr-3',
         isCollapsed ? 'w-[70px]' : 'w-[240px]'
       )}
     >

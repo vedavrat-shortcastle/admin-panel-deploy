@@ -9,13 +9,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formSchema } from '@/schemas/contacts';
 import type { FormValues } from '@/types/contactSection';
 import { useToast } from '@/hooks/use-toast';
-import { PersonalContactInfo } from '@/components/contacts/PersonalContantInfo';
+
 import { ProfessionalChessInfo } from '@/components/contacts/ProfessionalInfo';
 import { ContactAddressInfo } from '@/components/contacts/ContactAddressInfo';
 import { Contact } from 'lucide-react';
 import { defaultFormValues } from '@/utils/contactFormDefaults';
+import { PersonalContactInfo } from '@/components/contacts/PersonalContactInfo';
 
-export default function ChessCoachForm() {
+export default function NewContactForm() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
@@ -35,17 +36,40 @@ export default function ChessCoachForm() {
     setStep(1);
   };
 
-  const handleSubmit = () => {
-    form.handleSubmit(onSubmit)();
+  const handleSubmit = async () => {
+    const isValid = await form.trigger();
+    if (isValid) {
+      toast({
+        title: 'Form Submitted',
+        description: 'Your form has been successfully submitted.',
+      });
+      await form.handleSubmit(onSubmit)();
+    } else {
+      console.log('Form validation failed:', form.getValues());
+      console.log('errors', form.formState.errors);
+      // Log form data if validation fails
+      toast({
+        title: 'Validation Error',
+        description: 'Invalid or Incomplete field',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const nextStep = () => setStep((prevStep) => Math.min(prevStep + 1, 3));
-  const prevStep = () => setStep((prevStep) => Math.max(prevStep - 1, 1));
+  const nextStep = () => {
+    setStep((prevStep) => Math.min(prevStep + 1, 3));
+    window.scrollTo(0, 0);
+  };
+
+  const prevStep = () => {
+    setStep((prevStep) => Math.max(prevStep - 1, 1));
+    window.scrollTo(0, 0);
+  };
 
   const stepTitles = [
-    'Personal Contact Information',
-    'Professional Chess Information',
-    'Contact Address Information',
+    'Personal Information',
+    'Professional Information',
+    'Address and Notes',
   ];
 
   return (
@@ -79,11 +103,9 @@ export default function ChessCoachForm() {
           </div>
 
           <Form {...form}>
-            <>
-              {step === 1 && <PersonalContactInfo form={form} />}
-              {step === 2 && <ProfessionalChessInfo form={form} />}
-              {step === 3 && <ContactAddressInfo form={form} />}
-            </>
+            {step === 1 && <PersonalContactInfo form={form} />}
+            {step === 2 && <ProfessionalChessInfo form={form} />}
+            {step === 3 && <ContactAddressInfo form={form} />}
 
             <div className="flex justify-between mt-6">
               {step > 1 && (
@@ -104,25 +126,7 @@ export default function ChessCoachForm() {
                 <Button
                   type="button"
                   variant="accent"
-                  onClick={async () => {
-                    const isValid = await form.trigger();
-
-                    if (isValid) {
-                      toast({
-                        title: 'Form Submitted',
-                        description:
-                          'Your form has been successfully submitted.',
-                      });
-                      handleSubmit();
-                    } else {
-                      console.log('Form validation failed:', form.getValues()); // Log form data if validation fails
-                      toast({
-                        title: 'Validation Error',
-                        description: 'Invalid or Incomplete field',
-                        variant: 'destructive',
-                      });
-                    }
-                  }}
+                  onClick={handleSubmit}
                   className="ml-auto"
                 >
                   Submit

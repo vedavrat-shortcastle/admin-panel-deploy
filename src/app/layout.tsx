@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ClerkProvider } from '@clerk/nextjs';
 import TrpcProvider from '@/hooks/trpc-provider';
+import { SidebarProvider } from '@/components/ui/sidebar';
+import { AdminSidebar } from '@/components/Sidebar';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,7 +33,12 @@ export default function RootLayout({
           <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
           >
-            {children}
+            <div>
+              <SidebarProvider>
+                <AdminSidebar />
+                {children}
+              </SidebarProvider>
+            </div>
           </body>
         </html>
       </TrpcProvider>

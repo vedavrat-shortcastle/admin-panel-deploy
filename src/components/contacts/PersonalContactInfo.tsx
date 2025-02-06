@@ -1,28 +1,28 @@
-import type { UseFormReturn } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form';
-import { format } from 'date-fns';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
+import { UseFormReturn } from 'react-hook-form';
 
 export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
   return (
-    <div>
-      <div className="grid grid-cols-12 gap-4">
+    <div className="space-y-6">
+      <div className="grid grid-cols-12 gap-6">
         <div className="col-span-6">
           <FormField
             control={form.control}
@@ -56,35 +56,45 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
         </div>
       </div>
 
-      <FormField
-        control={form.control}
-        name="email"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <FormControl>
-              <Input placeholder="johndoe@email.com" type="email" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-6">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="johndoe@email.com"
+                    type="email"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-      <FormField
-        control={form.control}
-        name="phone"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Phone</FormLabel>
-            <FormControl>
-              <Input type="text" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <div className="col-span-6">
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} value={field.value ?? ''} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </div>
 
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-12 gap-6">
         <div className="col-span-6">
           <FormField
             control={form.control}
@@ -96,7 +106,7 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
                   <RadioGroup
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    className="flex my-auto"
+                    className="flex space-x-4 mt-2"
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="male" id="male" />
@@ -129,15 +139,15 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
-                        variant={'outline'}
+                        variant="outline"
                         className={cn(
-                          'w-[280px] justify-start text-left font-normal',
+                          'w-full justify-start text-left font-normal',
                           !field.value && 'text-muted-foreground'
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? (
-                          format(new Date(field.value), 'PPP')
+                          format(field.value, 'PPP')
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -146,10 +156,14 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={
-                          field.value ? new Date(field.value) : undefined
-                        }
-                        onSelect={(date) => field.onChange(date?.toISOString())}
+                        selected={field.value}
+                        onSelect={(date) => {
+                          console.log(date);
+                          field.onChange(date);
+                          if (date) {
+                            form.setValue('yearOfBirth', date.getFullYear());
+                          }
+                        }}
                         initialFocus
                       />
                     </PopoverContent>
@@ -161,30 +175,37 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
           />
         </div>
       </div>
-      <div className="col-span-12">
-        <FormField
-          control={form.control}
-          name="profilePhoto"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profile Photo</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      field.onChange(file);
-                    }
-                  }}
-                />
-              </FormControl>
-              {field.value && <p>Selected file: {field.value.name}</p>}
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+      <div className="grid grid-cols-12 gap-6">
+        <div className="col-span-12">
+          <FormField
+            control={form.control}
+            name="profilePhoto"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Profile Photo</FormLabel>
+                <FormControl>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        field.onChange(file);
+                      }
+                    }}
+                  />
+                </FormControl>
+                {field.value && (
+                  <p className="text-sm mt-2">
+                    Selected file: {field.value.name}
+                  </p>
+                )}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
       </div>
     </div>
   );

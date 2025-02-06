@@ -29,7 +29,7 @@ export default function DemoPage() {
   }, []);
 
   return (
-    <div className="container py-5">
+    <div className="container py-5 px-10">
       <div className="flex items-center">
         <UsersRoundIcon color="#645EEB" size={35} strokeWidth={2} />
         <h1 className="text-3xl font-semibold px-2 py-1">Contacts</h1>
