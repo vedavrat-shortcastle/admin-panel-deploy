@@ -23,9 +23,15 @@ import {
 } from '@/components/contacts/TagBasedFields';
 import { UseFormReturn } from 'react-hook-form';
 
-export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
+export function ProfessionalChessInfo({
+  form,
+  scrollableRef,
+}: {
+  form: UseFormReturn<any>;
+  scrollableRef: React.RefObject<HTMLDivElement>;
+}) {
   return (
-    <div className="grid grid-cols-12 gap-6 p-6">
+    <div className="grid grid-cols-12 gap-6 ">
       {/* First Row: Current Academy and Role */}
       <div className="col-span-12 lg:col-span-6 space-y-2">
         <FormField
@@ -287,7 +293,7 @@ export function ProfessionalChessInfo({ form }: { form: UseFormReturn<any> }) {
       </div>
 
       <div className="col-span-12">
-        <LanguagesSpoken form={form} />
+        <LanguagesSpoken scrollableRef={scrollableRef} form={form} />
       </div>
     </div>
   );

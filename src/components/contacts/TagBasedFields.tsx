@@ -292,8 +292,21 @@ export const PhysicallyTaught = ({ form }: { form: UseFormReturn<any> }) => {
   );
 };
 
-export const LanguagesSpoken = ({ form }: { form: UseFormReturn<any> }) => {
+export const LanguagesSpoken = ({
+  form,
+  scrollableRef,
+}: {
+  form: UseFormReturn<any>;
+  scrollableRef: React.RefObject<HTMLDivElement>;
+}) => {
   const selectedLanguages = form.watch('languagesSpoken') || [];
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      scrollableRef.current.scrollTop = scrollableRef.current.scrollHeight;
+    });
+  }, [selectedLanguages]);
+
   return (
     <div>
       <div className="col-span-12 flex items-end space-x-2 relative">
@@ -339,7 +352,7 @@ export const LanguagesSpoken = ({ form }: { form: UseFormReturn<any> }) => {
           {selectedLanguages.map((language: string, index: any) => (
             <div
               key={index}
-              className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
+              className="flex items-center justify-between p-1 text-sm bg-gray-100 overflow-y-auto rounded-md mb-2 px-3"
             >
               <span className="whitespace-nowrap">{language}</span>
               <button
@@ -357,35 +370,6 @@ export const LanguagesSpoken = ({ form }: { form: UseFormReturn<any> }) => {
     </div>
   );
 };
-
-{
-  /* <FormField
-  control={form.control}
-  name="titles"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Titles</FormLabel>
-      <Select
-        onValueChange={field.onChange}
-        defaultValue="FIDE-trainer"
-      >
-        <FormControl>
-          <SelectTrigger>
-            <SelectValue placeholder="Select titles" />
-          </SelectTrigger>
-        </FormControl>
-        <SelectContent>
-          <SelectItem value="FIDE-trainer">FIDE Trainer</SelectItem>
-          <SelectItem value="FIDE-instructor">
-            FIDE Instructor
-          </SelectItem>
-          <SelectItem value="GM">GM</SelectItem>
-          <SelectItem value="IM">IM</SelectItem>
-          <SelectItem value="WIM">WIM</SelectItem>
-          <SelectItem value="WGM">WGM</SelectItem>
-        </SelectContent>
-      </Select> */
-}
 
 export const Titles = ({ form }: { form: UseFormReturn<any> }) => {
   const selectedTitles = form.watch('titles') || [];
@@ -429,9 +413,7 @@ export const Titles = ({ form }: { form: UseFormReturn<any> }) => {
         <Button
           type="button"
           variant="accent"
-          onClick={() =>
-            handleAddItem({ form }, 'languagesSpoken', 'languagesSpokenInput')
-          }
+          onClick={() => handleAddItem({ form }, 'titles', 'titlesInput')}
         >
           Add
         </Button>

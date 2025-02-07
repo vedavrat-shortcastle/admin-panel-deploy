@@ -16,7 +16,7 @@ export const defaultFormValues = {
   gender: 'male' as Gender,
   languagesSpoken: [],
   currentAcademy: '',
-  workingMode: 'online' as WorkingMode, // Set a default value (could be 'online', 'offline', or 'hybrid')
+  workingMode: 'hybrid' as WorkingMode, // Set a default value (could be 'online', 'offline', or 'hybrid')
   onlinePercentage: 0, // Default to 0
   offlinePercentage: 0, // Default to 0
   stateRegion: '',
