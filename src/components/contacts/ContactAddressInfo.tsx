@@ -135,39 +135,6 @@ export function ContactAddressInfo({ form }: { form: UseFormReturn<any> }) {
         />
       </div>
 
-      {/* <div className="col-span-6">
-        <FormField
-          control={form.control}
-          name="titles"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Titles</FormLabel>
-              <Select
-                onValueChange={field.onChange}
-                defaultValue="FIDE-trainer"
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select titles" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="FIDE-trainer">FIDE Trainer</SelectItem>
-                  <SelectItem value="FIDE-instructor">
-                    FIDE Instructor
-                  </SelectItem>
-                  <SelectItem value="GM">GM</SelectItem>
-                  <SelectItem value="IM">IM</SelectItem>
-                  <SelectItem value="WIM">WIM</SelectItem>
-                  <SelectItem value="WGM">WGM</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div> */}
-
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField

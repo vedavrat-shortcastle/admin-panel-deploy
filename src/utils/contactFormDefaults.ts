@@ -11,8 +11,8 @@ export const defaultFormValues = {
   academyNames: [],
   website: '',
   country: '',
-  yearOfBirth: undefined, // Default to the current year
-  dateOfBirth: undefined, // Default to the current date
+  yearOfBirth: undefined,
+  dateOfBirth: undefined,
   gender: 'male' as Gender,
   languagesSpoken: [],
   currentAcademy: '',
