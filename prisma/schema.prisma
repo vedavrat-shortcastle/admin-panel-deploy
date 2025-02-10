@@ -788,8 +788,8 @@ model Location {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  contacts ContactLocation[]
-  contactPhysicalLocations  ContactPhysicalLocation[]
+  contacts                 ContactLocation[]
+  contactPhysicalLocations ContactPhysicalLocation[]
   @@map("locations")
 }
 
@@ -800,13 +800,15 @@ model Tag {
 
   // Relations
   contacts ContactTag[]
+
   @@map("tags")
 }
 
 model Contact {
   id                Int           @id @default(autoincrement())
   userId            String?       @map("user_id")
-  firstName          String?       @map("first_name") @db.VarChar(100)
+  imageUrl          String?       @map("image_url") @db.VarChar(255)
+  firstName         String?       @map("first_name") @db.VarChar(100)
   lastName          String?       @map("last_name") @db.VarChar(100)
   role              ContactRole   @map("role")
   email             String?       @db.VarChar(255)
@@ -818,14 +820,17 @@ model Contact {
   website           String?       @db.VarChar(255)
   teachingMode      TeachingMode? @map("teaching_mode")
   onlinePercentage  Int?          @map("online_percentage")
-  offlinePercentage  Int?          @map("offline_percentage")
+  offlinePercentage Int?          @map("offline_percentage")
   yearsInOperation  Int?          @map("years_in_operation")
   numberOfCoaches   Int?          @map("number_of_coaches")
   linkedinUrl       String?       @map("linkedin_url") @db.VarChar(255)
   facebookUrl       String?       @map("facebook_url") @db.VarChar(255)
   instagramUrl      String?       @map("instagram_url") @db.VarChar(255)
   twitterUrl        String?       @map("twitter_url") @db.VarChar(255)
-  fideId             String?       @map("fide_id") @db.VarChar(50)
+  classicRating     Int?          @map("classic_rating") 
+  rapidRating       Int?          @map("rapid_rating")
+  blitzRating       Int?          @map("blitz_rating")
+  fideId            String?       @map("fide_id") @db.VarChar(50)
   currentStatus     ContactStatus @default(new) @map("current_status")
   lastContacted     DateTime?     @map("last_contacted")
   notes             String?
@@ -835,12 +840,13 @@ model Contact {
   updatedAt         DateTime      @default(now()) @updatedAt @map("updated_at")
 
   // Relations
-  user                      User?                  @relation(fields: [userId], references: [uuid], map: "cl_user")
-  location          Location?                 @relation(fields: [locationId], references: [id]) // Single location
+  user                    User?                     @relation(fields: [userId], references: [uuid], map: "cl_user")
+  location                Location?                 @relation(fields: [locationId], references: [id]) // Single location
   physicalLocationsTaught ContactPhysicalLocation[]
-  academies                 ContactAcademy[]
-  tags                      ContactTag[]
-  statusHistory             ContactStatusHistory[]
+  academies               ContactAcademy[]
+  tags                    ContactTag[]
+  statusHistory           ContactStatusHistory[]
+  ContactLocation         ContactLocation[]
 
   @@map("contacts")
 }
@@ -860,7 +866,7 @@ model ContactLocation {
 
 model ContactAcademy {
   contactId Int      @map("contact_id")
-  academyId String   @db.Uuid @map("academy_id")
+  academyId String   @map("academy_id") @db.Uuid
   isCurrent Boolean  @default(false) @map("is_current")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -894,6 +900,7 @@ model ContactStatusHistory {
 
   // Relations
   contact Contact @relation(fields: [contactId], references: [id])
+
   @@map("contact_status_history")
 }
 
@@ -1171,7 +1178,7 @@ enum TournamentControlType {
 }
 
 enum ChessTitle {
-  FIDETrainer @map("FIDE Trainer")
+  FIDETrainer    @map("FIDE Trainer")
   FIDEInstructor @map("FIDE Instructor")
   GM
   IM
@@ -1185,4 +1192,3 @@ enum ContactRole {
   Subcoach
   Admin
 }
-

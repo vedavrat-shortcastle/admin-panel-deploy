@@ -1,10 +1,10 @@
-import { contactRouter } from '@/app/server/routers/contact';
+import { contactsRouter } from '@/app/server/routers/contact';
 import { usersRouter } from '@/app/server/routers/users';
 import { router } from '@/app/server/trpc';
 
 export const appRouter = router({
   users: usersRouter,
-  contact: contactRouter,
+  contacts: contactsRouter,
   // Add other routers here
 });
 

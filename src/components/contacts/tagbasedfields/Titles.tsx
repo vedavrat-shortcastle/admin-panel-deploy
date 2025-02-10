@@ -16,7 +16,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from '@radix-ui/react-select';
+} from '@/components/ui/select';
 import { X } from 'lucide-react';
 
 import { UseFormReturn } from 'react-hook-form';
