@@ -15,11 +15,17 @@ import {
 } from '@/components/ui/popover';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { cn } from '@/lib/utils';
+import { ContactFormReturn } from '@/types/contactSection';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
 
-export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
+interface PersonalContactProps {
+  form: ContactFormReturn;
+}
+
+export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
+  form,
+}) => {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-12 gap-6">
@@ -209,4 +215,4 @@ export function PersonalContactInfo({ form }: { form: UseFormReturn<any> }) {
       </div>
     </div>
   );
-}
+};

@@ -21,15 +21,17 @@ import {
   PhysicallyTaught,
   Titles,
 } from '@/components/contacts/TagBasedFields';
-import { UseFormReturn } from 'react-hook-form';
+import { ContactFormReturn } from '@/types/contactSection';
 
-export function ProfessionalChessInfo({
+interface ProfessionalChessInfoProps {
+  form: ContactFormReturn; // Ensure this type is correctly defined
+  scrollableRef: React.RefObject<HTMLDivElement>;
+}
+
+export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
   form,
   scrollableRef,
-}: {
-  form: UseFormReturn<any>;
-  scrollableRef: React.RefObject<HTMLDivElement>;
-}) {
+}) => {
   return (
     <div className="grid grid-cols-12 gap-6 ">
       {/* First Row: Current Academy and Role */}
@@ -297,4 +299,4 @@ export function ProfessionalChessInfo({
       </div>
     </div>
   );
-}
+};

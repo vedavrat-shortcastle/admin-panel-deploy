@@ -60,10 +60,10 @@ export const columns: ColumnDef<ContactsTable>[] = [
     header: 'Actions',
     cell: ({ row }) => (
       <div className="flex space-x-2">
-        <PencilIcon size={15} onClick={() => handleEdit(row.original)} />
+        <PencilIcon size={16} onClick={() => handleEdit(row.original)} />
         <TrashIcon
           color="red"
-          size={15}
+          size={16}
           className=""
           onClick={() => handleDelete(row.original)}
         />

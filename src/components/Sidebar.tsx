@@ -24,7 +24,7 @@ const navItems = [
   {
     title: 'Contacts',
     icon: Contact2,
-    href: '/',
+    href: '/contacts',
   },
   {
     title: 'Customer',

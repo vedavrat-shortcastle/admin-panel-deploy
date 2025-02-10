@@ -19,7 +19,7 @@ import { ContactAddressInfo } from '@/components/contacts/ContactAddressInfo';
 import { defaultFormValues } from '@/utils/contactFormDefaults';
 import { PersonalContactInfo } from '@/components/contacts/PersonalContactInfo';
 
-export default function NewContactForm() {
+export default function AddContact() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 

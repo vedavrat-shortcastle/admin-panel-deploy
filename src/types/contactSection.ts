@@ -1,4 +1,5 @@
 import { formSchema } from '@/schemas/contacts';
+import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
 export type ContactsTable = {
@@ -20,3 +21,5 @@ export type Academy = {
 };
 
 export type FormValues = z.infer<typeof formSchema>;
+
+export type ContactFormReturn = UseFormReturn<any>;

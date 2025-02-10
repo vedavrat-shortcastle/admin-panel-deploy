@@ -17,9 +17,13 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
-import { UseFormReturn } from 'react-hook-form';
+import { ContactFormReturn } from '@/types/contactSection';
 
-export function ContactAddressInfo({ form }: { form: UseFormReturn<any> }) {
+interface ContactAddressProps {
+  form: ContactFormReturn;
+}
+
+export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -193,4 +197,4 @@ export function ContactAddressInfo({ form }: { form: UseFormReturn<any> }) {
       </div>
     </div>
   );
-}
+};

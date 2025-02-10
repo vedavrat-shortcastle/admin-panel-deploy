@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 
 import { columns } from './columns';
 import { DataTable } from './data-table';
-import NewContactForm from '@/components/contacts/NewContactForm';
+
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import AddContact from '@/components/contacts/NewContactForm';
 
 async function getData() {
   const response = await fetch(
@@ -23,7 +24,7 @@ async function getData() {
   return await response.json();
 }
 
-export default function DemoPage() {
+export default function ContactsLandingPage() {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false); // Modal state
 
@@ -61,7 +62,7 @@ export default function DemoPage() {
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold ">
                 <div className="flex items-center">
-                  <Contact color="#645EEB" size={35} />
+                  <Contact color="#645EEB" size={36} />
                   <div className="ml-2 mt-1">Add Contact</div>
                 </div>
               </DialogTitle>
@@ -72,7 +73,7 @@ export default function DemoPage() {
               className="overflow-y-auto flex-grow"
               style={{ maxHeight: 'calc(100vh - 150px)' }}
             >
-              <NewContactForm />
+              <AddContact />
             </div>
           </DialogContent>
         </Dialog>
