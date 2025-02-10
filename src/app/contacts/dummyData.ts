@@ -1,6 +1,6 @@
-import { Contact } from '@/app/contacts/columns';
+import { ContactsTable } from '@/types/contactSection';
 
-export const contacts: Contact[] = [
+export const contacts: ContactsTable[] = [
   {
     firstname: 'John',
     lastname: 'Doe',

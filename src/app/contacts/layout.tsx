@@ -1,5 +1,4 @@
-import { AdminSidebar } from '@/components/Sidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/toaster';
 
 export default function ContactsLayout({
   children,
@@ -7,11 +6,9 @@ export default function ContactsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <section className=" h-full flex ">
-      <SidebarProvider>
-        <AdminSidebar />
-        {children}
-      </SidebarProvider>
+    <section className=" h-full flex justify-center w-full">
+      {children}
+      <Toaster />
     </section>
   );
 }
