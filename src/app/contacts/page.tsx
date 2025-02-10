@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import AddContact from '@/components/contacts/NewContactForm';
+import AddContact from '@/components/contacts/AddContact';
 
 async function getData() {
   const response = await fetch(
@@ -42,7 +42,7 @@ export default function ContactsLandingPage() {
     <div className="container py-5 px-10">
       {/* Header */}
       <div className="flex items-center">
-        <UsersRoundIcon color="#645EEB" size={35} strokeWidth={2} />
+        <UsersRoundIcon className="text-primary" size={35} strokeWidth={2} />
         <h1 className="text-3xl font-semibold px-2 py-1">Contacts</h1>
       </div>
 
@@ -53,7 +53,7 @@ export default function ContactsLandingPage() {
         {/* Modal Pop-up for Adding Contact */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button variant="accent" className="font-semibold">
+            <Button variant="default" className="font-semibold">
               Add Contact
             </Button>
           </DialogTrigger>
@@ -62,7 +62,7 @@ export default function ContactsLandingPage() {
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold ">
                 <div className="flex items-center">
-                  <Contact color="#645EEB" size={36} />
+                  <Contact className="text-primary" size={36} />
                   <div className="ml-2 mt-1">Add Contact</div>
                 </div>
               </DialogTitle>

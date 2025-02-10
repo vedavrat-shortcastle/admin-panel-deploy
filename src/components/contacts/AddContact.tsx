@@ -106,7 +106,7 @@ export default function AddContact() {
       </div>
 
       {/* Scrollable Content */}
-      <div ref={scrollableRef} className="flex-grow overflow-y-auto pr-3">
+      <div ref={scrollableRef} className="flex-grow overflow-y-auto p-3">
         <Form {...form}>
           {step === 1 && <PersonalContactInfo form={form} />}
           {step === 2 && (
@@ -119,14 +119,14 @@ export default function AddContact() {
       {/* Action Buttons - Fixed at Bottom */}
       <div className="p-4 border-t flex justify-between bg-white">
         {step > 1 && (
-          <Button type="button" onClick={prevStep} variant="outline">
+          <Button type="button" onClick={prevStep} variant="default">
             Previous
           </Button>
         )}
         {step < 3 ? (
           <Button
             type="button"
-            variant="accent"
+            variant="default"
             onClick={nextStep}
             className="ml-auto"
           >
@@ -135,7 +135,7 @@ export default function AddContact() {
         ) : (
           <Button
             type="button"
-            variant="accent"
+            variant="default"
             onClick={handleSubmit}
             className="ml-auto"
           >

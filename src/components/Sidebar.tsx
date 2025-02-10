@@ -68,7 +68,6 @@ export function AdminSidebar() {
       setIsCollapsed(true);
     }
   }, []);
-
   return (
     <aside
       className={cn(
@@ -101,7 +100,7 @@ export function AdminSidebar() {
 
       <div className={cn('px-4 py-3', isCollapsed && 'flex justify-center')}>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold">
+          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
             A
           </div>
           {!isCollapsed && (
@@ -127,7 +126,7 @@ export function AdminSidebar() {
               className={cn(
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors hover:bg-[rgb(50,50,50)]',
                 pathname === item.href
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-600'
+                  ? 'bg-primary text-white hover:bg-primary'
                   : 'text-white',
                 isCollapsed && 'justify-center px-2'
               )}

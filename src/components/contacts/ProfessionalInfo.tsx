@@ -14,14 +14,14 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import {
-  AcademyNames,
-  CustomTags,
-  LanguagesSpoken,
-  PhysicallyTaught,
-  Titles,
-} from '@/components/contacts/TagBasedFields';
+
 import { ContactFormReturn } from '@/types/contactSection';
+import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
+import { PhysicallyTaught } from '@/components/contacts/tagbasedfields/PhysicallyTaught';
+import { Titles } from '@/components/contacts/tagbasedfields/Titles';
+
+import { LanguagesSpoken } from '@/components/contacts/tagbasedfields/LanguagesSpoken';
+import { CustomTags } from '@/components/contacts/tagbasedfields/CustomTagsField';
 
 interface ProfessionalChessInfoProps {
   form: ContactFormReturn; // Ensure this type is correctly defined
