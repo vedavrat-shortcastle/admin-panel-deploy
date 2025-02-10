@@ -789,6 +789,7 @@ model Location {
 
   // Relations
   contacts ContactLocation[]
+  contactPhysicalLocations  ContactPhysicalLocation[]
 }
 
 model Tag {
@@ -805,8 +806,10 @@ model Contact {
   userId            String?       @map("user_id")
   firstName          String?       @map("first_name") @db.VarChar(100)
   lastName          String?       @map("last_name") @db.VarChar(100)
+  role              ContactRole   @map("role")
   email             String?       @db.VarChar(255)
   phone             String?       @db.VarChar(20)
+  titles            ChessTitle[]  @map("titles")
   dateOfBirth       DateTime?     @map("date_of_birth") @db.Date
   gender            GenderType?
   languagesSpoken   String[]      @map("languages_spoken")
@@ -825,13 +828,14 @@ model Contact {
   lastContacted     DateTime?     @map("last_contacted")
   notes             String?
   address           String?
+  locationId        Int?          @map("location_id")
   createdAt         DateTime      @default(now()) @map("created_at")
   updatedAt         DateTime      @default(now()) @updatedAt @map("updated_at")
 
   // Relations
   user                      User?                  @relation(fields: [userId], references: [uuid], map: "cl_user")
-  locations                 ContactLocation
-  physicallyTaughtLocations ContactLocation[]
+  location          Location?                 @relation(fields: [locationId], references: [id]) // Single location
+  physicalLocationsTaught ContactPhysicalLocation[]
   academies                 ContactAcademy[]
   tags                      ContactTag[]
   statusHistory             ContactStatusHistory[]
@@ -842,7 +846,6 @@ model Contact {
 model ContactLocation {
   contactId  Int      @map("contact_id")
   locationId Int      @map("location_id")
-  isCurrent  Boolean  @default(true) @map("is_current")
   createdAt  DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -887,6 +890,19 @@ model ContactStatusHistory {
 
   // Relations
   contact Contact @relation(fields: [contactId], references: [id])
+}
+
+model ContactPhysicalLocation {
+  contactId  Int      @map("contact_id")
+  locationId Int      @map("location_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  contact  Contact  @relation(fields: [contactId], references: [id])
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@id([contactId, locationId])
+  @@map("contact_physical_locations")
 }
 
 //
@@ -1148,3 +1164,20 @@ enum TournamentControlType {
 
   @@map("tournament_control_type")
 }
+
+enum ChessTitle {
+  FIDETrainer @map("FIDE Trainer")
+  FIDEInstructor @map("FIDE Instructor")
+  GM
+  IM
+  WIM
+  WGM
+}
+
+enum ContactRole {
+  Founder
+  Headcoach
+  Subcoach
+  Admin
+}
+
