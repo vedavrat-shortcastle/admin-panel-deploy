@@ -12,11 +12,12 @@ import {
 } from '@/components/ui/form';
 import {
   Select,
-  SelectTrigger,
-  SelectValue,
   SelectContent,
   SelectItem,
-} from '@radix-ui/react-select';
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
 import { X } from 'lucide-react';
 
 import { UseFormReturn } from 'react-hook-form';

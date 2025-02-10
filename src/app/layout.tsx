@@ -42,7 +42,7 @@ export default async function RootLayout({
               ) : (
                 <SidebarProvider>
                   <AdminSidebar />
-                  <main>{children}</main>
+                  <main className="h-full w-full">{children}</main>
                 </SidebarProvider>
               )}
             </div>
