@@ -790,6 +790,7 @@ model Location {
   // Relations
   contacts ContactLocation[]
   contactPhysicalLocations  ContactPhysicalLocation[]
+  @@map("locations")
 }
 
 model Tag {
@@ -799,6 +800,7 @@ model Tag {
 
   // Relations
   contacts ContactTag[]
+  @@map("tags")
 }
 
 model Contact {
@@ -853,11 +855,12 @@ model ContactLocation {
   location Location @relation(fields: [locationId], references: [id])
 
   @@id([contactId, locationId])
+  @@map("contact_locations")
 }
 
 model ContactAcademy {
   contactId Int      @map("contact_id")
-  academyId String   @map("academy_id")
+  academyId String   @db.Uuid @map("academy_id")
   isCurrent Boolean  @default(false) @map("is_current")
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -879,6 +882,7 @@ model ContactTag {
   tag     Tag     @relation(fields: [tagId], references: [id])
 
   @@id([contactId, tagId])
+  @@map("contact_tags")
 }
 
 model ContactStatusHistory {
@@ -890,6 +894,7 @@ model ContactStatusHistory {
 
   // Relations
   contact Contact @relation(fields: [contactId], references: [id])
+  @@map("contact_status_history")
 }
 
 model ContactPhysicalLocation {
