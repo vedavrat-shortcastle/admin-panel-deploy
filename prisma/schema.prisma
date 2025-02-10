@@ -785,7 +785,6 @@ model Location {
   country   String?  @db.VarChar(100)
   state     String?  @db.VarChar(100)
   city      String   @unique @db.VarChar(100)
-  address   String?
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
@@ -828,16 +827,17 @@ model Contact {
   currentStatus     ContactStatus @default(new) @map("current_status")
   lastContacted     DateTime?     @map("last_contacted")
   notes             String?
+  address           String?
   createdAt         DateTime      @default(now()) @map("created_at")
   updatedAt         DateTime      @default(now()) @updatedAt @map("updated_at")
 
   // Relations
-  user          User?                  @relation(fields: [userId], references: [uuid], map: "cl_user")
-  locations     ContactLocation[]
-  academies     ContactAcademy[]
-  tags          ContactTag[]
-  statusHistory ContactStatusHistory[]
-  physicalLocationsTaught ContactPhysicalLocation[]
+  user                      User?                  @relation(fields: [userId], references: [uuid], map: "cl_user")
+  locations                 ContactLocation
+  physicallyTaughtLocations ContactLocation[]
+  academies                 ContactAcademy[]
+  tags                      ContactTag[]
+  statusHistory             ContactStatusHistory[]
 
   @@map("contacts")
 }
