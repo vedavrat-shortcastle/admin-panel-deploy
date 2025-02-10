@@ -6,6 +6,7 @@ import TrpcProvider from '@/hooks/trpc-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/Sidebar';
 import { currentUser } from '@clerk/nextjs/server';
+import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,10 +42,11 @@ export default async function RootLayout({
               ) : (
                 <SidebarProvider>
                   <AdminSidebar />
-                  {children}
+                  <main>{children}</main>
                 </SidebarProvider>
               )}
             </div>
+            <Toaster />
           </body>
         </html>
       </TrpcProvider>
