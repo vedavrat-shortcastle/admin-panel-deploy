@@ -13,29 +13,32 @@ import { X } from 'lucide-react';
 export type SelectionMode = 'single' | 'multiple';
 
 interface SearchableSelectWithTagsProps {
-  form: UseFormReturn<any>; // Or be more specific with your form type
-  fieldName: string; // Field name in the form (e.g., 'academyNames', 'languagesSpoken')
-  Values: string[]; //
+  form: UseFormReturn<any>;
+  fieldName: string;
+  Values: string[];
   label?: string;
   placeholder?: string;
-  selectionMode?: SelectionMode; // New prop for single/multiple selection
-  onSearch?: (searchTerm: string) => void; // Callback for search input change**
+  selectionMode?: SelectionMode;
+  onSearch?: (searchTerm: string) => void;
+  onSelectItem?: (item: string) => void;
 }
 
 export const SearchableSelectWithTags = ({
   form,
   fieldName,
-  Values, // Now directly expects string array
+  Values,
   label,
   placeholder,
   selectionMode = 'multiple',
   onSearch,
+  onSelectItem,
 }: SearchableSelectWithTagsProps) => {
   const [searchedItems, setSearchedItems] = useState<string[]>([]);
   const isMounted = useRef(true);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const selectedItems =
     form.watch(fieldName) || (selectionMode === 'multiple' ? [] : '');
+  const [inputValue, setInputValue] = useState<string>('');
 
   useEffect(() => {
     return () => {
@@ -45,14 +48,13 @@ export const SearchableSelectWithTags = ({
 
   useEffect(() => {
     if (Values) {
-      // Now directly using fetchedValues as string array
-      setSearchedItems(Values); // Directly set searchedItems to fetchedValues
+      setSearchedItems(Values);
       setShowDropdown(Values.length > 0);
     } else {
       setSearchedItems([]);
       setShowDropdown(false);
     }
-  }, [Values]); // Dependency on fetchedValues (string array)
+  }, [Values]);
 
   const handleItemSearch = useCallback(
     debounce((value: string) => {
@@ -70,30 +72,41 @@ export const SearchableSelectWithTags = ({
         onSearch(searchValue);
       }
     }, 500),
-    [onSearch]
+    [onSearch, selectionMode]
   );
 
   const handleSelectItem = (item: string) => {
     if (selectionMode === 'multiple') {
-      form.setValue(fieldName, [...(selectedItems as string[]), item]);
+      if (!(selectedItems as string[]).includes(item)) {
+        form.setValue(fieldName, [...selectedItems, item]);
+        form.setValue(`${fieldName}Input`, '');
+        setShowDropdown(false);
+      } else {
+        console.log('Item already selected:', item);
+      }
     } else {
       form.setValue(fieldName, item);
+      setInputValue(item);
       setShowDropdown(false);
     }
     form.setValue(`${fieldName}Input`, '');
     if (selectionMode === 'multiple') {
       setShowDropdown(false);
     }
+    if (onSelectItem) {
+      onSelectItem(item);
+    }
   };
 
   const handleRemoveItem = (itemName: string) => {
     if (selectionMode === 'multiple') {
-      const updatedItems = (selectedItems as string[]).filter(
+      const updatedItems = selectedItems.filter(
         (name: string) => name !== itemName
       );
       form.setValue(fieldName, updatedItems);
     } else {
       form.setValue(fieldName, '');
+      setInputValue('');
     }
   };
 
@@ -108,10 +121,18 @@ export const SearchableSelectWithTags = ({
               <FormLabel>{label}</FormLabel>
               <FormControl>
                 <Input
-                  value={field.value ?? ''}
+                  value={
+                    selectionMode === 'single'
+                      ? inputValue
+                      : (field.value ?? '')
+                  }
                   placeholder={placeholder}
                   onChange={(e) => {
-                    field.onChange(e.target.value);
+                    if (selectionMode === 'single') {
+                      setInputValue(e.target.value);
+                    } else {
+                      field.onChange(e.target.value);
+                    }
                     handleItemSearch(e.target.value);
                   }}
                   onBlur={() => {
@@ -150,27 +171,21 @@ export const SearchableSelectWithTags = ({
       {/* Display Selected Items (Tags or Single Value) */}
       <div className="col-span-12 flex justify-start">
         <div className="bg-white p-2 rounded-md min-w-fit w-auto">
-          {selectionMode === 'multiple'
-            ? (selectedItems as string[]).map((item: string, index: any) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
+          {selectionMode === 'multiple' &&
+            (selectedItems as string[]).map((item: string, index: any) => (
+              <div
+                key={index}
+                className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
+              >
+                <span className="whitespace-nowrap">{item}</span>
+                <button
+                  onClick={() => handleRemoveItem(item)}
+                  className="text-gray-500 hover:text-red-500 transition"
                 >
-                  <span className="whitespace-nowrap">{item}</span>
-                  <button
-                    onClick={() => handleRemoveItem(item)}
-                    className="text-gray-500 hover:text-red-500 transition"
-                  >
-                    <X className="ml-3" size={14} strokeWidth={4} />
-                  </button>
-                </div>
-              ))
-            : typeof selectedItems === 'string' &&
-              selectedItems && (
-                <div className="p-1 text-sm bg-gray-100 rounded-md px-3">
-                  {selectedItems}
-                </div>
-              )}
+                  <X className="ml-3" size={14} strokeWidth={4} />
+                </button>
+              </div>
+            ))}
         </div>
       </div>
     </div>
