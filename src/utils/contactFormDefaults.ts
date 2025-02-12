@@ -7,11 +7,12 @@ type Status =
   | 'high_prospect';
 type Gender = 'male' | 'female' | 'other';
 type WorkingMode = 'online' | 'offline' | 'hybrid';
+type Role = 'Headcoach' | 'Subcoach' | 'Admin' | 'Founder';
 
 export const defaultFormValues = {
   firstName: '',
   lastName: '',
-  role: '',
+  role: 'Subcoach' as Role,
   email: '',
   phoneNumber: '',
   academyIds: [],

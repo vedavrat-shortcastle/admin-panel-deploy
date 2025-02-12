@@ -792,10 +792,6 @@ model Location {
   contactPhysicalLocations ContactPhysicalLocation[]
   Contact                  Contact[]
 
-  contacts                 ContactLocation[]
-  contactPhysicalLocations ContactPhysicalLocation[]
-  Contact                  Contact[]
-
   @@map("locations")
 }
 
@@ -828,7 +824,6 @@ model Contact {
   teachingMode      TeachingMode? @map("teaching_mode")
   onlinePercentage  Int?          @map("online_percentage")
   offlinePercentage Int?          @map("offline_percentage")
-  offlinePercentage Int?          @map("offline_percentage")
   yearsInOperation  Int?          @map("years_in_operation")
   numberOfCoaches   Int?          @map("number_of_coaches")
   linkedinUrl       String?       @map("linkedin_url") @db.VarChar(255)
@@ -850,13 +845,7 @@ model Contact {
   // Relations
   user                    User?                     @relation(fields: [userId], references: [uuid], map: "cl_user")
   location                Location?                 @relation(fields: [locationId], references: [id]) // Single location
-  user                    User?                     @relation(fields: [userId], references: [uuid], map: "cl_user")
-  location                Location?                 @relation(fields: [locationId], references: [id]) // Single location
   physicalLocationsTaught ContactPhysicalLocation[]
-  academies               ContactAcademy[]
-  tags                    ContactTag[]
-  statusHistory           ContactStatusHistory[]
-  ContactLocation         ContactLocation[]
   academies               ContactAcademy[]
   tags                    ContactTag[]
   statusHistory           ContactStatusHistory[]
@@ -880,7 +869,6 @@ model ContactLocation {
 
 model ContactAcademy {
   contactId Int      @map("contact_id")
-  academyId String   @map("academy_id") @db.Uuid
   academyId String   @map("academy_id") @db.Uuid
   isCurrent Boolean  @default(false) @map("is_current")
   createdAt DateTime @default(now()) @map("created_at")
@@ -1198,7 +1186,6 @@ enum TournamentControlType {
 }
 
 enum ChessTitle {
-  FIDETrainer    @map("FIDE Trainer")
   FIDETrainer    @map("FIDE Trainer")
   FIDEInstructor @map("FIDE Instructor")
   GM

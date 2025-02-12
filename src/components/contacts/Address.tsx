@@ -12,6 +12,7 @@ import { trpc } from '@/utils/trpc';
 import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
 
 interface Location {
+  id: number;
   city: string;
   state: string | null;
   country: string | null;
@@ -66,6 +67,7 @@ const Address: React.FC<AddressProps> = ({ form }) => {
         form.setValue('location.cityLocation', selectedLocation.city);
         form.setValue('location.stateRegion', selectedLocation.state ?? '');
         form.setValue('location.country', selectedLocation.country ?? '');
+        form.setValue('locationId', selectedLocation.id);
       } else {
         console.warn('Selected city not found in options:', selectedCityName);
       }

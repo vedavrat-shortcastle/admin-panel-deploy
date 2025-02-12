@@ -18,6 +18,7 @@ import { ProfessionalChessInfo } from '@/components/contacts/ProfessionalInfo';
 import { ContactAddressInfo } from '@/components/contacts/ContactAddressInfo';
 import { defaultFormValues } from '@/utils/contactFormDefaults';
 import { PersonalContactInfo } from '@/components/contacts/PersonalContactInfo';
+import { trpc } from '@/utils/trpc';
 
 export default function AddContact() {
   const [step, setStep] = useState(1);
@@ -48,7 +49,7 @@ export default function AddContact() {
     if (!isValid) {
       toast({
         title: 'Validation Error',
-        description: 'Please fill in the required fields.',
+        description: 'Please fill in the required fields for this step.',
         variant: 'destructive',
       });
       return false;
@@ -56,33 +57,52 @@ export default function AddContact() {
     return true;
   };
 
-  const onSubmit = () => {
-    toast({
-      title: 'Form Submitted',
-      description: 'Your form has been successfully submitted.',
-    });
-    form.reset();
-    setStep(1);
+  const { mutate, isLoading } = trpc.contacts.create.useMutation({
+    // Get mutate and isLoading
+    onSuccess: (response) => {
+      console.log('Contact created successfully:', response);
+      toast({
+        title: 'Success!',
+        description: 'Contact has been created.',
+      });
+      form.reset(); // Reset the form after successful submission
+      setStep(1); // Go back to step 1
+    },
+    onError: (error) => {
+      console.error('Error creating contact:', error);
+      toast({
+        title: 'Error!',
+        description: 'Failed to create contact. Please try again.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    // onSubmit now receives form data
+    console.log('Form Values on Submit:', data); // Log form values before mutation
+    mutate(data); // Call the mutation with form data
   };
 
   const handleSubmit = async () => {
     const isValid = await form.trigger();
-    console.log(form.getValues());
-    const errors = form.formState.errors;
-    console.log('this is the error', errors);
     if (isValid) {
-      console.log(form.getValues());
-      await form.handleSubmit(onSubmit)();
+      form.handleSubmit(onSubmit)(); // Call form's handleSubmit which in turn calls our onSubmit
     } else {
+      const errors = form.formState.errors;
+      console.log(errors);
       toast({
         title: 'Validation Error',
-        description: 'Please complete all required fields.',
+        description: 'Please complete all required fields in all steps.',
         variant: 'destructive',
       });
     }
   };
 
   const nextStep = async () => {
+    const error = form.formState.errors;
+    console.log(error);
+    console.log(form.getValues());
     const isValid = await validateStep();
     if (isValid) {
       setStep((prevStep) => Math.min(prevStep + 1, 3));
@@ -141,8 +161,9 @@ export default function AddContact() {
             variant="default"
             onClick={handleSubmit}
             className="ml-auto"
+            disabled={isLoading} // Disable button while submitting
           >
-            Submit
+            {isLoading ? 'Submitting...' : 'Submit'}
           </Button>
         )}
       </div>

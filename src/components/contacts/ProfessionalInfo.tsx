@@ -68,9 +68,10 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="coach">Coach</SelectItem>
-                    <SelectItem value="player">Player</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="Founder">Founder</SelectItem>
+                    <SelectItem value="Headcoach">Headcoach</SelectItem>
+                    <SelectItem value="Subcoach">Subcoach</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
