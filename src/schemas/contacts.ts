@@ -6,13 +6,13 @@ export const formSchema = z.object({
   role: z.string().min(1, { message: 'This field is required' }),
   email: z.string().email({ message: 'Invalid email address.' }),
   phoneNumber: z.string().min(1, { message: 'This field is required' }),
-  academyNames: z.array(z.string()),
+  academyIds: z.array(z.string()).min(1, { message: 'This field is requierd' }),
   website: z
     .string()
     .url({ message: 'Invalid URL.' })
     .optional()
     .or(z.literal('')),
-  yearOfBirth: z.number().min(1900).max(new Date().getFullYear()),
+  locationId: z.number().min(1, { message: 'This field is required' }),
   dateOfBirth: z.date(),
   gender: z.enum(['male', 'female', 'other']),
   languagesSpoken: z.array(z.string()),
@@ -20,12 +20,6 @@ export const formSchema = z.object({
   workingMode: z.enum(['online', 'offline', 'hybrid']),
   onlinePercentage: z.number().min(0).max(100).optional(),
   offlinePercentage: z.number().min(0).max(100).optional(),
-  location: z.object({
-    id: z.number().optional(),
-    stateRegion: z.string().min(1, { message: 'This field is required' }),
-    cityLocation: z.string().min(1, { message: 'This field is required' }),
-    country: z.string().min(1, { message: 'This field is required' }),
-  }),
   address: z.string().min(1, { message: 'This field is required' }),
   social: z.object({
     linkedin: z.string().url().optional().or(z.literal('')),
@@ -39,14 +33,21 @@ export const formSchema = z.object({
     blitz: z.number().optional(),
   }),
   fideId: z.string().optional(),
-  titles: z.array(z.string()),
-  physicallyTaught: z.array(z.string()),
+  titles: z.array(z.string()).min(1, { message: 'This field is required' }),
+  physicallyTaught: z.array(z.number()).optional(),
   lastContacted: z.date().optional(),
   notes: z.string().optional(),
   customTags: z.array(z.string()).optional(),
   yearsInOperation: z.number().min(0),
   numberOfCoaches: z.number().min(0),
-  status: z.enum(['active', 'inactive', 'pending']),
+  status: z.enum([
+    'new',
+    'lead',
+    'prospect',
+    'customer',
+    'churned',
+    'high_prospect',
+  ]),
   profilePhoto: z.instanceof(globalThis.File || Blob).optional(),
 });
 
@@ -56,7 +57,6 @@ export const personalInfoSchema = formSchema.pick({
   email: true,
   phoneNumber: true,
   dateOfBirth: true,
-  yearOfBirth: true,
   gender: true,
   profilePhoto: true,
 });
@@ -65,7 +65,7 @@ export const personalInfoSchema = formSchema.pick({
 export const professionalInfoSchema = formSchema.pick({
   role: true,
   currentAcademy: true,
-  academyNames: true,
+  academyIds: true,
   workingMode: true,
   onlinePercentage: true,
   offlinePercentage: true,
@@ -79,8 +79,7 @@ export const professionalInfoSchema = formSchema.pick({
 
 // Contact & Location Schema
 export const contactAddressSchema = formSchema.pick({
-  location: true,
-  notes: true,
-  lastContacted: true,
+  locationId: true,
+  address: true,
   social: true,
 });
