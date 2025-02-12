@@ -26,30 +26,28 @@ export const contactsRouter = router({
   }),
 
   getById: procedure.input(z.string()).query(async ({ ctx, input }) => {
-    return await ctx.db.contact.findUnique({
+    const contactTableData = await ctx.db.contact.findUnique({
       where: { id: parseInt(input) },
     });
+
+    const contactLocationData = await ctx.db.location.findUnique({
+      where: { id: contactTableData?.locationId },
+      select: {
+        country: true,
+        state: true,
+        city: true,
+      },
+    });
+
+    return { ...contactTableData, ...contactLocationData };
   }),
 
   create: procedure.input(formSchema).mutation(async ({ ctx, input }) => {
     return await ctx.db.$transaction(
       async (tx) => {
         try {
-          const inputAcademyNames = input.academyNames;
+          const inputAcademyIds = input.academyIds;
           const physicallyTaughtLocations = input.physicallyTaught;
-          let location = await tx.location.findUnique({
-            where: { city: input.cityLocation },
-          });
-
-          if (!location) {
-            location = await tx.location.create({
-              data: {
-                country: input.country,
-                state: input.stateRegion,
-                city: input.cityLocation,
-              },
-            });
-          }
 
           const newContact = await tx.contact.create({
             data: {
@@ -65,7 +63,7 @@ export const contactsRouter = router({
               teachingMode: input.workingMode as TeachingMode,
               onlinePercentage: input.onlinePercentage,
               offlinePercentage: input.offlinePercentage,
-              locationId: location.id,
+              locationId: input.locationId,
               address: input.address,
               linkedinUrl: input.social.linkedin,
               facebookUrl: input.social.facebook,
@@ -85,9 +83,9 @@ export const contactsRouter = router({
             },
           });
 
-          if (inputAcademyNames.length > 0) {
+          if (inputAcademyIds.length > 0) {
             await tx.contactAcademy.createMany({
-              data: inputAcademyNames.map((academyId) => ({
+              data: inputAcademyIds.map((academyId) => ({
                 contactId: newContact.id,
                 academyId: academyId,
                 isCurrent: academyId === input.currentAcademy,
@@ -96,28 +94,8 @@ export const contactsRouter = router({
           }
 
           if (physicallyTaughtLocations?.length) {
-            const locationIds = [];
-
-            for (const locationInput of physicallyTaughtLocations) {
-              let physicalLocation = await tx.location.findUnique({
-                where: { city: locationInput.city },
-              });
-
-              if (!physicalLocation) {
-                physicalLocation = await tx.location.create({
-                  data: {
-                    city: locationInput.city,
-                    state: locationInput.state,
-                    country: locationInput.country,
-                  },
-                });
-              }
-
-              locationIds.push(physicalLocation.id);
-            }
-
             await tx.contactPhysicalLocation.createMany({
-              data: locationIds.map((locationId) => ({
+              data: physicallyTaughtLocations.map((locationId) => ({
                 contactId: newContact.id,
                 locationId,
               })),

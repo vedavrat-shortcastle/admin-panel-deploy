@@ -1,4 +1,10 @@
-type Status = 'active' | 'inactive' | 'pending';
+type Status =
+  | 'new'
+  | 'lead'
+  | 'prospect'
+  | 'customer'
+  | 'churned'
+  | 'high_prospect';
 type Gender = 'male' | 'female' | 'other';
 type WorkingMode = 'online' | 'offline' | 'hybrid';
 
@@ -8,10 +14,9 @@ export const defaultFormValues = {
   role: '',
   email: '',
   phoneNumber: '',
-  academyNames: [],
+  academyIds: [],
+  locationId: undefined,
   website: '',
-  country: '',
-  yearOfBirth: undefined,
   dateOfBirth: undefined,
   gender: 'male' as Gender,
   languagesSpoken: [],
@@ -19,8 +24,6 @@ export const defaultFormValues = {
   workingMode: 'hybrid' as WorkingMode, // Set a default value (could be 'online', 'offline', or 'hybrid')
   onlinePercentage: 0, // Default to 0
   offlinePercentage: 0, // Default to 0
-  stateRegion: '',
-  cityLocation: '',
   address: '',
   social: {
     linkedin: '',
@@ -41,6 +44,6 @@ export const defaultFormValues = {
   customTags: [],
   yearsInOperation: 0, // Default to 0
   numberOfCoaches: 0, // Default to 0
-  status: 'active' as Status, // Default to 'active' with the Status type
+  status: 'new' as Status, // Default to 'active' with the Status type
   profilePhoto: undefined, // Default to null since this is optional
 };
