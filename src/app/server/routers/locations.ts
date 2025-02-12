@@ -12,6 +12,7 @@ export const locationRouter = router({
         },
       },
       select: {
+        id: true,
         city: true,
         state: true,
         country: true,

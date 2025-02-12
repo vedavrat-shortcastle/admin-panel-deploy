@@ -22,7 +22,9 @@ interface AddressProps {
 }
 
 const Address: React.FC<AddressProps> = ({ form }) => {
-  const [cityOptions, setCityOptions] = useState<Location[]>([]);
+  const [fetchedLocationObject, setFetchedLocationObject] = useState<
+    Location[]
+  >([]);
   const [cityNamesForDropdown, setCityNamesForDropdown] = useState<string[]>(
     []
   );
@@ -31,7 +33,8 @@ const Address: React.FC<AddressProps> = ({ form }) => {
   const locationsQuery = trpc.location.getAllLocations.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
     onSuccess: (data) => {
-      setCityOptions(data);
+      setFetchedLocationObject(data);
+      console.log(fetchedLocationObject);
     },
   });
 
@@ -49,24 +52,25 @@ const Address: React.FC<AddressProps> = ({ form }) => {
   const handleCitySearch = useCallback(
     (search: string) => {
       setSearchTerm(search);
+      form.setValue('location.citylocation', search);
     },
     [setSearchTerm]
   );
 
   const handleCitySelect = useCallback(
     (selectedCityName: string) => {
-      const selectedLocation = cityOptions.find(
+      const selectedLocation = fetchedLocationObject.find(
         (city) => city.city === selectedCityName
       );
       if (selectedLocation) {
-        form.setValue('cityLocation', selectedLocation.city);
-        form.setValue('stateRegion', selectedLocation.state ?? '');
-        form.setValue('country', selectedLocation.country ?? '');
+        form.setValue('location.cityLocation', selectedLocation.city);
+        form.setValue('location.stateRegion', selectedLocation.state ?? '');
+        form.setValue('location.country', selectedLocation.country ?? '');
       } else {
         console.warn('Selected city not found in options:', selectedCityName);
       }
     },
-    [cityOptions, form.setValue]
+    [fetchedLocationObject, form.setValue]
   );
 
   return (
@@ -87,7 +91,7 @@ const Address: React.FC<AddressProps> = ({ form }) => {
 
       <FormField
         control={form.control}
-        name="cityLocationInput"
+        name="cityLocation"
         render={() => (
           <FormItem>
             <FormControl>
@@ -110,7 +114,7 @@ const Address: React.FC<AddressProps> = ({ form }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="stateRegion"
+          name="location.stateRegion"
           render={({ field }) => (
             <FormItem>
               <FormLabel>State/Region</FormLabel>
@@ -124,7 +128,7 @@ const Address: React.FC<AddressProps> = ({ form }) => {
 
         <FormField
           control={form.control}
-          name="country"
+          name="location.country"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Country</FormLabel>

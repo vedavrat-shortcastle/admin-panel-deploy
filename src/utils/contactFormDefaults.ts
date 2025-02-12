@@ -10,7 +10,6 @@ export const defaultFormValues = {
   phoneNumber: '',
   academyNames: [],
   website: '',
-  country: '',
   yearOfBirth: undefined,
   dateOfBirth: undefined,
   gender: 'male' as Gender,
@@ -19,8 +18,13 @@ export const defaultFormValues = {
   workingMode: 'hybrid' as WorkingMode, // Set a default value (could be 'online', 'offline', or 'hybrid')
   onlinePercentage: 0, // Default to 0
   offlinePercentage: 0, // Default to 0
-  stateRegion: '',
-  cityLocation: '',
+  location: {
+    id: undefined,
+    country: '',
+    stateRegion: '',
+    cityLocation: '',
+  },
+
   address: '',
   social: {
     linkedin: '',

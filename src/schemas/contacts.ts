@@ -12,7 +12,6 @@ export const formSchema = z.object({
     .url({ message: 'Invalid URL.' })
     .optional()
     .or(z.literal('')),
-  country: z.string().min(1, { message: 'This field is required' }),
   yearOfBirth: z.number().min(1900).max(new Date().getFullYear()),
   dateOfBirth: z.date(),
   gender: z.enum(['male', 'female', 'other']),
@@ -21,8 +20,12 @@ export const formSchema = z.object({
   workingMode: z.enum(['online', 'offline', 'hybrid']),
   onlinePercentage: z.number().min(0).max(100).optional(),
   offlinePercentage: z.number().min(0).max(100).optional(),
-  stateRegion: z.string().min(1, { message: 'This field is required' }),
-  cityLocation: z.string().min(1, { message: 'This field is required' }),
+  location: z.object({
+    id: z.number().optional(),
+    stateRegion: z.string().min(1, { message: 'This field is required' }),
+    cityLocation: z.string().min(1, { message: 'This field is required' }),
+    country: z.string().min(1, { message: 'This field is required' }),
+  }),
   address: z.string().min(1, { message: 'This field is required' }),
   social: z.object({
     linkedin: z.string().url().optional().or(z.literal('')),
@@ -76,9 +79,8 @@ export const professionalInfoSchema = formSchema.pick({
 
 // Contact & Location Schema
 export const contactAddressSchema = formSchema.pick({
-  country: true,
-  stateRegion: true,
-  cityLocation: true,
-  address: true,
+  location: true,
+  notes: true,
+  lastContacted: true,
   social: true,
 });

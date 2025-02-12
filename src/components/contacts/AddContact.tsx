@@ -67,6 +67,9 @@ export default function AddContact() {
 
   const handleSubmit = async () => {
     const isValid = await form.trigger();
+    console.log(form.getValues());
+    const errors = form.formState.errors;
+    console.log('this is the error', errors);
     if (isValid) {
       console.log(form.getValues());
       await form.handleSubmit(onSubmit)();
