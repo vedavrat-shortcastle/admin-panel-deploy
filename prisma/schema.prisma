@@ -792,6 +792,10 @@ model Location {
   contactPhysicalLocations ContactPhysicalLocation[]
   Contact                  Contact[]
 
+  contacts                 ContactLocation[]
+  contactPhysicalLocations ContactPhysicalLocation[]
+  Contact                  Contact[]
+
   @@map("locations")
 }
 
@@ -802,6 +806,7 @@ model Tag {
 
   // Relations
   contacts ContactTag[]
+
 
   @@map("tags")
 }
@@ -822,6 +827,7 @@ model Contact {
   website           String?       @db.VarChar(255)
   teachingMode      TeachingMode? @map("teaching_mode")
   onlinePercentage  Int?          @map("online_percentage")
+  offlinePercentage Int?          @map("offline_percentage")
   offlinePercentage Int?          @map("offline_percentage")
   yearsInOperation  Int?          @map("years_in_operation")
   numberOfCoaches   Int?          @map("number_of_coaches")
@@ -844,7 +850,13 @@ model Contact {
   // Relations
   user                    User?                     @relation(fields: [userId], references: [uuid], map: "cl_user")
   location                Location?                 @relation(fields: [locationId], references: [id]) // Single location
+  user                    User?                     @relation(fields: [userId], references: [uuid], map: "cl_user")
+  location                Location?                 @relation(fields: [locationId], references: [id]) // Single location
   physicalLocationsTaught ContactPhysicalLocation[]
+  academies               ContactAcademy[]
+  tags                    ContactTag[]
+  statusHistory           ContactStatusHistory[]
+  ContactLocation         ContactLocation[]
   academies               ContactAcademy[]
   tags                    ContactTag[]
   statusHistory           ContactStatusHistory[]
@@ -868,6 +880,7 @@ model ContactLocation {
 
 model ContactAcademy {
   contactId Int      @map("contact_id")
+  academyId String   @map("academy_id") @db.Uuid
   academyId String   @map("academy_id") @db.Uuid
   isCurrent Boolean  @default(false) @map("is_current")
   createdAt DateTime @default(now()) @map("created_at")
@@ -902,6 +915,7 @@ model ContactStatusHistory {
 
   // Relations
   contact Contact @relation(fields: [contactId], references: [id])
+
 
   @@map("contact_status_history")
 }
@@ -1184,6 +1198,7 @@ enum TournamentControlType {
 }
 
 enum ChessTitle {
+  FIDETrainer    @map("FIDE Trainer")
   FIDETrainer    @map("FIDE Trainer")
   FIDEInstructor @map("FIDE Instructor")
   GM

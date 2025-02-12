@@ -25,7 +25,7 @@ export default function AddContact() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    mode: 'onTouched', // Ensures errors appear when a field is touched
+    mode: 'onTouched',
     defaultValues: defaultFormValues,
   });
 
@@ -39,7 +39,7 @@ export default function AddContact() {
 
   const validateStep = async () => {
     const schema = stepSchemas[step - 1];
-    const fieldsToValidate = Object.keys(schema.shape); // Get fields for the current step
+    const fieldsToValidate = Object.keys(schema.shape);
 
     const isValid = await form.trigger(fieldsToValidate as any, {
       shouldFocus: true,
@@ -56,8 +56,7 @@ export default function AddContact() {
     return true;
   };
 
-  const onSubmit = (data: FormValues) => {
-    console.log(data);
+  const onSubmit = () => {
     toast({
       title: 'Form Submitted',
       description: 'Your form has been successfully submitted.',
@@ -67,8 +66,9 @@ export default function AddContact() {
   };
 
   const handleSubmit = async () => {
-    const isValid = await form.trigger(); // Validate the entire form on final submit
+    const isValid = await form.trigger();
     if (isValid) {
+      console.log(form.getValues());
       await form.handleSubmit(onSubmit)();
     } else {
       toast({

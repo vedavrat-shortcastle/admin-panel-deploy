@@ -4,9 +4,6 @@ import { useEffect, useState } from 'react';
 import { Contact, UsersRoundIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-import { columns } from './columns';
-import { DataTable } from './data-table';
-
 import {
   Dialog,
   DialogContent,
@@ -15,6 +12,8 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import AddContact from '@/components/contacts/AddContact';
+import { DataTable } from '@/app/contacts/data-table';
+import { columns } from '@/app/contacts/columns';
 
 async function getData() {
   const response = await fetch(

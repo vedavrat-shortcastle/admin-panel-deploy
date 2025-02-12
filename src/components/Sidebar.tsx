@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import logo from '@/../public/assets/logo.png';
 import { useClerk } from '@clerk/nextjs';
+
 const navItems = [
   {
     title: 'Contacts',
