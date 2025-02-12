@@ -1,4 +1,4 @@
-import { contactsRouter } from '@/app/server/routers/contact';
+import { contactsRouter } from '@/app/server/routers/contacts';
 import { usersRouter } from '@/app/server/routers/users';
 import { router } from '@/app/server/trpc';
 

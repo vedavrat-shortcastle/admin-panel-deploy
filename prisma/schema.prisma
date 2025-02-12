@@ -790,6 +790,8 @@ model Location {
   // Relations
   contacts                 ContactLocation[]
   contactPhysicalLocations ContactPhysicalLocation[]
+  Contact                  Contact[]
+
   @@map("locations")
 }
 
@@ -925,12 +927,15 @@ enum GenderType {
   male
   female
   other
+
+  @@map("gender_type")
 }
 
 enum TeachingMode {
   online
   offline
   hybrid
+  @@map("teaching_mode")
 }
 
 enum ContactStatus {
@@ -940,6 +945,7 @@ enum ContactStatus {
   customer
   churned
   high_prospect
+  @@map("contact_status")
 }
 
 enum RatingSystemType {
@@ -1184,6 +1190,7 @@ enum ChessTitle {
   IM
   WIM
   WGM
+  @@map("chess_title")
 }
 
 enum ContactRole {
@@ -1191,4 +1198,5 @@ enum ContactRole {
   Headcoach
   Subcoach
   Admin
+  @@map("contact_role")
 }
