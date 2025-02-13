@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Contact, UsersRoundIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 import {
   Dialog,
@@ -14,28 +13,13 @@ import {
 import AddContact from '@/components/contacts/AddContact';
 import { DataTable } from '@/app/contacts/data-table';
 import { columns } from '@/app/contacts/columns';
-
-async function getData() {
-  const response = await fetch(
-    'https://67a307f6409de5ed52571dfd.mockapi.io/api/chessplayer',
-    { method: 'GET' }
-  );
-  return await response.json();
-}
+import { trpc } from '@/utils/trpc';
 
 export default function ContactsLandingPage() {
-  const [data, setData] = useState([]);
-  const [open, setOpen] = useState(false); // Modal state
+  const [dialogOpen, setDialogOpen] = useState(false); // Modal state
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const result = await getData();
-      setData(result);
-    };
-    fetchData();
-  }, []);
-
-  // Handle form submission and close modal
+  const { data, isLoading, error } = trpc.contacts.getAll.useQuery();
+  console.log(data);
 
   return (
     <div className="container py-5 px-10">
@@ -49,12 +33,9 @@ export default function ContactsLandingPage() {
       <div className="my-2 flex justify-between">
         <div>Search filters</div>
 
-        {/* Modal Pop-up for Adding Contact */}
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="default" className="font-semibold">
-              Add Contact
-            </Button>
+            <button>Add Contact</button>
           </DialogTrigger>
 
           <DialogContent className="max-w-2xl">
@@ -78,8 +59,22 @@ export default function ContactsLandingPage() {
         </Dialog>
       </div>
 
-      {/* Data Table */}
-      <DataTable columns={columns} data={data} />
+      {/* Data Table or Loading State */}
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <p className="ml-2">Loading contacts...</p>
+        </div>
+      ) : error ? ( // Handle error case
+        <div className="flex justify-center py-10 text-red-500">
+          <p className="ml-2">Error fetching contacts: {error.message}</p>
+        </div>
+      ) : !data || data.length === 0 ? ( // Handle empty data case
+        <div className="flex justify-center py-10">
+          <p className="ml-2">No contacts found.</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={data} />
+      )}
     </div>
   );
 }

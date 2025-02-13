@@ -1,85 +1,111 @@
-import {
-  handleAddItem,
-  handleRemoveItem,
-} from '@/components/contacts/tagbasedfields/tagutils';
+import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
+
+import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
 import { Button } from '@/components/ui/button';
 import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { X } from 'lucide-react';
-
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import { trpc } from '@/utils/trpc';
+import { useCallback, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+
+interface Location {
+  id: number;
+  country: string | null;
+  state: string | null;
+  city: string;
+}
 
 export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
-  const selectedLocations = form.watch('physicallyTaught') || [];
-  return (
-    <div>
-      <div className="col-span-12 flex items-end space-x-2 relative">
-        <FormField
-          control={form.control}
-          name="physicallyTaughtInput"
-          render={({ field }) => (
-            <FormItem className="flex-grow">
-              <FormLabel>Physical Locations Taught</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Type a location and press Add"
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' &&
-                    (e.preventDefault(),
-                    handleAddItem(
-                      { form },
-                      'physicallyTaught',
-                      'physicallyTaughtInput'
-                    ))
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="button"
-          variant="default"
-          onClick={() =>
-            handleAddItem({ form }, 'physicallyTaught', 'physicallyTaughtInput')
-          }
-        >
-          Add
-        </Button>
-      </div>
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
+    useState<boolean>(false); // ADD THIS LINE - Modal state
 
-      {/* Display Selected Locations */}
-      <div className="col-span-12 flex justify-start">
-        <div className="bg-white p-2 rounded-md min-w-fit w-auto">
-          {selectedLocations.map((location: string, index: number) => (
-            <div
-              key={index}
-              className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
-            >
-              <span className="whitespace-nowrap">{location}</span>
-              <button
-                onClick={() =>
-                  handleRemoveItem({ form }, 'physicallyTaught', location)
-                }
-                className="text-gray-500 hover:text-red-500 transition"
+  const { data: locationsData, error } = trpc.location.getAllLocations.useQuery(
+    searchTerm,
+    {
+      enabled: searchTerm.length > 0,
+    }
+  );
+
+  const onSearch = useCallback((search: string) => {
+    setSearchTerm(search);
+    setHasSearched(true);
+  }, []);
+
+  const handleLocationSelect = useCallback(
+    (selectedLocation: Location) => {
+      console.log('This is selected location', selectedLocation);
+      const locationId = selectedLocation.id;
+
+      const currentPhysicallyTaughtIds = form.watch('physicallyTaught') || [];
+      const physicallyTaughtIdsArray = Array.isArray(currentPhysicallyTaughtIds)
+        ? currentPhysicallyTaughtIds
+        : [];
+
+      if (!physicallyTaughtIdsArray.includes(locationId)) {
+        console.log('This is location ID', locationId);
+        form.setValue('physicallyTaught', [
+          ...physicallyTaughtIdsArray,
+          locationId,
+        ]);
+      } else {
+        console.log('Location ID already added:', locationId);
+      }
+    },
+    [form]
+  );
+
+  if (error) {
+    return <div>Error loading locations: {error.message}</div>;
+  }
+
+  return (
+    <div className="flex items-center space-x-2 relative">
+      <SearchableSelectWithTags<Location>
+        form={form}
+        fieldName="physicallyTaughtNames"
+        label="Physical Locations Taught"
+        placeholder="Search locations..."
+        data={locationsData || []}
+        displayKey="city"
+        selectionMode="multiple"
+        onSelectItem={handleLocationSelect}
+        onSearch={onSearch}
+      />
+
+      {hasSearched && (!locationsData || locationsData.length === 0) && (
+        <Dialog
+          open={isAddLocationModalOpen}
+          onOpenChange={setIsAddLocationModalOpen}
+        >
+          <DialogTrigger asChild>
+            <Button>Add Location</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <div>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">
+                  Add New Location
+                </DialogTitle>
+              </DialogHeader>
+              <div
+                className="overflow-y-auto p-5 flex-grow"
+                style={{ maxHeight: 'calc(100vh - 150px)' }}
               >
-                <X className="ml-3" size={14} strokeWidth={4} />
-              </button>
+                <AddLocation />
+              </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };

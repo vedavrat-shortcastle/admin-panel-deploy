@@ -12,7 +12,10 @@ export const formSchema = z.object({
     .url({ message: 'Invalid URL.' })
     .optional()
     .or(z.literal('')),
-  locationId: z.number().min(1, { message: 'This field is required' }),
+  locationId: z
+    .number()
+    .min(1, { message: 'This field is required' })
+    .optional(),
   dateOfBirth: z.date(),
   gender: z.enum(['male', 'female', 'other']),
   languagesSpoken: z.array(z.string()),
@@ -84,4 +87,10 @@ export const contactAddressSchema = formSchema.pick({
   social: true,
   notes: true,
   lastContacted: true,
+});
+
+export const newCitySchema = z.object({
+  city: z.string().min(1, { message: 'City is required' }),
+  state: z.string().optional().default(''), // Ensures it's always a string
+  country: z.string().min(1, { message: 'Country is required' }),
 });

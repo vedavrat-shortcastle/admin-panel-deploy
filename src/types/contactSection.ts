@@ -1,14 +1,15 @@
 import { formSchema } from '@/schemas/contacts';
+import { ChessTitle, ContactRole, ContactStatus } from '@prisma/client';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
 export type ContactsTable = {
-  firstname: string;
-  lastname: string;
-  email: string;
-  role: 'Coach' | 'Subcoach' | 'Admin' | 'Founder';
-  title: 'GM' | 'IM' | 'FM' | 'CM' | 'NM';
-  status: 'active' | 'lead' | 'churned' | 'prospect' | 'new';
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  role: ContactRole | null;
+  titles: ChessTitle | null;
+  currentStatus: ContactStatus | null;
 };
 
 export type Academy = {

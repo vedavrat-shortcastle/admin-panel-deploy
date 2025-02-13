@@ -8,11 +8,11 @@ import { ContactsTable } from '@/types/contactSection';
 
 export const columns: ColumnDef<ContactsTable>[] = [
   {
-    accessorKey: 'firstname',
+    accessorKey: 'firstName',
     header: 'First Name',
   },
   {
-    accessorKey: 'lastname',
+    accessorKey: 'lastName',
     header: 'Last Name',
   },
   {
@@ -24,17 +24,17 @@ export const columns: ColumnDef<ContactsTable>[] = [
     header: 'Role',
   },
   {
-    accessorKey: 'title',
-    header: 'Title',
+    accessorKey: 'titles',
+    header: 'Titles',
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'currentStatus',
     header: 'Status',
     cell: ({ row }) => {
-      const status = row.getValue('status');
+      const status = row.getValue('currentStatus');
       let variant: 'green' | 'orange' | 'red' | 'gray' | 'blue' | 'outline';
       switch (status) {
-        case 'active':
+        case 'new':
           variant = 'green';
           break;
         case 'lead':
@@ -46,13 +46,16 @@ export const columns: ColumnDef<ContactsTable>[] = [
         case 'prospect':
           variant = 'gray';
           break;
-        case 'new':
+        case 'customer':
           variant = 'blue';
+          break;
+        case 'high_prospect':
+          variant = 'gray';
           break;
         default:
           variant = 'green';
       }
-      return <Badge variant={variant}>{row.getValue('status')}</Badge>;
+      return <Badge variant={variant}>{row.getValue('currentStatus')}</Badge>;
     },
   },
   {

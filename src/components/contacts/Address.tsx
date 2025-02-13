@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   FormField,
   FormItem,
@@ -23,60 +23,41 @@ interface AddressProps {
 }
 
 const Address: React.FC<AddressProps> = ({ form }) => {
-  const [fetchedLocationObject, setFetchedLocationObject] = useState<
-    Location[]
-  >([]);
-  const [cityNamesForDropdown, setCityNamesForDropdown] = useState<string[]>(
-    []
-  );
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const locationsQuery = trpc.location.getAllLocations.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
-    onSuccess: (data) => {
-      setFetchedLocationObject(data);
-      console.log(fetchedLocationObject);
-    },
-  });
-
-  useEffect(() => {
-    if (locationsQuery.data) {
-      const names = locationsQuery.data.map(
-        (location: Location) => location.city
-      );
-      setCityNamesForDropdown(names);
-    } else {
-      setCityNamesForDropdown([]);
-    }
-  }, [locationsQuery.data]);
-
-  const handleCitySearch = useCallback(
-    (search: string) => {
-      setSearchTerm(search);
-      form.setValue('location.citylocation', search);
-    },
-    [setSearchTerm]
+  // Fetch locations based on search term
+  const { data: locations = [] } = trpc.location.getAllLocations.useQuery(
+    searchTerm,
+    { enabled: searchTerm.length > 0 }
   );
 
+  // Extract city names for dropdown
+
+  const handleCitySearch = useCallback((search: string) => {
+    setSearchTerm(search);
+  }, []);
+
   const handleCitySelect = useCallback(
-    (selectedCityName: string) => {
-      const selectedLocation = fetchedLocationObject.find(
-        (city) => city.city === selectedCityName
-      );
-      if (selectedLocation) {
-        form.setValue('location.cityLocation', selectedLocation.city);
-        form.setValue('location.stateRegion', selectedLocation.state ?? '');
-        form.setValue('location.country', selectedLocation.country ?? '');
-        form.setValue('locationId', selectedLocation.id);
+    (selectedCityDetails: Location) => {
+      console.log('selectedcitydetails', selectedCityDetails);
+      if (selectedCityDetails) {
+        form.setValue('cityLocation', selectedCityDetails.city);
+        form.setValue('stateRegion', selectedCityDetails.state ?? '');
+        form.setValue('country', selectedCityDetails.country ?? '');
+        form.setValue('locationId', selectedCityDetails.id);
       } else {
-        console.warn('Selected city not found in options:', selectedCityName);
+        console.warn(
+          'Selected city not found in options:',
+          selectedCityDetails
+        );
       }
     },
-    [fetchedLocationObject, form.setValue]
+    [locations, form]
   );
 
   return (
     <div>
+      {/* Address Field */}
       <FormField
         control={form.control}
         name="address"
@@ -91,20 +72,22 @@ const Address: React.FC<AddressProps> = ({ form }) => {
         )}
       />
 
+      {/* City Dropdown */}
       <FormField
         control={form.control}
         name="cityLocation"
         render={() => (
           <FormItem>
+            <FormLabel>City/Location</FormLabel>
             <FormControl>
               <SearchableSelectWithTags
                 form={form}
+                displayKey="city"
                 fieldName="cityLocation"
-                label="City/Location"
                 placeholder="Search City and Select"
-                Values={cityNamesForDropdown}
-                onSearch={handleCitySearch}
+                data={locations}
                 selectionMode="single"
+                onSearch={handleCitySearch}
                 onSelectItem={handleCitySelect}
               />
             </FormControl>
@@ -113,10 +96,11 @@ const Address: React.FC<AddressProps> = ({ form }) => {
         )}
       />
 
+      {/* State & Country Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="location.stateRegion"
+          name="stateRegion"
           render={({ field }) => (
             <FormItem>
               <FormLabel>State/Region</FormLabel>
@@ -130,7 +114,7 @@ const Address: React.FC<AddressProps> = ({ form }) => {
 
         <FormField
           control={form.control}
-          name="location.country"
+          name="country"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Country</FormLabel>
