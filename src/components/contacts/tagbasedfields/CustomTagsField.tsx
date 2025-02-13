@@ -1,78 +1,116 @@
-import {
-  handleAddItem,
-  handleRemoveItem,
-} from '@/components/contacts/tagbasedfields/tagutils';
-import { Button } from '@/components/ui/button';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
+import { useState, useCallback } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 
-import { UseFormReturn } from 'react-hook-form';
+interface Tag {
+  name: string;
+}
 
-export const CustomTags: React.FC<{ form: UseFormReturn<any> }> = ({
+export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false); // Controls dropdown visibility
+  const [tagsDataState, setTagsDataState] = useState<Tag[]>([]);
+
+  trpc.tags.getTags.useQuery(searchTerm, {
+    enabled: searchTerm.length > 0,
+    onSuccess: (data) => {
+      setTagsDataState(data || []);
+      setShowDropdown(true); // Show dropdown when results arrive
+    },
+  });
+
   const selectedTags = form.watch('customTags') || [];
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setShowDropdown(true); // Reopen dropdown on search
+  };
+
+  const handleAddTag = useCallback(() => {
+    if (!searchTerm.trim()) return;
+
+    if (!selectedTags.includes(searchTerm)) {
+      form.setValue('customTags', [...selectedTags, searchTerm]);
+      setTagsDataState((prev) => [
+        ...prev,
+        { id: Date.now(), name: searchTerm },
+      ]);
+    }
+
+    setSearchTerm('');
+    setShowDropdown(false); // Close dropdown after adding
+  }, [form, searchTerm, selectedTags]);
+
+  const handleTagSelect = (tag: string) => {
+    if (!selectedTags.includes(tag)) {
+      form.setValue('customTags', [...selectedTags, tag]);
+    }
+
+    setSearchTerm('');
+    setShowDropdown(false); // Close dropdown after selection
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    form.setValue(
+      'customTags',
+      selectedTags.filter((t: string) => t !== tag)
+    );
+  };
+
   return (
-    <div className="space-y-2">
-      <div className="col-span-12 flex items-end space-x-2 relative">
-        <FormField
-          control={form.control}
-          name="customTagsInput"
-          render={({ field }) => (
-            <FormItem className="flex-grow">
-              <FormLabel>Custom Tags</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Type a tag and press Add"
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' &&
-                    (e.preventDefault(),
-                    handleAddItem({ form }, 'customTags', 'customTagsInput'))
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <div>
+      <label className="block font-medium mb-2">Custom Tags</label>
+      <div className="relative">
+        <Input
+          type="text"
+          placeholder="Search or add a tag..."
+          value={searchTerm}
+          onChange={handleSearchChange}
+          onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
         />
-        <Button
-          type="button"
-          variant="default"
-          onClick={() =>
-            handleAddItem({ form }, 'customTags', 'customTagsInput')
-          }
-        >
-          Add
-        </Button>
-      </div>
-      {selectedTags.length > 0 && (
-        <div className="col-span-12 flex justify-start">
-          <div className="bg-white p-2 rounded-md min-w-fit w-auto">
-            {selectedTags.map((tag: string, index: any) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
-              >
-                <span className="whitespace-nowrap">{tag}</span>
-                <button
-                  onClick={() => handleRemoveItem({ form }, 'customTags', tag)}
-                  className="text-gray-500 hover:text-red-500 transition"
+        {showDropdown && searchTerm && (
+          <div className="absolute left-0 w-full bg-white border rounded-md mt-1 z-10 shadow-lg">
+            {tagsDataState.length > 0 ? (
+              tagsDataState.map((tag, index) => (
+                <div
+                  key={index}
+                  className="p-2 cursor-pointer hover:bg-gray-200"
+                  onClick={() => handleTagSelect(tag.name)}
                 >
-                  <X className="ml-3" size={14} strokeWidth={4} />
-                </button>
-              </div>
-            ))}
+                  {tag.name}
+                </div>
+              ))
+            ) : (
+              <div className="p-2 text-gray-500">No tags found</div>
+            )}
           </div>
+        )}
+      </div>
+
+      {searchTerm && (
+        <Button className="mt-2" onClick={handleAddTag}>
+          Add Tag
+        </Button>
+      )}
+
+      {selectedTags.length > 0 && (
+        <div className="flex flex-wrap mt-3 gap-2">
+          {selectedTags.map((tag: string) => (
+            <div
+              key={tag}
+              className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
+            >
+              <span>{tag}</span>
+              <button onClick={() => handleRemoveTag(tag)} className="ml-2">
+                <X size={16} className="text-gray-600 hover:text-red-500" />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

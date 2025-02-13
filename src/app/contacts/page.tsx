@@ -14,12 +14,12 @@ import AddContact from '@/components/contacts/AddContact';
 import { DataTable } from '@/app/contacts/data-table';
 import { columns } from '@/app/contacts/columns';
 import { trpc } from '@/utils/trpc';
+import { Button } from '@/components/ui/button';
 
 export default function ContactsLandingPage() {
   const [dialogOpen, setDialogOpen] = useState(false); // Modal state
 
   const { data, isLoading, error } = trpc.contacts.getAll.useQuery();
-  console.log(data);
 
   return (
     <div className="container py-5 px-10">
@@ -35,7 +35,7 @@ export default function ContactsLandingPage() {
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <button>Add Contact</button>
+            <Button>Add Contact</Button>
           </DialogTrigger>
 
           <DialogContent className="max-w-2xl">

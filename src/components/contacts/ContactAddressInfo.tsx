@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { ContactFormReturn } from '@/types/contactSection';
-import Address from '@/components/contacts/Address';
+import { Address } from '@/components/contacts/Address';
 
 interface ContactAddressProps {
   form: ContactFormReturn;

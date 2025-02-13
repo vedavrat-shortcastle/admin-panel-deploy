@@ -1,94 +1,89 @@
-import React, { useState, useCallback } from 'react';
+import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
+
+import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
+import { Button } from '@/components/ui/button';
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UseFormReturn } from 'react-hook-form';
 import { trpc } from '@/utils/trpc';
-import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
+import { useCallback, useState } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 
 interface Location {
   id: number;
-  city: string;
-  state: string | null;
   country: string | null;
+  state: string | null;
+  city: string;
 }
 
-interface AddressProps {
-  form: UseFormReturn<any>;
-}
-
-const Address: React.FC<AddressProps> = ({ form }) => {
+export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
+    useState<boolean>(false); // ADD THIS LINE - Modal state
 
-  // Fetch locations based on search term
-  const { data: locations = [] } = trpc.location.getAllLocations.useQuery(
+  const { data: locationsData, error } = trpc.location.getAllLocations.useQuery(
     searchTerm,
-    { enabled: searchTerm.length > 0 }
+    {
+      enabled: searchTerm.length > 0,
+    }
   );
 
-  // Extract city names for dropdown
-
-  const handleCitySearch = useCallback((search: string) => {
+  const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
+    setHasSearched(true);
   }, []);
 
-  const handleCitySelect = useCallback(
-    (selectedCityDetails: Location) => {
-      console.log('selectedcitydetails', selectedCityDetails);
-      if (selectedCityDetails) {
-        form.setValue('cityLocation', selectedCityDetails.city);
-        form.setValue('stateRegion', selectedCityDetails.state ?? '');
-        form.setValue('country', selectedCityDetails.country ?? '');
-        form.setValue('locationId', selectedCityDetails.id);
+  const handleLocationSelect = useCallback(
+    (selectedLocation: Location) => {
+      console.log('This is selected location', selectedLocation);
+      const locationId = selectedLocation.id;
+
+      const currentCityId = form.watch('locationId') || [];
+      const cityIdsArray = Array.isArray(currentCityId) ? currentCityId : [];
+
+      if (!cityIdsArray.includes(locationId)) {
+        console.log('This is location ID', locationId);
+        form.setValue('locationId', [...cityIdsArray, locationId]);
+        form.setValue('cityLocation', selectedLocation.city);
       } else {
-        console.warn(
-          'Selected city not found in options:',
-          selectedCityDetails
-        );
+        console.log('Location ID already added:', locationId);
       }
     },
-    [locations, form]
+    [form]
   );
 
+  if (error) {
+    return <div>Error loading locations: {error.message}</div>;
+  }
+
   return (
-    <div>
-      {/* Address Field */}
+    <div className="grid items-center space-x-2 relative">
       <FormField
         control={form.control}
         name="address"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Address</FormLabel>
+            <FormLabel className="font-medium">Address</FormLabel>
             <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* City Dropdown */}
-      <FormField
-        control={form.control}
-        name="cityLocation"
-        render={() => (
-          <FormItem>
-            <FormLabel>City/Location</FormLabel>
-            <FormControl>
-              <SearchableSelectWithTags
-                form={form}
-                displayKey="city"
-                fieldName="cityLocation"
-                placeholder="Search City and Select"
-                data={locations}
-                selectionMode="single"
-                onSearch={handleCitySearch}
-                onSelectItem={handleCitySelect}
+              <Input
+                type="text"
+                className="w-full"
+                {...field}
+                value={field.value || ''} // Ensure it's a string
+                onChange={(e) => field.onChange(e.target.value)} // Handle text input properly
               />
             </FormControl>
             <FormMessage />
@@ -96,38 +91,43 @@ const Address: React.FC<AddressProps> = ({ form }) => {
         )}
       />
 
-      {/* State & Country Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          control={form.control}
-          name="stateRegion"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>State/Region</FormLabel>
-              <FormControl>
-                <Input type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+      <SearchableSelectWithTags<Location>
+        form={form}
+        fieldName="cityLocation"
+        label="City"
+        placeholder="Search City..."
+        data={locationsData || []}
+        displayKey="city"
+        selectionMode="single"
+        onSelectItem={handleLocationSelect}
+        onSearch={onSearch}
+      />
 
-        <FormField
-          control={form.control}
-          name="country"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Country</FormLabel>
-              <FormControl>
-                <Input type="text" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      {hasSearched && (!locationsData || locationsData.length === 0) && (
+        <Dialog
+          open={isAddLocationModalOpen}
+          onOpenChange={setIsAddLocationModalOpen}
+        >
+          <DialogTrigger asChild>
+            <Button>Add Location</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <div>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">
+                  Add New Location
+                </DialogTitle>
+              </DialogHeader>
+              <div
+                className="overflow-y-auto p-5 flex-grow"
+                style={{ maxHeight: 'calc(100vh - 150px)' }}
+              >
+                <AddLocation />
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
-
-export default Address;

@@ -21,8 +21,9 @@ import { PhysicallyTaught } from '@/components/contacts/tagbasedfields/Physicall
 import { Titles } from '@/components/contacts/tagbasedfields/Titles';
 
 import { LanguagesSpoken } from '@/components/contacts/tagbasedfields/LanguagesSpoken';
-import { CustomTags } from '@/components/contacts/tagbasedfields/CustomTagsField';
+
 import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
+import { CustomTagsField } from '@/components/contacts/tagbasedfields/CustomTagsField';
 
 interface ProfessionalChessInfoProps {
   form: ContactFormReturn; // Ensure this type is correctly defined
@@ -293,7 +294,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
       </div>
 
       <div className="col-span-12">
-        <CustomTags form={form} />
+        <CustomTagsField form={form} />
       </div>
 
       <div className="col-span-12">

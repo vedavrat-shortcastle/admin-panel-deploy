@@ -98,8 +98,8 @@ export const SearchableSelectWithTags = <T extends Record<string, any>>({
       form.setValue(fieldName, displayValue);
       setInputValue(displayValue);
     }
-    setShowDropdown(false); // Hide dropdown in both single and multiple select
-    onSelectItem?.(item); // Optional chaining for onSelectItem
+    setShowDropdown(false);
+    onSelectItem?.(item);
   };
 
   const handleRemoveItem = (itemName: string) => {
@@ -124,18 +124,10 @@ export const SearchableSelectWithTags = <T extends Record<string, any>>({
               <FormLabel>{label}</FormLabel>
               <FormControl>
                 <Input
-                  value={
-                    selectionMode === 'single'
-                      ? inputValue
-                      : (field.value ?? '')
-                  }
+                  value={field.value ?? ''} // Simplified value prop
                   placeholder={placeholder}
                   onChange={(e) => {
-                    if (selectionMode === 'single') {
-                      setInputValue(e.target.value);
-                    } else {
-                      field.onChange(e.target.value);
-                    }
+                    field.onChange(e.target.value); //  Simplified onChange - always update field
                     handleItemSearch(e.target.value);
                   }}
                   onBlur={() =>

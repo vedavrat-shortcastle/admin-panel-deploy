@@ -8,7 +8,7 @@ export type ContactsTable = {
   lastName: string | null;
   email: string | null;
   role: ContactRole | null;
-  titles: ChessTitle | null;
+  titles: ChessTitle[] | null;
   currentStatus: ContactStatus | null;
 };
 
