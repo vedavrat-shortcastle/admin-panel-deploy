@@ -803,7 +803,6 @@ model Tag {
   // Relations
   contacts ContactTag[]
 
-
   @@map("tags")
 }
 
@@ -903,7 +902,6 @@ model ContactStatusHistory {
 
   // Relations
   contact Contact @relation(fields: [contactId], references: [id])
-
 
   @@map("contact_status_history")
 }
