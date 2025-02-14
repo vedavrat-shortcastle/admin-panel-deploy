@@ -1,15 +1,13 @@
 import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
-
-import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
-import { Button } from '@/components/ui/button';
+import { SearchableSelect } from '@/components/SearchableSelectWithTags';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { trpc } from '@/utils/trpc';
+import { X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
@@ -24,9 +22,9 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
     useState<boolean>(false); // ADD THIS LINE - Modal state
+  const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
   const { data: locationsData, error } = trpc.location.getAllLocations.useQuery(
     searchTerm,
@@ -37,30 +35,55 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
 
   const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
-    setHasSearched(true);
+  }, []);
+
+  const onClick = useCallback(() => {
+    setIsAddLocationModalOpen(true);
   }, []);
 
   const handleLocationSelect = useCallback(
-    (selectedLocation: Location) => {
-      console.log('This is selected location', selectedLocation);
-      const locationId = selectedLocation.id;
+    (location: Location) => {
+      setSelectedLocations((prevLocations) => {
+        // Prevent duplicates
+        if (prevLocations.some((loc) => loc.id === location.id)) {
+          return prevLocations;
+        }
+        return [...prevLocations, location];
+      });
 
+      const locationId = location.id;
       const currentPhysicallyTaughtIds = form.watch('physicallyTaught') || [];
       const physicallyTaughtIdsArray = Array.isArray(currentPhysicallyTaughtIds)
         ? currentPhysicallyTaughtIds
         : [];
 
       if (!physicallyTaughtIdsArray.includes(locationId)) {
-        console.log('This is location ID', locationId);
         form.setValue('physicallyTaught', [
           ...physicallyTaughtIdsArray,
           locationId,
         ]);
-      } else {
-        console.log('Location ID already added:', locationId);
       }
     },
     [form]
+  );
+
+  const handleRemoveLocation = useCallback(
+    (index: number) => {
+      setSelectedLocations((prevLocations) => {
+        const updatedLocations = [...prevLocations];
+        updatedLocations.splice(index, 1); // Remove location at index
+        return updatedLocations;
+      });
+
+      // Remove the corresponding location ID from the form field
+      form.setValue(
+        'physicallyTaught',
+        selectedLocations
+          .filter((_, i) => i !== index) // Exclude the removed location
+          .map((location) => location.id)
+      );
+    },
+    [form, selectedLocations]
   );
 
   if (error) {
@@ -68,8 +91,8 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
   }
 
   return (
-    <div className="flex items-center space-x-2 relative">
-      <SearchableSelectWithTags<Location>
+    <div>
+      <SearchableSelect<Location>
         form={form}
         fieldName="physicallyTaughtNames"
         label="Physical Locations Taught"
@@ -79,33 +102,55 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
         selectionMode="multiple"
         onSelectItem={handleLocationSelect}
         onSearch={onSearch}
+        onClick={onClick}
+        showButton
       />
 
-      {hasSearched && (!locationsData || locationsData.length === 0) && (
-        <Dialog
-          open={isAddLocationModalOpen}
-          onOpenChange={setIsAddLocationModalOpen}
-        >
-          <DialogTrigger asChild>
-            <Button>Add Location</Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <div>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold">
-                  Add New Location
-                </DialogTitle>
-              </DialogHeader>
-              <div
-                className="overflow-y-auto p-5 flex-grow"
-                style={{ maxHeight: 'calc(100vh - 150px)' }}
+      <div className="flex flex-wrap gap-2 mt-3">
+        {selectedLocations.length > 0 ? (
+          selectedLocations.map((location, index) => (
+            <div
+              key={index}
+              className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
+            >
+              <span>{location.city}</span>
+              <button
+                onClick={() => handleRemoveLocation(index)}
+                className="ml-2"
               >
-                <AddLocation />
-              </div>
+                <X
+                  size={14}
+                  className="text-gray-600 hover:text-red-500"
+                  strokeWidth={3}
+                />
+              </button>
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          ))
+        ) : (
+          <div className="text-gray-400 text-sm italic">
+            No languages added yet.
+          </div>
+        )}
+      </div>
+
+      <Dialog
+        open={isAddLocationModalOpen}
+        onOpenChange={setIsAddLocationModalOpen}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">
+              Add New Location
+            </DialogTitle>
+          </DialogHeader>
+          <div
+            className="overflow-y-auto p-5 flex-grow"
+            style={{ maxHeight: 'calc(100vh - 150px)' }}
+          >
+            <AddLocation />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

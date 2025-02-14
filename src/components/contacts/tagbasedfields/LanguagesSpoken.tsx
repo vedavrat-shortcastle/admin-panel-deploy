@@ -1,12 +1,4 @@
-import { Button } from '@/components/ui/button';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { SearchableSelect } from '@/components/SearchableSelectWithTags';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
@@ -46,32 +38,15 @@ export const LanguagesSpoken: React.FC<{
 
   return (
     <div>
-      <FormField
-        control={form.control}
-        name="languagesSpokenInput"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Languages Known</FormLabel>
-            <div className="flex items-center space-x-2">
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Type a language..."
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' &&
-                    (e.preventDefault(), handleAddLanguage())
-                  }
-                  className="flex-grow"
-                />
-              </FormControl>
-              <Button type="button" onClick={handleAddLanguage}>
-                Add
-              </Button>
-            </div>
-            <FormMessage />
-          </FormItem>
-        )}
+      <SearchableSelect
+        label="Languages Spoken"
+        fieldName="languagesSpoken"
+        onClick={handleAddLanguage}
+        form={form}
+        data={languageInput}
+        displayKey={languageInput}
+        selectionMode="single"
+        showButton
       />
 
       <div className="flex flex-wrap gap-2 mt-3">

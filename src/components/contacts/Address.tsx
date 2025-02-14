@@ -1,13 +1,11 @@
 import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
+import { SearchableSelect } from '@/components/SearchableSelectWithTags';
 
-import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
-import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   FormControl,
@@ -32,12 +30,13 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
-    useState<boolean>(false); // ADD THIS LINE - Modal state
+    useState<boolean>(false);
+  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false); // Track if a location is selected
 
   const { data: locationsData, error } = trpc.location.getAllLocations.useQuery(
     searchTerm,
     {
-      enabled: searchTerm.length > 0,
+      enabled: true,
     }
   );
 
@@ -48,29 +47,28 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
   const handleLocationSelect = useCallback(
     (selectedLocation: Location) => {
-      console.log('This is selected location', selectedLocation);
+      console.log('Selected location:', selectedLocation);
       const locationId = selectedLocation.id;
 
-      const currentCityId = form.watch('locationId') || [];
-      const cityIdsArray = Array.isArray(currentCityId) ? currentCityId : [];
-
-      if (!cityIdsArray.includes(locationId)) {
-        console.log('This is location ID', locationId);
-        form.setValue('locationId', [...cityIdsArray, locationId]);
-        form.setValue('cityLocation', selectedLocation.city);
-      } else {
-        console.log('Location ID already added:', locationId);
-      }
+      form.setValue('locationId', locationId);
+      form.setValue('cityLocation', selectedLocation.city);
+      form.setValue('stateRegion', selectedLocation.state || ''); // Auto-fill state
+      form.setValue('country', selectedLocation.country || ''); // Auto-fill country
+      setIsLocationSelected(true); // Disable fields when location is set
     },
     [form]
   );
+
+  const onClick = useCallback(() => {
+    setIsAddLocationModalOpen(true);
+  }, []);
 
   if (error) {
     return <div>Error loading locations: {error.message}</div>;
   }
 
   return (
-    <div className="grid items-center space-x-2 relative">
+    <div className="space-y-2">
       <FormField
         control={form.control}
         name="address"
@@ -82,8 +80,8 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                 type="text"
                 className="w-full"
                 {...field}
-                value={field.value || ''} // Ensure it's a string
-                onChange={(e) => field.onChange(e.target.value)} // Handle text input properly
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
               />
             </FormControl>
             <FormMessage />
@@ -91,7 +89,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
         )}
       />
 
-      <SearchableSelectWithTags<Location>
+      <SearchableSelect<Location>
         form={form}
         fieldName="cityLocation"
         label="City"
@@ -101,6 +99,8 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
         selectionMode="single"
         onSelectItem={handleLocationSelect}
         onSearch={onSearch}
+        showButton
+        onClick={onClick}
       />
 
       {hasSearched && (!locationsData || locationsData.length === 0) && (
@@ -108,9 +108,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
           open={isAddLocationModalOpen}
           onOpenChange={setIsAddLocationModalOpen}
         >
-          <DialogTrigger asChild>
-            <Button>Add Location</Button>
-          </DialogTrigger>
           <DialogContent className="max-w-md">
             <div>
               <DialogHeader>
@@ -128,6 +125,50 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
           </DialogContent>
         </Dialog>
       )}
+
+      <div className="grid grid-cols-2 gap-4">
+        <FormField
+          control={form.control}
+          name="stateRegion"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-medium">State/Region</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  className="w-full"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  disabled={isLocationSelected} // Disable when a location is selected
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="font-medium">Country</FormLabel>
+              <FormControl>
+                <Input
+                  type="text"
+                  className="w-full"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  disabled={isLocationSelected} // Disable when a location is selected
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
     </div>
   );
 };

@@ -1,9 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
+import { trpc } from '@/utils/trpc';
+import { SearchableSelect } from '@/components/SearchableSelectWithTags';
 
 interface Tag {
   name: string;
@@ -13,48 +12,29 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false); // Controls dropdown visibility
-  const [tagsDataState, setTagsDataState] = useState<Tag[]>([]);
 
-  trpc.tags.getTags.useQuery(searchTerm, {
+  // Fetch available tags based on search input
+  const { data: tagsData } = trpc.tags.getTags.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
-    onSuccess: (data) => {
-      setTagsDataState(data || []);
-      setShowDropdown(true); // Show dropdown when results arrive
-    },
   });
 
+  // Get currently selected tags from the form
   const selectedTags = form.watch('customTags') || [];
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setShowDropdown(true); // Reopen dropdown on search
-  };
+  // Handle input search change
 
-  const handleAddTag = useCallback(() => {
-    if (!searchTerm.trim()) return;
+  // Handle adding a new tag (manual input)
 
-    if (!selectedTags.includes(searchTerm)) {
-      form.setValue('customTags', [...selectedTags, searchTerm]);
-      setTagsDataState((prev) => [
-        ...prev,
-        { id: Date.now(), name: searchTerm },
-      ]);
+  // Handle selecting a tag from the dropdown
+  const handleTagSelect = (selectedTag: Tag) => {
+    if (!selectedTags.includes(selectedTag.name)) {
+      form.setValue('customTags', [...selectedTags, selectedTag.name]);
     }
 
     setSearchTerm('');
-    setShowDropdown(false); // Close dropdown after adding
-  }, [form, searchTerm, selectedTags]);
-
-  const handleTagSelect = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
-      form.setValue('customTags', [...selectedTags, tag]);
-    }
-
-    setSearchTerm('');
-    setShowDropdown(false); // Close dropdown after selection
   };
 
+  // Handle removing a selected tag
   const handleRemoveTag = (tag: string) => {
     form.setValue(
       'customTags',
@@ -62,42 +42,28 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
     );
   };
 
+  const onClick = (value: string) => {
+    form.setValue('customTags', [...selectedTags, value]);
+  };
+
   return (
     <div>
-      <label className="block font-medium mb-2">Custom Tags</label>
-      <div className="relative">
-        <Input
-          type="text"
-          placeholder="Search or add a tag..."
-          value={searchTerm}
-          onChange={handleSearchChange}
-          onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
-        />
-        {showDropdown && searchTerm && (
-          <div className="absolute left-0 w-full bg-white border rounded-md mt-1 z-10 shadow-lg">
-            {tagsDataState.length > 0 ? (
-              tagsDataState.map((tag, index) => (
-                <div
-                  key={index}
-                  className="p-2 cursor-pointer hover:bg-gray-200"
-                  onClick={() => handleTagSelect(tag.name)}
-                >
-                  {tag.name}
-                </div>
-              ))
-            ) : (
-              <div className="p-2 text-gray-500">No tags found</div>
-            )}
-          </div>
-        )}
-      </div>
+      {/* Searchable dropdown for existing tags */}
+      <SearchableSelect<Tag>
+        form={form}
+        fieldName="customTags"
+        label="Tags"
+        placeholder="Search or add tags..."
+        data={tagsData || []}
+        displayKey="name"
+        selectionMode="multiple"
+        onSelectItem={handleTagSelect}
+        onSearch={setSearchTerm}
+        showButton
+        onClick={onClick}
+      />
 
-      {searchTerm && (
-        <Button className="mt-2" onClick={handleAddTag}>
-          Add Tag
-        </Button>
-      )}
-
+      {/* Show selected tags */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap mt-3 gap-2">
           {selectedTags.map((tag: string) => (
