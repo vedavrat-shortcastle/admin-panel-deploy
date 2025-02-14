@@ -24,6 +24,7 @@ import { LanguagesSpoken } from '@/components/contacts/tagbasedfields/LanguagesS
 
 import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 import { CustomTagsField } from '@/components/contacts/tagbasedfields/CustomTagsField';
+import { CurrentAcademy } from '@/components/contacts/tagbasedfields/CurrentAcademyField';
 
 interface ProfessionalChessInfoProps {
   form: ContactFormReturn; // Ensure this type is correctly defined
@@ -36,22 +37,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-12 gap-6 ">
-      {/* First Row: Current Academy and Role */}
-      <div className="col-span-12 lg:col-span-6 space-y-2">
-        <FormField
-          control={form.control}
-          name="currentAcademy"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel className="font-medium">Current Academy</FormLabel>
-              <FormControl>
-                <Input className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
       <div className="col-span-12 lg:col-span-6 space-y-2">
         <FormField
           control={form.control}
@@ -84,11 +69,12 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
       <div className="col-span-12">
         <AcademyNames form={form} />
       </div>
-
+      <div className="col-span-12">
+        <CurrentAcademy form={form} />
+      </div>
       <div className="col-span-12">
         <PhysicallyTaught form={form} />
       </div>
-
       {/* Website */}
       <div className="col-span-12 space-y-2">
         <FormField
