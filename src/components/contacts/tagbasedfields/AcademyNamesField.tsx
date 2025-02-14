@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, useWatch } from 'react-hook-form';
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
@@ -23,32 +23,42 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
     return <div>Error loading academy names: {error.message}</div>;
   }
 
-  const selectedAcademyIds: string[] = form.watch('academyIds') || [];
-  const selectedAcademyNames: string[] = form.watch('academyNames') || [];
+  const selectedAcademyIds = useWatch({
+    control: form.control,
+    name: 'academyIds',
+    defaultValue: [],
+  });
+  const selectedAcademyNames = useWatch({
+    control: form.control,
+    name: 'academyNames',
+    defaultValue: [],
+  });
 
   useEffect(() => {
     if (academyNamesData) {
       const selectedNames = selectedAcademyIds
         .map(
-          (id) => academyNamesData.find((academy) => academy.id === id)?.name
+          (id: string) =>
+            academyNamesData.find((academy) => academy.id === id)?.name
         )
         .filter(Boolean) as string[];
-      form.setValue('academyNames', selectedNames);
+
+      form.setValue('academyNames', [
+        ...new Set([...selectedAcademyNames, ...selectedNames]),
+      ]);
     }
   }, [selectedAcademyIds, academyNamesData, form]);
 
   const handleOnSelect = (selectedAcademy: getAcademyNamesRes) => {
-    if (!academyNamesData) return;
+    const updatedIds = new Set([...selectedAcademyIds, selectedAcademy.id]);
+    const updatedNames = new Set([
+      ...selectedAcademyNames,
+      selectedAcademy.name,
+    ]);
 
-    const updatedIds = [...selectedAcademyIds];
-    const updatedNames = [...selectedAcademyNames];
+    form.setValue('academyIds', Array.from(updatedIds));
+    form.setValue('academyNames', Array.from(updatedNames));
 
-    if (!updatedIds.includes(selectedAcademy.id)) {
-      updatedIds.push(selectedAcademy.id);
-      updatedNames.push(selectedAcademy.name);
-      form.setValue('academyIds', updatedIds);
-      form.setValue('academyNames', updatedNames);
-    }
     setSearchTerm('');
   };
 
@@ -80,7 +90,7 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
       {/* Render Selected Academy Tags */}
       <div className="flex flex-wrap gap-2 mt-3">
         {selectedAcademyNames.length > 0 ? (
-          selectedAcademyNames.map((academy, index) => (
+          selectedAcademyNames.map((academy: string, index: number) => (
             <div
               key={index}
               className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
