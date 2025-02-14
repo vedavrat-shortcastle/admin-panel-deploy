@@ -7,15 +7,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Controller, UseFormReturn } from 'react-hook-form';
-import { debounce } from 'lodash';
 import { Button } from '@/components/ui/button';
+import { debounce } from 'lodash';
 
 export type SelectionMode = 'single' | 'multiple';
 
 interface SearchableSelectWithTagsProps<T extends Record<string, any>> {
   form: UseFormReturn<any>; // React Hook Form instance
   fieldName: string; // Field name in form state
-  data: T[]; // List of selectable items
+  data?: T[]; // List of selectable items
   displayKey: keyof T; // Key used to display items in dropdown
   label?: string; // Input label
   placeholder?: string; // Input placeholder
@@ -48,15 +48,9 @@ export const SearchableSelect = <T extends Record<string, any>>({
   const [inputValue, setInputValue] = useState<string>('');
 
   useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
     setApiData(initialData || []);
     setSearchedItems(initialData || []);
-    setShowDropdown(initialData.length > 0);
+    setShowDropdown((initialData ?? []).length > 0);
   }, [initialData]);
 
   useEffect(() => {
@@ -73,12 +67,23 @@ export const SearchableSelect = <T extends Record<string, any>>({
     }
   }, [inputValue, apiData, displayKey]);
 
+  // const handleItemSearch = useCallback(
+  //   debounce((value: string) => {
+  //     if (!isMounted.current) return;
+  //     setInputValue(value);
+  //     onSearch?.(value.trim());
+  //     setShowDropdown(true);
+  //   }, 500),
+  //   [onSearch]
+  // );
+
   const handleItemSearch = useCallback(
     debounce((value: string) => {
-      if (!isMounted.current) return;
+      // if (!isMounted.current) return;
       setInputValue(value);
       onSearch?.(value.trim());
-    }, 500),
+      setShowDropdown(true);
+    }, 500), // Delay is now 200ms
     [onSearch]
   );
 

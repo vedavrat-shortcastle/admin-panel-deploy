@@ -1,5 +1,5 @@
-import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
-import { SearchableSelect } from '@/components/SearchableSelectWithTags';
+import AddLocation from '@/components/contacts/tagbasedfields/AddLocation';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
 import {
   Dialog,
@@ -31,19 +31,24 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
     useState<boolean>(false);
-  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false); // Track if a location is selected
+  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
+  const [locationsData, setLocationsData] = useState<Location[] | undefined>(
+    undefined
+  ); // Store data locally
 
-  const { data: locationsData, error } = trpc.location.getAllLocations.useQuery(
-    searchTerm,
-    {
-      enabled: true,
-    }
+  const { refetch } = trpc.location.getAllLocations.useQuery(searchTerm, {
+    enabled: hasSearched,
+    onSuccess: (data) => setLocationsData(data), // Update local state on success
+  });
+
+  const onSearch = useCallback(
+    (search: string) => {
+      setSearchTerm(search);
+      setHasSearched(true);
+      refetch();
+    },
+    [refetch]
   );
-
-  const onSearch = useCallback((search: string) => {
-    setSearchTerm(search);
-    setHasSearched(true);
-  }, []);
 
   const handleLocationSelect = useCallback(
     (selectedLocation: Location) => {
@@ -52,9 +57,13 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
       form.setValue('locationId', locationId);
       form.setValue('cityLocation', selectedLocation.city);
-      form.setValue('stateRegion', selectedLocation.state || ''); // Auto-fill state
-      form.setValue('country', selectedLocation.country || ''); // Auto-fill country
-      setIsLocationSelected(true); // Disable fields when location is set
+      form.setValue('cityLocationInput', selectedLocation.city);
+      form.setValue('stateRegion', selectedLocation.state || '');
+      form.setValue('country', selectedLocation.country || '');
+      setIsLocationSelected(true);
+      setSearchTerm(''); // Clear search for next search
+      setHasSearched(false); // Reset for next search
+      setLocationsData(undefined); // Clear displayed locations
     },
     [form]
   );
@@ -62,10 +71,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const onClick = useCallback(() => {
     setIsAddLocationModalOpen(true);
   }, []);
-
-  if (error) {
-    return <div>Error loading locations: {error.message}</div>;
-  }
 
   return (
     <div className="space-y-2">
@@ -103,28 +108,26 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
         onClick={onClick}
       />
 
-      {hasSearched && (!locationsData || locationsData.length === 0) && (
-        <Dialog
-          open={isAddLocationModalOpen}
-          onOpenChange={setIsAddLocationModalOpen}
-        >
-          <DialogContent className="max-w-md">
-            <div>
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-bold">
-                  Add New Location
-                </DialogTitle>
-              </DialogHeader>
-              <div
-                className="overflow-y-auto p-5 flex-grow"
-                style={{ maxHeight: 'calc(100vh - 150px)' }}
-              >
-                <AddLocation />
-              </div>
+      <Dialog
+        open={isAddLocationModalOpen}
+        onOpenChange={setIsAddLocationModalOpen}
+      >
+        <DialogContent className="max-w-md">
+          <div>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">
+                Add New Location
+              </DialogTitle>
+            </DialogHeader>
+            <div
+              className="overflow-y-auto p-5 flex-grow"
+              style={{ maxHeight: 'calc(100vh - 150px)' }}
+            >
+              <AddLocation />
             </div>
-          </DialogContent>
-        </Dialog>
-      )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <div className="grid grid-cols-2 gap-4">
         <FormField

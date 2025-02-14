@@ -1,8 +1,8 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { trpc } from '@/utils/trpc';
-import { SearchableSelect } from '@/components/SearchableSelectWithTags';
 import { X } from 'lucide-react';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
 interface getAcademyNamesRes {
   id: string;
@@ -14,25 +14,15 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const {
-    data: academyNamesData,
-    error,
-    refetch, // 🔥 Use refetch when search term changes
-  } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
-    enabled: true, // ✅ Always enabled to allow initial fetch
-  });
-
-  useEffect(() => {
-    if (searchTerm.length > 0) {
-      refetch(); // 🔥 Refetch data when search term updates
-    }
-  }, [searchTerm, refetch]);
+  const { data: academyNamesData, error } =
+    trpc.academy.getAcademyNames.useQuery(searchTerm, {
+      enabled: searchTerm.length > 0,
+    });
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
   }
 
-  // Watch selected academy IDs & names
   const selectedAcademyIds: string[] = form.watch('academyIds') || [];
   const selectedAcademyNames: string[] = form.watch('academyNames') || [];
 
@@ -59,6 +49,7 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
       form.setValue('academyIds', updatedIds);
       form.setValue('academyNames', updatedNames);
     }
+    setSearchTerm('');
   };
 
   const handleRemoveTag = (index: number) => {
@@ -72,10 +63,6 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
     form.setValue('academyNames', updatedNames);
   };
 
-  const onSearch = useCallback((search: string) => {
-    setSearchTerm(search); // ✅ This will trigger refetch in useEffect
-  }, []);
-
   return (
     <div>
       <SearchableSelect<getAcademyNamesRes>
@@ -87,7 +74,7 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
         displayKey="name"
         selectionMode="multiple"
         onSelectItem={handleOnSelect}
-        onSearch={onSearch}
+        onSearch={setSearchTerm}
       />
 
       {/* Render Selected Academy Tags */}
@@ -110,7 +97,7 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
           ))
         ) : (
           <div className="text-gray-400 text-sm italic">
-            No languages added yet.
+            No academies added yet.
           </div>
         )}
       </div>

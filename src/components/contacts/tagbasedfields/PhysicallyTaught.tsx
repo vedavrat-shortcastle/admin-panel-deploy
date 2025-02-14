@@ -1,5 +1,5 @@
 import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
-import { SearchableSelect } from '@/components/SearchableSelectWithTags';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import {
   Dialog,
   DialogContent,

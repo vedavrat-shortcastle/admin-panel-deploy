@@ -16,13 +16,11 @@ import { trpc } from '@/utils/trpc';
 import { newCitySchema } from '@/schemas/contacts';
 import { toast } from '@/hooks/use-toast';
 
-// ✅ Define type for form values based on the schema
 type NewCityValues = z.infer<typeof newCitySchema>;
 
 export default function AddLocation() {
   const createLocationMutation = trpc.location.create.useMutation();
 
-  // ✅ Initialize react-hook-form
   const form = useForm<NewCityValues>({
     resolver: zodResolver(newCitySchema),
     defaultValues: {

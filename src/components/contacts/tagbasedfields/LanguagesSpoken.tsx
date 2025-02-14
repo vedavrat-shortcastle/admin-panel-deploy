@@ -1,4 +1,4 @@
-import { SearchableSelect } from '@/components/SearchableSelectWithTags';
+import { SearchableSelect } from '@/components/SearchableSelect';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
@@ -43,7 +43,6 @@ export const LanguagesSpoken: React.FC<{
         fieldName="languagesSpoken"
         onClick={handleAddLanguage}
         form={form}
-        data={languageInput}
         displayKey={languageInput}
         selectionMode="single"
         showButton

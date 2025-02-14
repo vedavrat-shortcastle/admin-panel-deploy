@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { X } from 'lucide-react';
 import { trpc } from '@/utils/trpc';
-import { SearchableSelect } from '@/components/SearchableSelectWithTags';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
 interface Tag {
   name: string;
@@ -20,10 +20,6 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
 
   // Get currently selected tags from the form
   const selectedTags = form.watch('customTags') || [];
-
-  // Handle input search change
-
-  // Handle adding a new tag (manual input)
 
   // Handle selecting a tag from the dropdown
   const handleTagSelect = (selectedTag: Tag) => {

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 
 import { PencilIcon, TrashIcon } from 'lucide-react';
 import { ContactsTable } from '@/types/contactSection';
+import { ChessTitle } from '@prisma/client';
 
 export const columns: ColumnDef<ContactsTable>[] = [
   {
@@ -26,6 +27,18 @@ export const columns: ColumnDef<ContactsTable>[] = [
   {
     accessorKey: 'titles',
     header: 'Titles',
+    cell: ({ row }) => {
+      const titles: ChessTitle[] = row.getValue('titles');
+      return (
+        <div>
+          {titles.map((title, index) => (
+            <Badge key={index} variant="outline">
+              {title}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
   },
   {
     accessorKey: 'currentStatus',

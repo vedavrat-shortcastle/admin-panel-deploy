@@ -59,8 +59,7 @@ export default function AddContact() {
 
   const { mutate, isLoading } = trpc.contacts.create.useMutation({
     // Get mutate and isLoading
-    onSuccess: (response) => {
-      console.log('Contact created successfully:', response);
+    onSuccess: () => {
       toast({
         title: 'Success!',
         description: 'Contact has been created.',
