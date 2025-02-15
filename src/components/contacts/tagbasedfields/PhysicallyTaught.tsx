@@ -26,12 +26,13 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
     useState<boolean>(false); // ADD THIS LINE - Modal state
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
 
-  const { data: locationsData, error } = trpc.location.getAllLocations.useQuery(
-    searchTerm,
-    {
-      enabled: searchTerm.length > 0,
-    }
-  );
+  const {
+    data: locationsData,
+    error,
+    isLoading,
+  } = trpc.location.getAllLocations.useQuery(searchTerm, {
+    enabled: searchTerm.length > 0,
+  });
 
   const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
@@ -104,6 +105,7 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
         onSearch={onSearch}
         onClick={onClick}
         showButton
+        isLoading={isLoading}
       />
 
       <div className="flex flex-wrap gap-2 mt-3">

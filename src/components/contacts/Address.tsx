@@ -36,10 +36,13 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
     undefined
   ); // Store data locally
 
-  const { refetch } = trpc.location.getAllLocations.useQuery(searchTerm, {
-    enabled: hasSearched,
-    onSuccess: (data) => setLocationsData(data), // Update local state on success
-  });
+  const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
+    searchTerm,
+    {
+      enabled: hasSearched,
+      onSuccess: (data) => setLocationsData(data), // Update local state on success
+    }
+  );
 
   const onSearch = useCallback(
     (search: string) => {
@@ -106,6 +109,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
         onSearch={onSearch}
         showButton
         onClick={onClick}
+        isLoading={isLoading}
       />
 
       <Dialog

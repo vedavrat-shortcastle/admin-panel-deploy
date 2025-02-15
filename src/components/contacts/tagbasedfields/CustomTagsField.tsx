@@ -14,7 +14,7 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   // Fetch available tags based on search input
-  const { data: tagsData } = trpc.tags.getTags.useQuery(searchTerm, {
+  const { data: tagsData, isLoading } = trpc.tags.getTags.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
 
@@ -57,6 +57,7 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
         onSearch={setSearchTerm}
         showButton
         onClick={onClick}
+        isLoading={isLoading}
       />
 
       {/* Show selected tags */}

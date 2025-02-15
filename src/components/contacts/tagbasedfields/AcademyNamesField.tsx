@@ -14,10 +14,24 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const { data: academyNamesData, error } =
-    trpc.academy.getAcademyNames.useQuery(searchTerm, {
-      enabled: searchTerm.length > 0,
-    });
+  const {
+    data: academyNamesData,
+    error,
+    isLoading,
+  } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
+    enabled: searchTerm.length > 0,
+  });
+
+  console.log('component is rendering');
+
+  useEffect(() => {
+    console.log(
+      'AcademyNames Render - isLoading:',
+      isLoading,
+      'searchTerm:',
+      searchTerm
+    );
+  });
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
@@ -85,6 +99,7 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
         selectionMode="multiple"
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
+        isLoading={isLoading}
       />
 
       {/* Render Selected Academy Tags */}

@@ -9,21 +9,23 @@ import { Input } from '@/components/ui/input';
 import { Controller, UseFormReturn } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { debounce } from 'lodash';
+import { Loader2 } from 'lucide-react';
 
 export type SelectionMode = 'single' | 'multiple';
 
 interface SearchableSelectWithTagsProps<T extends Record<string, any>> {
-  form: UseFormReturn<any>; // React Hook Form instance
-  fieldName: string; // Field name in form state
-  data?: T[]; // List of selectable items
-  displayKey: keyof T; // Key used to display items in dropdown
-  label?: string; // Input label
-  placeholder?: string; // Input placeholder
-  selectionMode?: SelectionMode; // Selection mode (single/multiple)
-  onSearch?: (searchTerm: string) => void; // Callback for search
-  onSelectItem?: (item: T) => void; // Callback for selection
-  onClick?: (searchTerm: string) => void; // Callback for button click
+  form: UseFormReturn<any>;
+  fieldName: string;
+  data?: T[];
+  displayKey: keyof T;
+  label?: string;
+  placeholder?: string;
+  selectionMode?: SelectionMode;
+  onSearch?: (searchTerm: string) => void;
+  onSelectItem?: (item: T) => void;
+  onClick?: (searchTerm: string) => void;
   showButton?: boolean;
+  isLoading?: boolean;
 }
 
 export const SearchableSelect = <T extends Record<string, any>>({
@@ -38,6 +40,7 @@ export const SearchableSelect = <T extends Record<string, any>>({
   onSelectItem,
   onClick,
   showButton = false,
+  isLoading = false,
 }: SearchableSelectWithTagsProps<T>) => {
   const [apiData, setApiData] = useState<T[]>(initialData || []);
   const [searchedItems, setSearchedItems] = useState<T[]>(initialData || []);
@@ -50,7 +53,7 @@ export const SearchableSelect = <T extends Record<string, any>>({
   useEffect(() => {
     setApiData(initialData || []);
     setSearchedItems(initialData || []);
-    setShowDropdown((initialData ?? []).length > 0);
+    // setShowDropdown((initialData ?? []).length > 0);
   }, [initialData]);
 
   useEffect(() => {
@@ -67,23 +70,12 @@ export const SearchableSelect = <T extends Record<string, any>>({
     }
   }, [inputValue, apiData, displayKey]);
 
-  // const handleItemSearch = useCallback(
-  //   debounce((value: string) => {
-  //     if (!isMounted.current) return;
-  //     setInputValue(value);
-  //     onSearch?.(value.trim());
-  //     setShowDropdown(true);
-  //   }, 500),
-  //   [onSearch]
-  // );
-
   const handleItemSearch = useCallback(
     debounce((value: string) => {
-      // if (!isMounted.current) return;
       setInputValue(value);
       onSearch?.(value.trim());
       setShowDropdown(true);
-    }, 500), // Delay is now 200ms
+    }, 500),
     [onSearch]
   );
 
@@ -104,6 +96,8 @@ export const SearchableSelect = <T extends Record<string, any>>({
     onSelectItem?.(item);
   };
 
+  // Inside SearchableSelect
+
   return (
     <div className="flex gap-3">
       <div className="col-span-12 flex flex-grow items-end space-x-2 relative">
@@ -114,40 +108,45 @@ export const SearchableSelect = <T extends Record<string, any>>({
             <FormItem className="flex-grow relative">
               <FormLabel>{label}</FormLabel>
               <FormControl>
-                <Input
-                  value={field.value ?? ''}
-                  placeholder={placeholder}
-                  onChange={(e) => {
-                    field.onChange(e.target.value);
-                    handleItemSearch(e.target.value);
-                  }}
-                  onFocus={() => setShowDropdown(true)}
-                  onBlur={() =>
-                    setTimeout(
-                      () => isMounted.current && setShowDropdown(false),
-                      200
-                    )
-                  }
-                  name={field.name}
-                  ref={field.ref}
-                />
+                <div className="relative">
+                  <Input
+                    value={field.value ?? ''}
+                    placeholder={placeholder}
+                    onChange={(e) => {
+                      field.onChange(e.target.value);
+                      handleItemSearch(e.target.value);
+                      setShowDropdown(true);
+                    }}
+                    onBlur={() =>
+                      setTimeout(
+                        () => isMounted.current && setShowDropdown(false),
+                        200
+                      )
+                    }
+                    name={field.name}
+                    ref={field.ref}
+                  />
+                  {isLoading && inputValue.trim() !== '' && (
+                    <div className="absolute inset-y-0 right-3 flex items-center">
+                      <Loader2 className="animate-spin h-4 w-4" />
+                    </div>
+                  )}
+                </div>
               </FormControl>
 
-              {showDropdown &&
-                Array.isArray(searchedItems) &&
-                searchedItems.length > 0 && (
-                  <div className="absolute left-0 right-0 bg-white border border-gray-300 shadow-lg mt-1 rounded-md max-h-40 overflow-y-auto z-10">
-                    {searchedItems.map((item, index) => (
-                      <div
-                        key={index}
-                        className="p-2 cursor-pointer hover:bg-gray-100"
-                        onMouseDown={() => handleSelectItem(item)}
-                      >
-                        {String(item[displayKey])}
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {showDropdown && (
+                <div className="absolute left-0 right-0 bg-white border border-gray-300 shadow-lg mt-1 rounded-md max-h-40 overflow-y-auto z-10">
+                  {searchedItems.map((item, index) => (
+                    <div
+                      key={index}
+                      className="p-2 cursor-pointer hover:bg-gray-100"
+                      onMouseDown={() => handleSelectItem(item)}
+                    >
+                      {String(item[displayKey])}
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <FormMessage />
             </FormItem>

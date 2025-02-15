@@ -1,8 +1,4 @@
-import {
-  handleAddItem,
-  handleRemoveItem,
-} from '@/components/contacts/tagbasedfields/tagutils';
-import { Button } from '@/components/ui/button';
+import { handleRemoveItem } from '@/components/contacts/tagbasedfields/tagutils';
 import {
   FormField,
   FormItem,
@@ -61,13 +57,6 @@ export const Titles = ({ form }: { form: UseFormReturn<any> }) => {
             </FormItem>
           )}
         />
-        <Button
-          type="button"
-          variant="default"
-          onClick={() => handleAddItem({ form }, 'titles', 'titlesInput')}
-        >
-          Add
-        </Button>
       </div>
 
       <div className="col-span-12 flex justify-start">
