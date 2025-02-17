@@ -79,7 +79,6 @@ export default function AddContact() {
 
   const onSubmit = (data: FormValues) => {
     // onSubmit now receives form data
-    console.log('Form Values on Submit:', data); // Log form values before mutation
     mutate(data); // Call the mutation with form data
   };
 
@@ -88,8 +87,6 @@ export default function AddContact() {
     if (isValid) {
       form.handleSubmit(onSubmit)(); // Call form's handleSubmit which in turn calls our onSubmit
     } else {
-      const errors = form.formState.errors;
-      console.log(errors);
       toast({
         title: 'Validation Error',
         description: 'Please complete all required fields in all steps.',
@@ -99,9 +96,6 @@ export default function AddContact() {
   };
 
   const nextStep = async () => {
-    const error = form.formState.errors;
-    console.log(error);
-    console.log(form.getValues());
     const isValid = await validateStep();
     if (isValid) {
       setStep((prevStep) => Math.min(prevStep + 1, 3));

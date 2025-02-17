@@ -22,17 +22,6 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
     enabled: searchTerm.length > 0,
   });
 
-  console.log('component is rendering');
-
-  useEffect(() => {
-    console.log(
-      'AcademyNames Render - isLoading:',
-      isLoading,
-      'searchTerm:',
-      searchTerm
-    );
-  });
-
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
   }

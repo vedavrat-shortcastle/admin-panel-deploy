@@ -11,10 +11,13 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import AddContact from '@/components/contacts/AddContact';
-import { DataTable } from '@/app/contacts/data-table';
+
 import { columns } from '@/app/contacts/columns';
 import { trpc } from '@/utils/trpc';
 import { Button } from '@/components/ui/button';
+
+import { DataTable } from '@/components/data-table';
+import TableSkeleton from '@/components/tableSkeleton';
 
 export default function ContactsLandingPage() {
   const [dialogOpen, setDialogOpen] = useState(false); // Modal state
@@ -62,7 +65,7 @@ export default function ContactsLandingPage() {
       {/* Data Table or Loading State */}
       {isLoading ? (
         <div className="flex justify-center py-10">
-          <p className="ml-2">Loading contacts...</p>
+          <TableSkeleton />
         </div>
       ) : error ? ( // Handle error case
         <div className="flex justify-center py-10 text-red-500">

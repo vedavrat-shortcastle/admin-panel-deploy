@@ -55,7 +55,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
   const handleLocationSelect = useCallback(
     (selectedLocation: Location) => {
-      console.log('Selected location:', selectedLocation);
       const locationId = selectedLocation.id;
 
       form.setValue('locationId', locationId);
