@@ -164,7 +164,6 @@ export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
                         mode="single"
                         selected={field.value}
                         onSelect={(date) => {
-                          console.log(date);
                           field.onChange(date);
                           if (date) {
                             form.setValue('yearOfBirth', date.getFullYear());

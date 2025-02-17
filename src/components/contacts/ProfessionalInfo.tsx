@@ -16,12 +16,15 @@ import {
 import { Input } from '@/components/ui/input';
 
 import { ContactFormReturn } from '@/types/contactSection';
-import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
+
 import { PhysicallyTaught } from '@/components/contacts/tagbasedfields/PhysicallyTaught';
 import { Titles } from '@/components/contacts/tagbasedfields/Titles';
 
 import { LanguagesSpoken } from '@/components/contacts/tagbasedfields/LanguagesSpoken';
-import { CustomTags } from '@/components/contacts/tagbasedfields/CustomTagsField';
+
+import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
+import { CustomTagsField } from '@/components/contacts/tagbasedfields/CustomTagsField';
+import { CurrentAcademy } from '@/components/contacts/tagbasedfields/CurrentAcademyField';
 
 interface ProfessionalChessInfoProps {
   form: ContactFormReturn; // Ensure this type is correctly defined
@@ -34,23 +37,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-12 gap-6 ">
-      {/* First Row: Current Academy and Role */}
-      <div className="col-span-12 lg:col-span-6 space-y-2">
-        <FormField
-          control={form.control}
-          name="currentAcademy"
-          render={({ field }) => (
-            <FormItem className="w-full">
-              <FormLabel className="font-medium">Current Academy</FormLabel>
-              <FormControl>
-                <Input className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
-
       <div className="col-span-12 lg:col-span-6 space-y-2">
         <FormField
           control={form.control}
@@ -68,9 +54,10 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="coach">Coach</SelectItem>
-                    <SelectItem value="player">Player</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="Founder">Founder</SelectItem>
+                    <SelectItem value="Headcoach">Headcoach</SelectItem>
+                    <SelectItem value="Subcoach">Subcoach</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -79,16 +66,15 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
-      {/* Academy Names */}
       <div className="col-span-12">
         <AcademyNames form={form} />
       </div>
-
+      <div className="col-span-12">
+        <CurrentAcademy form={form} />
+      </div>
       <div className="col-span-12">
         <PhysicallyTaught form={form} />
       </div>
-
       {/* Website */}
       <div className="col-span-12 space-y-2">
         <FormField
@@ -105,7 +91,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       {/* Working Mode */}
       <div className="col-span-12 space-y-2">
         <FormField
@@ -145,7 +130,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       <div className="col-span-12 lg:col-span-6 ">
         <FormField
           control={form.control}
@@ -166,11 +150,9 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       <div className="col-span-12 lg:col-span-6 ">
         <Titles form={form} />
       </div>
-
       {/* Percentages */}
       <div className="col-span-12 lg:col-span-6 space-y-2">
         <FormField
@@ -192,7 +174,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       <div className="col-span-12 lg:col-span-6 space-y-2">
         <FormField
           control={form.control}
@@ -213,7 +194,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       {/* Ratings */}
       <div className="col-span-12 lg:col-span-4 space-y-2">
         <FormField
@@ -239,7 +219,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       <div className="col-span-12 lg:col-span-4 space-y-2">
         <FormField
           control={form.control}
@@ -264,7 +243,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       <div className="col-span-12 lg:col-span-4 space-y-2">
         <FormField
           control={form.control}
@@ -289,11 +267,9 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-
       <div className="col-span-12">
-        <CustomTags form={form} />
+        <CustomTagsField form={form} />
       </div>
-
       <div className="col-span-12">
         <LanguagesSpoken scrollableRef={scrollableRef} form={form} />
       </div>

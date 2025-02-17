@@ -1,78 +1,79 @@
-import {
-  handleAddItem,
-  handleRemoveItem,
-} from '@/components/contacts/tagbasedfields/tagutils';
-import { Button } from '@/components/ui/button';
-import {
-  FormField,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { X } from 'lucide-react';
-
+import { useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+import { X } from 'lucide-react';
+import { trpc } from '@/utils/trpc';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
-export const CustomTags: React.FC<{ form: UseFormReturn<any> }> = ({
+interface Tag {
+  name: string;
+}
+
+export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Fetch available tags based on search input
+  const { data: tagsData, isLoading } = trpc.tags.getTags.useQuery(searchTerm, {
+    enabled: searchTerm.length > 0,
+  });
+
+  // Get currently selected tags from the form
   const selectedTags = form.watch('customTags') || [];
 
+  // Handle selecting a tag from the dropdown
+  const handleTagSelect = (selectedTag: Tag) => {
+    if (!selectedTags.includes(selectedTag.name)) {
+      form.setValue('customTags', [...selectedTags, selectedTag.name]);
+    }
+
+    setSearchTerm('');
+  };
+
+  // Handle removing a selected tag
+  const handleRemoveTag = (tag: string) => {
+    form.setValue(
+      'customTags',
+      selectedTags.filter((t: string) => t !== tag)
+    );
+  };
+
+  const onClick = (value: string) => {
+    form.setValue('customTags', [...selectedTags, value]);
+  };
+
   return (
-    <div className="space-y-2">
-      <div className="col-span-12 flex items-end space-x-2 relative">
-        <FormField
-          control={form.control}
-          name="customTagsInput"
-          render={({ field }) => (
-            <FormItem className="flex-grow">
-              <FormLabel>Custom Tags</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  placeholder="Type a tag and press Add"
-                  onChange={(e) => field.onChange(e.target.value)}
-                  onKeyDown={(e) =>
-                    e.key === 'Enter' &&
-                    (e.preventDefault(),
-                    handleAddItem({ form }, 'customTags', 'customTagsInput'))
-                  }
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button
-          type="button"
-          variant="default"
-          onClick={() =>
-            handleAddItem({ form }, 'customTags', 'customTagsInput')
-          }
-        >
-          Add
-        </Button>
-      </div>
+    <div>
+      {/* Searchable dropdown for existing tags */}
+      <SearchableSelect<Tag>
+        form={form}
+        fieldName="customTags"
+        label="Tags"
+        placeholder="Search or add tags..."
+        data={tagsData || []}
+        displayKey="name"
+        selectionMode="multiple"
+        onSelectItem={handleTagSelect}
+        onSearch={setSearchTerm}
+        showButton
+        onClick={onClick}
+        isLoading={isLoading}
+      />
+
+      {/* Show selected tags */}
       {selectedTags.length > 0 && (
-        <div className="col-span-12 flex justify-start">
-          <div className="bg-white p-2 rounded-md min-w-fit w-auto">
-            {selectedTags.map((tag: string, index: any) => (
-              <div
-                key={index}
-                className="flex items-center justify-between p-1 text-sm bg-gray-100 rounded-md mb-2 px-3"
-              >
-                <span className="whitespace-nowrap">{tag}</span>
-                <button
-                  onClick={() => handleRemoveItem({ form }, 'customTags', tag)}
-                  className="text-gray-500 hover:text-red-500 transition"
-                >
-                  <X className="ml-3" size={14} strokeWidth={4} />
-                </button>
-              </div>
-            ))}
-          </div>
+        <div className="flex flex-wrap mt-3 gap-2">
+          {selectedTags.map((tag: string) => (
+            <div
+              key={tag}
+              className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
+            >
+              <span>{tag}</span>
+              <button onClick={() => handleRemoveTag(tag)} className="ml-2">
+                <X size={16} className="text-gray-600 hover:text-red-500" />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>

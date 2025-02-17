@@ -1,7 +1,8 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { UseFormReturn } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { UseFormReturn, useWatch } from 'react-hook-form';
 import { trpc } from '@/utils/trpc';
-import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
+import { X } from 'lucide-react';
+import { SearchableSelect } from '@/components/SearchableSelect';
 
 interface getAcademyNamesRes {
   id: string;
@@ -12,36 +13,108 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [academyNamesForDropdown, setAcademyNamesForDropdown] = useState<
-    string[]
-  >([]);
 
-  const academies = trpc.academy.getAcademyNames.useQuery(searchTerm, {
+  const {
+    data: academyNamesData,
+    error,
+    isLoading,
+  } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
 
-  useEffect(() => {
-    setAcademyNamesForDropdown(
-      academies.data?.map((academy: getAcademyNamesRes) => academy.name) ?? []
-    );
-  }, [academies.data, searchTerm]);
+  if (error) {
+    return <div>Error loading academy names: {error.message}</div>;
+  }
 
-  const handleAcademySearch = useCallback(
-    (search: string) => {
-      setSearchTerm(search);
-    },
-    [setSearchTerm]
-  );
+  const selectedAcademyIds = useWatch({
+    control: form.control,
+    name: 'academyIds',
+    defaultValue: [],
+  });
+  const selectedAcademyNames = useWatch({
+    control: form.control,
+    name: 'academyNames',
+    defaultValue: [],
+  });
+
+  useEffect(() => {
+    if (academyNamesData) {
+      const selectedNames = selectedAcademyIds
+        .map(
+          (id: string) =>
+            academyNamesData.find((academy) => academy.id === id)?.name
+        )
+        .filter(Boolean) as string[];
+
+      form.setValue('academyNames', [
+        ...new Set([...selectedAcademyNames, ...selectedNames]),
+      ]);
+    }
+  }, [selectedAcademyIds, academyNamesData, form]);
+
+  const handleOnSelect = (selectedAcademy: getAcademyNamesRes) => {
+    const updatedIds = new Set([...selectedAcademyIds, selectedAcademy.id]);
+    const updatedNames = new Set([
+      ...selectedAcademyNames,
+      selectedAcademy.name,
+    ]);
+
+    form.setValue('academyIds', Array.from(updatedIds));
+    form.setValue('academyNames', Array.from(updatedNames));
+
+    setSearchTerm('');
+  };
+
+  const handleRemoveTag = (index: number) => {
+    const updatedIds = [...selectedAcademyIds];
+    const updatedNames = [...selectedAcademyNames];
+
+    updatedIds.splice(index, 1);
+    updatedNames.splice(index, 1);
+
+    form.setValue('academyIds', updatedIds);
+    form.setValue('academyNames', updatedNames);
+  };
 
   return (
-    <SearchableSelectWithTags
-      form={form}
-      fieldName="academyNames"
-      label="Academy Names (Multiple)"
-      placeholder="Search Academy and Select"
-      Values={academyNamesForDropdown}
-      onSearch={handleAcademySearch}
-      selectionMode="multiple"
-    />
+    <div>
+      <SearchableSelect<getAcademyNamesRes>
+        form={form}
+        fieldName="academyNames"
+        label="Academy Names"
+        placeholder="Search Academy and Select"
+        data={academyNamesData || []}
+        displayKey="name"
+        selectionMode="multiple"
+        onSelectItem={handleOnSelect}
+        onSearch={setSearchTerm}
+        isLoading={isLoading}
+      />
+
+      {/* Render Selected Academy Tags */}
+      <div className="flex flex-wrap gap-2 mt-3">
+        {selectedAcademyNames.length > 0 ? (
+          selectedAcademyNames.map((academy: string, index: number) => (
+            <div
+              key={index}
+              className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
+            >
+              <span>{academy}</span>
+              <button onClick={() => handleRemoveTag(index)} className="ml-2">
+                <X
+                  size={14}
+                  className="text-gray-600 hover:text-red-500"
+                  strokeWidth={3}
+                />
+              </button>
+            </div>
+          ))
+        ) : (
+          <div className="text-gray-400 text-sm italic">
+            No academies added yet.
+          </div>
+        )}
+      </div>
+    </div>
   );
 };

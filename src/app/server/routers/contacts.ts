@@ -78,7 +78,7 @@ export const contactsRouter = router({
               yearsInOperation: input.yearsInOperation,
               numberOfCoaches: input.numberOfCoaches,
               currentStatus: input.status as ContactStatus,
-              imageUrl: 'https://placehold.co/600x400', // save in cloud platform and provide actual url
+              imageUrl: 'https://placehold.co/600x400',
               lastContacted: input.lastContacted,
             },
           });

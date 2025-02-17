@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const formSchema = z.object({
   firstName: z.string().min(1, { message: 'This field is required' }),
   lastName: z.string().min(1, { message: 'This field is required' }),
-  role: z.string().min(1, { message: 'This field is required' }),
+  role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']),
   email: z.string().email({ message: 'Invalid email address.' }),
   phoneNumber: z.string().min(1, { message: 'This field is required' }),
   academyIds: z.array(z.string()).min(1, { message: 'This field is requierd' }),
@@ -12,7 +12,10 @@ export const formSchema = z.object({
     .url({ message: 'Invalid URL.' })
     .optional()
     .or(z.literal('')),
-  locationId: z.number().min(1, { message: 'This field is required' }),
+  locationId: z
+    .number()
+    .min(1, { message: 'This field is required' })
+    .optional(),
   dateOfBirth: z.date(),
   gender: z.enum(['male', 'female', 'other']),
   languagesSpoken: z.array(z.string()),
@@ -82,4 +85,12 @@ export const contactAddressSchema = formSchema.pick({
   locationId: true,
   address: true,
   social: true,
+  notes: true,
+  lastContacted: true,
+});
+
+export const newCitySchema = z.object({
+  city: z.string().min(1, { message: 'City is required' }),
+  state: z.string().optional().default(''), // Ensures it's always a string
+  country: z.string().min(1, { message: 'Country is required' }),
 });

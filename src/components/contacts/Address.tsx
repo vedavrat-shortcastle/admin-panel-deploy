@@ -1,105 +1,94 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import AddLocation from '@/components/contacts/tagbasedfields/AddLocation';
+import { SearchableSelect } from '@/components/SearchableSelect';
+
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormControl,
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { UseFormReturn } from 'react-hook-form';
 import { trpc } from '@/utils/trpc';
-import { SearchableSelectWithTags } from '@/components/SearchableSelectWithTags';
+import { useCallback, useState } from 'react';
+import { UseFormReturn } from 'react-hook-form';
 
 interface Location {
-  city: string;
-  state: string | null;
+  id: number;
   country: string | null;
+  state: string | null;
+  city: string;
 }
 
-interface AddressProps {
-  form: UseFormReturn<any>;
-}
-
-const Address: React.FC<AddressProps> = ({ form }) => {
-  const [cityOptions, setCityOptions] = useState<Location[]>([]);
-  const [cityNamesForDropdown, setCityNamesForDropdown] = useState<string[]>(
-    []
-  );
+export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
+    useState<boolean>(false);
+  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
+  const [locationsData, setLocationsData] = useState<Location[] | undefined>(
+    undefined
+  ); // Store data locally
 
-  const locationsQuery = trpc.location.getAllLocations.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
-    onSuccess: (data) => {
-      setCityOptions(data);
-    },
-  });
-
-  useEffect(() => {
-    if (locationsQuery.data) {
-      const names = locationsQuery.data.map(
-        (location: Location) => location.city
-      );
-      setCityNamesForDropdown(names);
-    } else {
-      setCityNamesForDropdown([]);
+  const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
+    searchTerm,
+    {
+      enabled: hasSearched,
+      onSuccess: (data) => setLocationsData(data), // Update local state on success
     }
-  }, [locationsQuery.data]);
+  );
 
-  const handleCitySearch = useCallback(
+  const onSearch = useCallback(
     (search: string) => {
       setSearchTerm(search);
+      setHasSearched(true);
+      refetch();
     },
-    [setSearchTerm]
+    [refetch]
   );
 
-  const handleCitySelect = useCallback(
-    (selectedCityName: string) => {
-      const selectedLocation = cityOptions.find(
-        (city) => city.city === selectedCityName
-      );
-      if (selectedLocation) {
-        form.setValue('cityLocation', selectedLocation.city);
-        form.setValue('stateRegion', selectedLocation.state ?? '');
-        form.setValue('country', selectedLocation.country ?? '');
-      } else {
-        console.warn('Selected city not found in options:', selectedCityName);
-      }
+  const handleLocationSelect = useCallback(
+    (selectedLocation: Location) => {
+      const locationId = selectedLocation.id;
+
+      form.setValue('locationId', locationId);
+      form.setValue('cityLocation', selectedLocation.city);
+      form.setValue('cityLocationInput', selectedLocation.city);
+      form.setValue('stateRegion', selectedLocation.state || '');
+      form.setValue('country', selectedLocation.country || '');
+      setIsLocationSelected(true);
+      setSearchTerm(''); // Clear search for next search
+      setHasSearched(false); // Reset for next search
+      setLocationsData(undefined); // Clear displayed locations
     },
-    [cityOptions, form.setValue]
+    [form]
   );
+
+  const onClick = useCallback(() => {
+    setIsAddLocationModalOpen(true);
+  }, []);
 
   return (
-    <div>
+    <div className="space-y-2">
       <FormField
         control={form.control}
         name="address"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Address</FormLabel>
+            <FormLabel className="font-medium">Address</FormLabel>
             <FormControl>
-              <Input {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name="cityLocationInput"
-        render={() => (
-          <FormItem>
-            <FormControl>
-              <SearchableSelectWithTags
-                form={form}
-                fieldName="cityLocation"
-                label="City/Location"
-                placeholder="Search City and Select"
-                Values={cityNamesForDropdown}
-                onSearch={handleCitySearch}
-                selectionMode="single"
-                onSelectItem={handleCitySelect}
+              <Input
+                type="text"
+                className="w-full"
+                {...field}
+                value={field.value || ''}
+                onChange={(e) => field.onChange(e.target.value)}
               />
             </FormControl>
             <FormMessage />
@@ -107,15 +96,58 @@ const Address: React.FC<AddressProps> = ({ form }) => {
         )}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <SearchableSelect<Location>
+        form={form}
+        fieldName="cityLocation"
+        label="City"
+        placeholder="Search City..."
+        data={locationsData || []}
+        displayKey="city"
+        selectionMode="single"
+        onSelectItem={handleLocationSelect}
+        onSearch={onSearch}
+        showButton
+        onClick={onClick}
+        isLoading={isLoading}
+      />
+
+      <Dialog
+        open={isAddLocationModalOpen}
+        onOpenChange={setIsAddLocationModalOpen}
+      >
+        <DialogContent className="max-w-md">
+          <div>
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">
+                Add New Location
+              </DialogTitle>
+            </DialogHeader>
+            <div
+              className="overflow-y-auto p-5 flex-grow"
+              style={{ maxHeight: 'calc(100vh - 150px)' }}
+            >
+              <AddLocation />
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
           name="stateRegion"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>State/Region</FormLabel>
+              <FormLabel className="font-medium">State/Region</FormLabel>
               <FormControl>
-                <Input type="text" {...field} />
+                <Input
+                  type="text"
+                  className="w-full"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  disabled={isLocationSelected} // Disable when a location is selected
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -127,9 +159,16 @@ const Address: React.FC<AddressProps> = ({ form }) => {
           name="country"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Country</FormLabel>
+              <FormLabel className="font-medium">Country</FormLabel>
               <FormControl>
-                <Input type="text" {...field} />
+                <Input
+                  type="text"
+                  className="w-full"
+                  {...field}
+                  value={field.value || ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                  disabled={isLocationSelected} // Disable when a location is selected
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -139,5 +178,3 @@ const Address: React.FC<AddressProps> = ({ form }) => {
     </div>
   );
 };
-
-export default Address;

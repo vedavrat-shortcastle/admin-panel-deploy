@@ -1,8 +1,4 @@
-import {
-  handleAddItem,
-  handleRemoveItem,
-} from '@/components/contacts/tagbasedfields/tagutils';
-import { Button } from '@/components/ui/button';
+import { handleRemoveItem } from '@/components/contacts/tagbasedfields/tagutils';
 import {
   FormField,
   FormItem,
@@ -25,7 +21,7 @@ import { UseFormReturn } from 'react-hook-form';
 export const Titles = ({ form }: { form: UseFormReturn<any> }) => {
   const selectedTitles = form.watch('titles') || [];
 
-  const titles = ['FIDE Trainer', 'FIDE Instructor', 'GM', 'IM', 'WIM', 'WGM'];
+  const titles = ['FIDETrainer', 'FIDEInstructor', 'GM', 'IM', 'WIM', 'WGM'];
 
   return (
     <div>
@@ -61,13 +57,6 @@ export const Titles = ({ form }: { form: UseFormReturn<any> }) => {
             </FormItem>
           )}
         />
-        <Button
-          type="button"
-          variant="default"
-          onClick={() => handleAddItem({ form }, 'titles', 'titlesInput')}
-        >
-          Add
-        </Button>
       </div>
 
       <div className="col-span-12 flex justify-start">
