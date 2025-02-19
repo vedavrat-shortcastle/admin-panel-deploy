@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const formSchema = z.object({
+export const contactFormSchema = z.object({
   firstName: z.string().min(1, { message: 'This field is required' }),
   lastName: z.string().min(1, { message: 'This field is required' }),
   role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']),
@@ -54,7 +54,7 @@ export const formSchema = z.object({
   profilePhoto: z.instanceof(globalThis.File || Blob).optional(),
 });
 
-export const personalInfoSchema = formSchema.pick({
+export const personalInfoSchema = contactFormSchema.pick({
   firstName: true,
   lastName: true,
   email: true,
@@ -65,7 +65,7 @@ export const personalInfoSchema = formSchema.pick({
 });
 
 // Professional Details Schema
-export const professionalInfoSchema = formSchema.pick({
+export const professionalInfoSchema = contactFormSchema.pick({
   role: true,
   currentAcademy: true,
   academyIds: true,
@@ -81,7 +81,7 @@ export const professionalInfoSchema = formSchema.pick({
 });
 
 // Contact & Location Schema
-export const contactAddressSchema = formSchema.pick({
+export const contactAddressSchema = contactFormSchema.pick({
   locationId: true,
   address: true,
   social: true,

@@ -4,14 +4,17 @@ import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
 
-interface getAcademyNamesRes {
+interface GetAcademyNamesRes {
   id: string;
   name: string;
 }
 
-export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
-  form,
-}) => {
+interface AcademyNamesProps {
+  form: UseFormReturn<any>;
+  mode: 'single' | 'multiple';
+}
+
+export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const {
@@ -26,33 +29,51 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
     return <div>Error loading academy names: {error.message}</div>;
   }
 
-  const selectedAcademyIds = useWatch({
+  // Watch form fields based on mode
+  const selectedIds = useWatch({
     control: form.control,
-    name: 'academyIds',
-    defaultValue: [],
-  });
-  const selectedAcademyNames = useWatch({
-    control: form.control,
-    name: 'academyNames',
-    defaultValue: [],
+    name: mode === 'multiple' ? 'academyIds' : 'academyId',
+    defaultValue: mode === 'multiple' ? [] : '',
   });
 
+  const selectedNames = useWatch({
+    control: form.control,
+    name: mode === 'multiple' ? 'academyNames' : 'academyName',
+    defaultValue: mode === 'multiple' ? [] : '',
+  });
+
+  // Sync names with IDs when data is available
   useEffect(() => {
-    if (academyNamesData) {
-      const selectedNames = selectedAcademyIds
+    if (academyNamesData && mode === 'multiple' && selectedIds.length > 0) {
+      const currentNames = new Set(selectedNames as string[]);
+      const newNames = selectedIds
         .map(
           (id: string) =>
-            academyNamesData.find((academy) => academy.id === id)?.name
+            academyNamesData.find((academy) => academy.id === id)?.name || ''
         )
         .filter(Boolean) as string[];
 
+      const filteredNewNames = newNames.filter(
+        (name: string): name is string => name !== ''
+      ); // Ensure non-empty strings
       form.setValue('academyNames', [
-        ...new Set([...selectedAcademyNames, ...selectedNames]),
+        ...new Set([...filteredNewNames, ...selectedNames]),
       ]);
-    }
-  }, [selectedAcademyIds, academyNamesData, form]);
 
-  const handleOnSelect = (selectedAcademy: getAcademyNamesRes) => {
+      // Only update if there are differences
+      if (
+        newNames.length !== currentNames.size ||
+        !newNames.every((name: string) => currentNames.has(name))
+      ) {
+        form.setValue(
+          'academyNames',
+          Array.from(new Set([...currentNames, ...newNames]))
+        );
+      }
+    }
+  }, [selectedIds, academyNamesData, form, mode]);
+
+  const handleOnSelect = (selectedAcademy: GetAcademyNamesRes) => {
     if (mode === 'multiple') {
       if (!selectedNames.includes(selectedAcademy.name)) {
         form.setValue('academyIds', [...selectedIds, selectedAcademy.id]);
@@ -67,21 +88,27 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
   };
 
   const handleRemoveTag = (index: number) => {
-    const updatedIds = [...selectedAcademyIds];
-    const updatedNames = [...selectedAcademyNames];
+    if (mode === 'multiple') {
+      const updatedIds = [...(selectedIds as string[])];
+      const updatedNames = [...(selectedNames as string[])];
 
-    updatedIds.splice(index, 1);
-    updatedNames.splice(index, 1);
+      updatedIds.splice(index, 1);
+      updatedNames.splice(index, 1);
 
-    form.setValue('academyIds', updatedIds);
-    form.setValue('academyNames', updatedNames);
+      form.setValue('academyIds', updatedIds);
+      form.setValue('academyNames', updatedNames);
+    } else {
+      form.setValue('academyId', '');
+      form.setValue('academyName', '');
+      form.setValue('academyNameInput', '');
+    }
   };
 
   return (
     <div>
-      <SearchableSelect<getAcademyNamesRes>
+      <SearchableSelect<GetAcademyNamesRes>
         form={form}
-        fieldName="academyNames"
+        fieldName={mode === 'multiple' ? 'academyNames' : 'academyName'}
         label="Academy Names"
         placeholder="Search Academy and Select"
         data={academyNamesData || []}
@@ -92,10 +119,9 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
         isLoading={isLoading}
       />
 
-      {/* Render Selected Academy Tags */}
-      <div className="flex flex-wrap gap-2 mt-3">
-        {selectedAcademyNames.length > 0 ? (
-          selectedAcademyNames.map((academy: string, index: number) => (
+      {mode === 'multiple' && selectedNames.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {selectedNames.map((academy: string, index: number) => (
             <div
               key={index}
               className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
@@ -109,13 +135,15 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
                 />
               </button>
             </div>
-          ))
-        ) : (
-          <div className="text-gray-400 text-sm italic">
-            No academies added yet.
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {mode === 'multiple' && selectedNames.length === 0 && (
+        <div className="text-gray-400 text-sm italic mt-2">
+          No academies added yet.
+        </div>
+      )}
     </div>
   );
 };

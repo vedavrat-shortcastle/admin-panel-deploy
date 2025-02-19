@@ -1,4 +1,4 @@
-import { formSchema } from '@/schemas/contacts';
+import { contactFormSchema } from '@/schemas/contacts';
 import { ChessTitle, ContactRole, ContactStatus } from '@prisma/client';
 import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
@@ -21,6 +21,6 @@ export type Academy = {
   createdAt: Date;
 };
 
-export type FormValues = z.infer<typeof formSchema>;
+export type contactFormValues = z.infer<typeof contactFormSchema>;
 
 export type ContactFormReturn = UseFormReturn<any>;

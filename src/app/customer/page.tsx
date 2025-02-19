@@ -15,12 +15,13 @@ import {
 import { DataTable } from '@/components/data-table';
 import { columns } from '@/app/customer/columns';
 import { trpc } from '@/utils/trpc';
+import TableSkeleton from '@/components/tableSkeleton';
 import AddCustomer from '@/components/customer/AddCustomer';
 
 export default function CustomersLandingPage() {
   const [open, setOpen] = useState(false); // Modal state
 
-  const { data } = trpc.subscription.getAll.useQuery();
+  const { data, isLoading, error } = trpc.subscription.getAll.useQuery();
 
   return (
     <div className="container py-5 px-10">
@@ -63,7 +64,21 @@ export default function CustomersLandingPage() {
         </Dialog>
       </div>
 
-      {data && <DataTable columns={columns} data={data} />}
+      {isLoading ? (
+        <div className="flex justify-center py-10">
+          <TableSkeleton />
+        </div>
+      ) : error ? ( // Handle error case
+        <div className="flex justify-center py-10 text-red-500">
+          <p className="ml-2">Error fetching contacts: {error.message}</p>
+        </div>
+      ) : !data || data.length === 0 ? ( // Handle empty data case
+        <div className="flex justify-center py-10">
+          <p className="ml-2">No contacts found.</p>
+        </div>
+      ) : (
+        <DataTable columns={columns} data={data} />
+      )}
     </div>
   );
 }

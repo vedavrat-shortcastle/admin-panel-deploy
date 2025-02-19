@@ -6,24 +6,25 @@ import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { customerFormDefaults } from '@/utils/customerFormDefaults';
+
 import { trpc } from '@/utils/trpc';
 import {
   customerDetailsSchema,
   subscriptionDetailsSchema,
   subscriptionFormValues,
-  subscriptionSchema,
+  createSubscriptionSchema,
 } from '@/schemas/subscription';
 import { CustomerDetails } from '@/components/customer/CustomerDetails';
 import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
+import { subscriptionFormDefaults } from '@/utils/subscriptionFormDefaults';
 export default function AddCustomer() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
   const form = useForm<subscriptionFormValues>({
-    resolver: zodResolver(subscriptionSchema),
+    resolver: zodResolver(createSubscriptionSchema),
     mode: 'onTouched',
-    defaultValues: customerFormDefaults,
+    defaultValues: subscriptionFormDefaults,
   });
 
   const createCustomerMutation = trpc.subscription.create.useMutation({

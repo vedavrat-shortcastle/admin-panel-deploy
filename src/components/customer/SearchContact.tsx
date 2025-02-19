@@ -9,7 +9,13 @@ interface GetContactsRes {
   email: string | null;
 }
 
-const SearchContact = ({ form }) => {
+import { UseFormReturn } from 'react-hook-form';
+
+interface SearchContactProps {
+  form: UseFormReturn<any>;
+}
+
+const SearchContact = ({ form }: SearchContactProps) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const { data, isLoading, error } = trpc.contacts.getAll.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,

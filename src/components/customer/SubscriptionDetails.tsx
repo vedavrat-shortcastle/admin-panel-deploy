@@ -15,12 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { custumerFormReturn } from '@/types/customerSection';
+import { subscriptionFormReturns } from '@/types/customerSection';
 
 import React from 'react';
 
 interface customerDetailsProps {
-  form: custumerFormReturn;
+  form: subscriptionFormReturns;
 }
 
 const SubscriptionDetails: React.FC<customerDetailsProps> = ({ form }) => {

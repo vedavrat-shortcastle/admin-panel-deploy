@@ -93,6 +93,7 @@ export const SearchableSelect = <T extends Record<string, any>>({
       if (!(selectedItems as string[]).includes(displayValue)) {
         form.setValue(fieldName, [...selectedItems, displayValue]);
       }
+      setInputValue('');
     } else {
       form.setValue(fieldName, displayValue);
       setInputValue(displayValue);
