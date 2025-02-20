@@ -34,40 +34,65 @@ export const filterInputSchema = z.object({
 });
 
 export function buildPrismaFilter(filter: FilterGroup): WhereInput {
-  const conditions = filter.conditions.map((condition) => {
-    const { fieldId, operator, value } = condition;
+  if (!filter.conditions.length && (!filter.groups || !filter.groups.length)) {
+    return {};
+  }
 
-    switch (operator) {
-      case 'equals':
-        return { [fieldId]: { equals: value } };
-      case 'contains':
-        return { [fieldId]: { contains: value, mode: 'insensitive' } };
-      case 'startsWith':
-        return { [fieldId]: { startsWith: value } };
-      case 'endsWith':
-        return { [fieldId]: { endsWith: value } };
-      case 'greaterThan':
-        return { [fieldId]: { gt: value } };
-      case 'lessThan':
-        return { [fieldId]: { lt: value } };
-      case 'between':
-        return {
-          AND: [
-            { [fieldId]: { gte: value.min } },
-            { [fieldId]: { lte: value.max } },
-          ],
-        };
-      case 'in':
-        return { [fieldId]: { in: value } };
-      default:
-        return {};
-    }
-  });
+  const conditions = filter.conditions
+    .filter(
+      (condition) => condition.value !== null && condition.value !== undefined
+    )
+    .map((condition) => {
+      const { fieldId, operator, value } = condition;
 
-  const nestedGroups = filter.groups?.map(buildPrismaFilter) ?? [];
+      switch (operator) {
+        case 'equals':
+          return { [fieldId]: { equals: value } };
+        case 'contains':
+          return { [fieldId]: { contains: value, mode: 'insensitive' } };
+        case 'startsWith':
+          return { [fieldId]: { startsWith: value } };
+        case 'endsWith':
+          return { [fieldId]: { endsWith: value } };
+        case 'greaterThan':
+          return { [fieldId]: { gt: value } };
+        case 'lessThan':
+          return { [fieldId]: { lt: value } };
+        case 'between':
+          if (value?.min !== undefined && value?.max !== undefined) {
+            return {
+              AND: [
+                { [fieldId]: { gte: value.min } },
+                { [fieldId]: { lte: value.max } },
+              ],
+            };
+          }
+          return null;
+        case 'in':
+          return { [fieldId]: { in: Array.isArray(value) ? value : [value] } };
+        default:
+          return null;
+      }
+    })
+    .filter(Boolean);
+
+  const nestedGroups =
+    filter.groups
+      ?.map(buildPrismaFilter)
+      .filter((group) => Object.keys(group).length > 0) ?? [];
+
   const allConditions = [...conditions, ...nestedGroups];
 
-  return allConditions.length > 0
-    ? { [filter.logic.toLowerCase()]: allConditions }
-    : {};
+  if (!allConditions.length) {
+    return {};
+  }
+
+  // For single condition, return it directly without wrapping in AND/OR
+  if (allConditions.length === 1) {
+    return allConditions[0] as WhereInput;
+  }
+
+  return {
+    [filter.logic.toLowerCase()]: allConditions,
+  };
 }

@@ -41,3 +41,5 @@ export type EntityFilter = {
     direction: 'asc' | 'desc';
   };
 };
+
+export type FieldType = 'string' | 'number' | 'date' | 'boolean';

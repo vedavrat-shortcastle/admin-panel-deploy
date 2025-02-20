@@ -1,14 +1,15 @@
 import { FilterField } from '@/types/dynamicFilter';
+import { ContactRole, ContactStatus } from '@prisma/client';
 
 export const contactFilterFields: FilterField[] = [
   {
-    id: 'firstname',
+    id: 'firstName',
     name: 'First Name',
     type: 'string',
     operators: ['equals', 'contains', 'startsWith'],
   },
   {
-    id: 'lastname',
+    id: 'lastName',
     name: 'Last Name',
     type: 'string',
     operators: ['equals', 'contains', 'startsWith'],
@@ -24,6 +25,19 @@ export const contactFilterFields: FilterField[] = [
     name: 'Role',
     type: 'string',
     operators: ['equals', 'in'],
-    options: ['ADMIN', 'USER', 'GUEST'], // Add your actual role options
+    options: Object.values(ContactRole),
+  },
+  {
+    id: 'currentStatus',
+    name: 'Status',
+    type: 'string',
+    operators: ['equals', 'in'],
+    options: Object.values(ContactStatus),
+  },
+  {
+    id: 'createdAt',
+    name: 'Created At',
+    type: 'date',
+    operators: ['equals', 'greaterThan', 'lessThan', 'between'],
   },
 ];

@@ -63,7 +63,7 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
     resolver: zodResolver(filterValueSchema),
     defaultValues: value,
   });
-
+  console.log('field', field);
   switch (field.type) {
     case 'date':
       return operator === 'between' ? (
