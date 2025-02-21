@@ -53,15 +53,16 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
   }, [selectedAcademyIds, academyNamesData, form]);
 
   const handleOnSelect = (selectedAcademy: getAcademyNamesRes) => {
-    const updatedIds = new Set([...selectedAcademyIds, selectedAcademy.id]);
-    const updatedNames = new Set([
-      ...selectedAcademyNames,
-      selectedAcademy.name,
-    ]);
-
-    form.setValue('academyIds', Array.from(updatedIds));
-    form.setValue('academyNames', Array.from(updatedNames));
-
+    if (mode === 'multiple') {
+      if (!selectedNames.includes(selectedAcademy.name)) {
+        form.setValue('academyIds', [...selectedIds, selectedAcademy.id]);
+        form.setValue('academyNames', [...selectedNames, selectedAcademy.name]);
+      }
+    } else {
+      form.setValue('academyId', selectedAcademy.id);
+      form.setValue('academyName', selectedAcademy.name);
+      form.setValue('academyNameInput', selectedAcademy.name);
+    }
     setSearchTerm('');
   };
 

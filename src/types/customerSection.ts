@@ -10,4 +10,4 @@ export type CustomerTable = {
   salesType: string;
 };
 
-export type costumerFormReturn = UseFormReturn<any>;
+export type custumerFormReturn = UseFormReturn<any>;

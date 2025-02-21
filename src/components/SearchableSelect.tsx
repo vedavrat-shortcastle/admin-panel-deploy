@@ -17,7 +17,7 @@ interface SearchableSelectWithTagsProps<T extends Record<string, any>> {
   form: UseFormReturn<any>;
   fieldName: string;
   data?: T[];
-  displayKey: keyof T;
+  displayKey: keyof T | (keyof T)[];
   label?: string;
   placeholder?: string;
   selectionMode?: SelectionMode;
@@ -63,7 +63,11 @@ export const SearchableSelect = <T extends Record<string, any>>({
       setShowDropdown(apiData.length > 0);
     } else {
       const filteredItems = apiData.filter((item) =>
-        String(item[displayKey]).toLowerCase().includes(trimmedInput)
+        Array.isArray(displayKey)
+          ? displayKey.some((key) =>
+              String(item[key]).toLowerCase().includes(trimmedInput)
+            )
+          : String(item[displayKey]).toLowerCase().includes(trimmedInput)
       );
       setSearchedItems(filteredItems);
       setShowDropdown(filteredItems.length > 0);
@@ -80,7 +84,9 @@ export const SearchableSelect = <T extends Record<string, any>>({
   );
 
   const handleSelectItem = (item: T) => {
-    const displayValue = String(item[displayKey]);
+    const displayValue = Array.isArray(displayKey)
+      ? displayKey.map((key) => String(item[key])).join(' ')
+      : String(item[displayKey]);
     form.setValue(`${fieldName}Input`, '');
 
     if (selectionMode === 'multiple') {
@@ -142,7 +148,9 @@ export const SearchableSelect = <T extends Record<string, any>>({
                       className="p-2 cursor-pointer hover:bg-gray-100"
                       onMouseDown={() => handleSelectItem(item)}
                     >
-                      {String(item[displayKey])}
+                      {Array.isArray(displayKey)
+                        ? displayKey.map((key) => String(item[key])).join(' ')
+                        : String(item[displayKey])}
                     </div>
                   ))}
                 </div>
