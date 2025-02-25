@@ -15,6 +15,7 @@ import {
   filterInputSchema,
 } from '@/utils/Filter/filterBuilder';
 import { FilterGroup } from '@/types/dynamicFilter';
+import { contactUpdateSchema } from '@/schemas/contactUpdateSchema';
 
 export const contactsRouter = router({
   getAll: procedure.query(async ({ ctx }) => {
@@ -402,66 +403,141 @@ export const contactsRouter = router({
 
   //       return updatedContact;
   //     }),
+  //   updateById: procedure
+  //     .input(contactUpdateSchema.extend({ id: z.number() })) // Include `id` in input
+  //     .mutation(async ({ ctx, input }) => {
+  //       return await ctx.db.$transaction(
+  //         async (tx) => {
+  //           try {
+  //             const { id, academyIds, physicallyTaught, customTags, ...rest } =
+  //               input;
+  //             // ✅ Update contact details
+  //             const updatedContact = await tx.contact.update({
+  //               where: { id },
+  //               data: {
+  //                 ...rest,
+  //                 role: rest.role as ContactRole,
+  //                 gender: rest.gender as GenderType,
+  //                 teachingMode: rest.teachingMode as TeachingMode,
+  //                 titles: rest.titles as ChessTitle[],
+  //                 currentStatus:  rest.currentStatus as ContactStatus,
+  //                 linkedinUrl: rest.social?.linkedin,
+  //                 facebookUrl: rest.social?.facebook,
+  //                 instagramUrl: rest.social?.instagram,
+  //                 twitterUrl: rest.social?.twitter,
+  //                 classicRating: rest.rating.classic,
+  //                 rapidRating: rest.rating.rapid,
+  //                 blitzRating: rest.rating.blitz,
+  //               },
+  //             });
+  //             // ✅ Update associated academies
+  //             await tx.contactAcademy.deleteMany({ where: { contactId: id } });
+  //             if (academyIds.length > 0) {
+  //               await tx.contactAcademy.createMany({
+  //                 data: academyIds.map((academyId) => ({
+  //                   contactId: id,
+  //                   academyId,
+  //                   isCurrent: academyId === input.currentAcademy,
+  //                 })),
+  //               });
+  //             }
+  //             // ✅ Update physically taught locations
+  //             await tx.contactPhysicalLocation.deleteMany({
+  //               where: { contactId: id },
+  //             });
+  //             if (physicallyTaught?.length) {
+  //               await tx.contactPhysicalLocation.createMany({
+  //                 data: physicallyTaught.map((locationId) => ({
+  //                   contactId: id,
+  //                   locationId,
+  //                 })),
+  //               });
+  //             }
+  //             // ✅ Update custom tags
+  //             await tx.contactTag.deleteMany({ where: { contactId: id } });
+  //             if (Array.isArray(customTags) && customTags.length > 0) {
+  //               for (const tagName of customTags) {
+  //                 let tag = await tx.tag.findUnique({ where: { name: tagName } });
+  //                 if (!tag) {
+  //                   tag = await tx.tag.create({ data: { name: tagName } });
+  //                 }
+  //                 await tx.contactTag.create({
+  //                   data: { contactId: id, tagId: tag.id },
+  //                 });
+  //               }
+  //             }
+  //             return updatedContact;
+  //           } catch (error) {
+  //             throw new Error(`Error updating contact: ${error}`);
+  //           }
+  //         },
+  //         { timeout: 15000 }
+  //       );
+  //     }),
+  // });
   updateById: procedure
-    .input(formSchema.extend({ id: z.number() })) // Include `id` in input
+    .input(contactUpdateSchema.extend({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.$transaction(
         async (tx) => {
           try {
             const { id, academyIds, physicallyTaught, customTags, ...rest } =
               input;
-            // ✅ Update contact details
-            const updatedContact = await tx.contact.update({
-              where: { id },
-              data: {
-                ...rest,
-                role: rest.role as ContactRole,
-                gender: rest.gender as GenderType,
-                teachingMode: rest.workingMode as TeachingMode,
-                titles: rest.titles as ChessTitle[],
-                currentStatus: rest.status as ContactStatus,
-                linkedinUrl: rest.social.linkedin,
-                facebookUrl: rest.social.facebook,
-                instagramUrl: rest.social.instagram,
-                twitterUrl: rest.social.twitter,
-                classicRating: rest.rating.classic,
-                rapidRating: rest.rating.rapid,
-                blitzRating: rest.rating.blitz,
-              },
-            });
-            // ✅ Update associated academies
-            await tx.contactAcademy.deleteMany({ where: { contactId: id } });
-            if (academyIds.length > 0) {
-              await tx.contactAcademy.createMany({
-                data: academyIds.map((academyId) => ({
-                  contactId: id,
-                  academyId,
-                  isCurrent: academyId === input.currentAcademy,
-                })),
+            // Directly use the rest object, filtering out undefined values.
+            const updateData = Object.fromEntries(
+              Object.entries(rest).filter(([value]) => value !== undefined)
+            );
+            let updatedContact;
+            if (Object.keys(updateData).length > 0) {
+              updatedContact = await tx.contact.update({
+                where: { id },
+                data: updateData,
               });
+            } else {
+              updatedContact = await tx.contact.findUnique({ where: { id } });
             }
-            // ✅ Update physically taught locations
-            await tx.contactPhysicalLocation.deleteMany({
-              where: { contactId: id },
-            });
-            if (physicallyTaught?.length) {
-              await tx.contactPhysicalLocation.createMany({
-                data: physicallyTaught.map((locationId) => ({
-                  contactId: id,
-                  locationId,
-                })),
+            if (academyIds !== undefined) {
+              await tx.contactAcademy.deleteMany({ where: { contactId: id } });
+              if (academyIds.length > 0) {
+                await tx.contactAcademy.createMany({
+                  data: academyIds.map((academyId) => ({
+                    contactId: id,
+                    academyId,
+                    isCurrent: academyId === input.currentAcademy,
+                  })),
+                });
+              }
+            }
+            if (physicallyTaught !== undefined) {
+              await tx.contactPhysicalLocation.deleteMany({
+                where: { contactId: id },
               });
+              if (physicallyTaught.length) {
+                await tx.contactPhysicalLocation.createMany({
+                  data: physicallyTaught.map((locationId) => ({
+                    contactId: id,
+                    locationId,
+                  })),
+                });
+              }
             }
-            // ✅ Update custom tags
-            await tx.contactTag.deleteMany({ where: { contactId: id } });
-            if (Array.isArray(customTags) && customTags.length > 0) {
-              for (const tagName of customTags) {
-                let tag = await tx.tag.findUnique({ where: { name: tagName } });
-                if (!tag) {
-                  tag = await tx.tag.create({ data: { name: tagName } });
-                }
-                await tx.contactTag.create({
-                  data: { contactId: id, tagId: tag.id },
+            if (customTags !== undefined) {
+              await tx.contactTag.deleteMany({ where: { contactId: id } });
+              if (customTags.length > 0) {
+                const existingTags = await tx.tag.findMany({
+                  where: { name: { in: customTags } },
+                });
+                const existingTagNames = existingTags.map((tag) => tag.name);
+                const newTags = customTags
+                  .filter((tagName) => !existingTagNames.includes(tagName))
+                  .map((tagName) => tx.tag.create({ data: { name: tagName } }));
+                const createdTags = await Promise.all(newTags);
+                const allTags = [...existingTags, ...createdTags];
+                await tx.contactTag.createMany({
+                  data: allTags.map((tag) => ({
+                    contactId: id,
+                    tagId: tag.id,
+                  })),
                 });
               }
             }

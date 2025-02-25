@@ -94,3 +94,69 @@ export const newCitySchema = z.object({
   state: z.string().optional().default(''),
   country: z.string().min(1, { message: 'Country is required' }),
 });
+
+export const contactUpdateSchema = z.object({
+  firstName: z
+    .string()
+    .min(1, { message: 'This field is required' })
+    .optional(), // Made optional
+  lastName: z.string().min(1, { message: 'This field is required' }).optional(), // Made optional
+  role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']).optional(), // Made optional
+  email: z.string().email({ message: 'Invalid email address.' }).optional(), // Made optional
+  phone: z.string().min(1, { message: 'This field is required' }).optional(), // Made optional
+  academyIds: z
+    .array(z.string())
+    .min(1, { message: 'This field is requierd' })
+    .optional(), // Made optional
+  website: z.string().url({ message: 'Invalid URL.' }).optional(),
+  // .or(z.literal('')) - No need for .or(z.literal('')) as optional handles undefined already
+  locationId: z
+    .number()
+    .min(1, { message: 'This field is required' })
+    .optional(),
+  dateOfBirth: z.date().optional(), // Made optional
+  gender: z.enum(['male', 'female', 'other']).optional(), // Made optional
+  languagesSpoken: z.array(z.string()).optional(), // Made optional
+  currentAcademy: z
+    .string()
+    .min(1, { message: 'This field is required' })
+    .optional(), // Made optional
+  teachingMode: z.enum(['online', 'offline', 'hybrid']).optional(), // Made optional
+  onlinePercentage: z.number().min(0).max(100).optional(),
+  offlinePercentage: z.number().min(0).max(100).optional(),
+  address: z.string().min(1, { message: 'This field is required' }).optional(), // Made optional
+  social: z
+    .object({
+      linkedin: z.string().url().optional(),
+      // .or(z.literal('')) - No need for .or(z.literal(''))
+      facebook: z.string().url().optional(),
+      // .or(z.literal('')) - No need for .or(z.literal(''))
+      instagram: z.string().url().optional(),
+      // .or(z.literal('')) - No need for .or(z.literal(''))
+      twitter: z.string().url().optional(),
+      // .or(z.literal('')) - No need for .or(z.literal(''))
+    })
+    .optional(), // Made social object itself optional
+  rating: z
+    .object({
+      classic: z.number().optional(),
+      rapid: z.number().optional(),
+      blitz: z.number().optional(),
+    })
+    .optional(), // Made rating object itself optional
+  fideId: z.string().optional(),
+  titles: z
+    .array(z.string())
+    .min(1, { message: 'This field is required' })
+    .optional(), // Made optional
+  physicallyTaught: z.array(z.number()).optional(),
+  lastContacted: z.date().optional(),
+  notes: z.string().optional(),
+  customTags: z.array(z.string()).optional(),
+  yearsInOperation: z.number().min(0).optional(), // Made optional
+  numberOfCoaches: z.number().min(0).optional(), // Made optional
+  currentStatus: z
+    .enum(['new', 'lead', 'prospect', 'customer', 'churned', 'high_prospect'])
+    .optional(), // Made optional
+  profilePhoto: z.instanceof(globalThis.File || Blob).optional(),
+});
