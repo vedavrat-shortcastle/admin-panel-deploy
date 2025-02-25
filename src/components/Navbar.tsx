@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { UserButton } from '@clerk/nextjs';
 import { capitalize } from 'lodash';
 
 export function Navbar() {
@@ -11,7 +10,6 @@ export function Navbar() {
   return (
     <nav className="flex justify-between items-center p-4 border-b">
       <h1 className="text-2xl font-semibold">{capitalize(currentPath)}</h1>
-      <UserButton />
     </nav>
   );
 }
