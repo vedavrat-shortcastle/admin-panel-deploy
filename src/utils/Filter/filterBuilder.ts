@@ -33,6 +33,83 @@ export const filterInputSchema = z.object({
     .optional(),
 });
 
+function validatePrismaFilter(
+  filter: WhereInput,
+  logError: boolean = true
+): boolean {
+  if (typeof filter !== 'object' || filter === null) {
+    if (logError) console.error('Filter is not an object or is null:', filter);
+    return false;
+  }
+
+  // Add mode as a valid operator property
+  const validProperties = [
+    'equals',
+    'contains',
+    'startsWith',
+    'endsWith',
+    'gt',
+    'lt',
+    'gte',
+    'lte',
+    'in',
+    'mode', // Add this to allow the mode property
+  ];
+
+  const validateCondition = (condition: any): boolean => {
+    if (typeof condition !== 'object' || condition === null) {
+      if (logError)
+        console.error('Condition is not an object or is null:', condition);
+      return false;
+    }
+
+    for (const key in condition) {
+      if (key === 'AND' || key === 'OR') {
+        if (!Array.isArray(condition[key])) {
+          if (logError)
+            console.error(`Condition ${key} is not an array:`, condition[key]);
+          return false;
+        }
+        if (
+          !condition[key].every((subCondition: any) =>
+            validateCondition(subCondition)
+          )
+        ) {
+          if (logError)
+            console.error(
+              `Condition ${key} has invalid sub-conditions:`,
+              condition[key]
+            );
+          return false;
+        }
+      } else {
+        const operatorObject = condition[key];
+        if (typeof operatorObject !== 'object' || operatorObject === null) {
+          if (logError)
+            console.error(
+              'Operator object is not an object or is null:',
+              operatorObject
+            );
+          return false;
+        }
+        for (const operator in operatorObject) {
+          if (!validProperties.includes(operator)) {
+            if (logError) console.error('Invalid operator:', operator);
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  };
+
+  const isValid = validateCondition(filter);
+  if (!isValid && logError) {
+    console.error('Invalid filter structure:', JSON.stringify(filter, null, 2));
+  }
+  return isValid;
+}
+
 export function buildPrismaFilter(filter: FilterGroup): WhereInput {
   if (!filter.conditions.length && (!filter.groups || !filter.groups.length)) {
     return {};
@@ -89,10 +166,20 @@ export function buildPrismaFilter(filter: FilterGroup): WhereInput {
 
   // For single condition, return it directly without wrapping in AND/OR
   if (allConditions.length === 1) {
-    return allConditions[0] as WhereInput;
+    const singleCondition = allConditions[0] as WhereInput;
+    if (!validatePrismaFilter(singleCondition, false)) {
+      throw new Error('Invalid filter conditions');
+    }
+    return singleCondition;
   }
 
-  return {
-    [filter.logic.toLowerCase()]: allConditions,
+  const prismaFilter = {
+    [filter.logic.toUpperCase()]: allConditions,
   };
+
+  if (!validatePrismaFilter(prismaFilter)) {
+    throw new Error('Invalid filter conditions');
+  }
+
+  return prismaFilter;
 }

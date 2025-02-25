@@ -55,7 +55,9 @@ export default function CustomersLandingPage() {
             <div
               className="overflow-y-auto flex-grow"
               style={{ maxHeight: 'calc(100vh - 150px)' }}
-            ></div>
+            >
+              {/* {//should add customer form component} */}
+            </div>
           </DialogContent>
         </Dialog>
       </div>

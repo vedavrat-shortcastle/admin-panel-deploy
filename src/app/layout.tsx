@@ -1,11 +1,9 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import { ClerkProvider, SignIn } from '@clerk/nextjs';
 import TrpcProvider from '@/hooks/trpc-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/Sidebar';
-import { currentUser } from '@clerk/nextjs/server';
 import { Toaster } from '@/components/ui/toaster';
 
 const geistSans = Geist({
@@ -28,28 +26,21 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await currentUser();
   return (
-    <ClerkProvider>
-      <TrpcProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-            <div>
-              {!user?.id ? (
-                <SignIn />
-              ) : (
-                <SidebarProvider>
-                  <AdminSidebar />
-                  <main className="h-full w-full">{children}</main>
-                </SidebarProvider>
-              )}
-            </div>
-            <Toaster />
-          </body>
-        </html>
-      </TrpcProvider>
-    </ClerkProvider>
+    <TrpcProvider>
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          <div>
+            <SidebarProvider>
+              <AdminSidebar />
+              <main className="h-full w-full">{children}</main>
+            </SidebarProvider>
+          </div>
+          <Toaster />
+        </body>
+      </html>
+    </TrpcProvider>
   );
 }

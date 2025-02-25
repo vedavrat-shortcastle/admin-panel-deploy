@@ -52,20 +52,16 @@ export const contactsRouter = router({
     .input(filterInputSchema)
     .query(async ({ ctx, input }) => {
       console.log('input', JSON.stringify(input));
-      const where = buildPrismaFilter(input.filter as FilterGroup);
-      console.log('where', JSON.stringify(where));
-      const skip = input.pagination
-        ? (input.pagination.page - 1) * input.pagination.limit
-        : 0;
-      const take = input.pagination?.limit ?? 10;
-      const orderBy = input.sort
-        ? { [input.sort.field]: input.sort.direction }
-        : { id: 'desc' as const };
-
       try {
-        if (!where || typeof where !== 'object') {
-          throw new Error('Invalid filter conditions');
-        }
+        const where = buildPrismaFilter(input.filter as FilterGroup);
+        console.log('where', JSON.stringify(where));
+        const skip = input.pagination
+          ? (input.pagination.page - 1) * input.pagination.limit
+          : 0;
+        const take = input.pagination?.limit ?? 10;
+        const orderBy = input.sort
+          ? { [input.sort.field]: input.sort.direction }
+          : { id: 'desc' as const };
 
         const [data, total] = await Promise.all([
           ctx.db.contact.findMany({
@@ -93,9 +89,9 @@ export const contactsRouter = router({
           limit: take,
           pageCount: Math.ceil(total / take),
         };
-      } catch (error) {
+      } catch (error: any) {
         console.error('Filter error:', error);
-        throw new Error('Failed to fetch filtered contacts');
+        throw new Error('Failed to fetch filtered contacts: ' + error.message);
       }
     }),
 

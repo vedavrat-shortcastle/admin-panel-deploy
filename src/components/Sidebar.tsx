@@ -19,7 +19,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import logo from '@/../public/assets/logo.png';
-import { useClerk } from '@clerk/nextjs';
 
 const navItems = [
   {
@@ -62,7 +61,6 @@ const navItems = [
 export function AdminSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
-  const { signOut } = useClerk();
 
   useEffect(() => {
     if (window.innerWidth < 768) {
@@ -148,7 +146,7 @@ export function AdminSidebar() {
             isCollapsed && 'justify-center px-2'
           )}
           title={isCollapsed ? 'Logout Account' : undefined}
-          onClick={() => signOut({ redirectUrl: '/' })}
+          onClick={() => console.log('add logout logic')}
         >
           <LogOut className="h-4 w-4" />
           {!isCollapsed && 'Logout Account'}

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const subscriptionSchema = z.object({
+export const createSubscriptionSchema = z.object({
   contactId: z.number(),
   academyId: z.string(),
   adminName: z.string().max(100).optional(),

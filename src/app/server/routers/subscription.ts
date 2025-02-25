@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { procedure, router } from '@/app/server/trpc';
-import { subscriptionSchema } from '@/schemas/subscription';
+import { createSubscriptionSchema } from '@/schemas/subscription';
 
 export const subscriptionRouter = router({
   getAll: procedure.query(async ({ ctx }) => {
@@ -54,7 +54,7 @@ export const subscriptionRouter = router({
   }),
 
   create: procedure
-    .input(subscriptionSchema)
+    .input(createSubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.subscription.create({
         data: { ...input },
