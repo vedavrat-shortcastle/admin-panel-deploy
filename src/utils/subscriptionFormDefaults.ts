@@ -4,8 +4,8 @@ export const subscriptionFormDefaults: subscriptionFormValues = {
   contactId: 0, // Placeholder, replace with actual ID
   academyId: '',
   adminName: '',
-  paidSeats: 0,
-  freeSeats: 0,
+  paidSeats: undefined,
+  freeSeats: undefined,
   planType: 'MONTHLY',
   renewalType: 'AUTOMATIC',
   planStartDate: new Date(),

@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import {
   contactAddressSchema,
-  formSchema,
+  contactFormSchema,
   personalInfoSchema,
   professionalInfoSchema,
 } from '@/schemas/contacts';
-import type { FormValues } from '@/types/contactSection';
+import type { contactFormValues } from '@/types/contactSection';
 import { useToast } from '@/hooks/use-toast';
 
 import { ProfessionalChessInfo } from '@/components/contacts/ProfessionalInfo';
@@ -24,8 +24,8 @@ export default function AddContact() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<contactFormValues>({
+    resolver: zodResolver(contactFormSchema),
     mode: 'onTouched',
     defaultValues: defaultFormValues,
   });
@@ -77,7 +77,7 @@ export default function AddContact() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = (data: contactFormValues) => {
     // onSubmit now receives form data
     mutate(data); // Call the mutation with form data
   };
