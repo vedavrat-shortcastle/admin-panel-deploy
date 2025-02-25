@@ -129,6 +129,7 @@ model Academy {
   preferences    Json               @default("{}")
   courses        Course[]
   ContactAcademy ContactAcademy[]
+  Subscription   Subscription[]
 
   @@map("cp_academy")
 }
@@ -810,7 +811,7 @@ model Contact {
   id                Int           @id @default(autoincrement())
   userId            String?       @map("user_id")
   imageUrl          String?       @map("image_url") @db.VarChar(255)
-  firstName          String?       @map("first_name") @db.VarChar(100)
+  firstName         String?       @map("first_name") @db.VarChar(100)
   lastName          String?       @map("last_name") @db.VarChar(100)
   role              ContactRole   @map("role")
   email             String?       @db.VarChar(255)
@@ -829,7 +830,7 @@ model Contact {
   facebookUrl       String?       @map("facebook_url") @db.VarChar(255)
   instagramUrl      String?       @map("instagram_url") @db.VarChar(255)
   twitterUrl        String?       @map("twitter_url") @db.VarChar(255)
-  classicRating     Int?          @map("classic_rating") 
+  classicRating     Int?          @map("classic_rating")
   rapidRating       Int?          @map("rapid_rating")
   blitzRating       Int?          @map("blitz_rating")
   fideId            String?       @map("fide_id") @db.VarChar(50)
@@ -849,6 +850,7 @@ model Contact {
   tags                    ContactTag[]
   statusHistory           ContactStatusHistory[]
   ContactLocation         ContactLocation[]
+  Subscription            Subscription[]
 
   @@map("contacts")
 }
@@ -919,6 +921,31 @@ model ContactPhysicalLocation {
   @@map("contact_physical_locations")
 }
 
+model Subscription {
+  id            Int         @id @default(autoincrement())
+  contactId     Int         @map("contactid")
+  academyId     String      @map("academyid")
+  adminName     String?     @map("admin_name") @db.VarChar(100)
+  paidSeats     Int         @map("paid_seats")
+  freeSeats     Int         @map("free_seats")
+  planType      PlanType    @default(MONTHLY) @map("plan_type")
+  renewalType   RenewalType @default(AUTOMATIC) @map("renewal_type")
+  planStartDate DateTime    @default(now()) @map("plan_startdate")
+  planEndDate   DateTime    @default(now()) @map("plan_enddate")
+  salesType     SalesType   @default(NEW) @map("sales_type")
+  notes         String?
+  salesPerson   String?     @map("sales_person") @db.VarChar(100)
+  paymentMode   PaymentMode @map("payment_mode")
+  currency      Currency    @map("cl_currency")
+  amount        Int?        @map("amount")
+
+  //Relations
+  contact Contact @relation(fields: [contactId], references: [id])
+  academy Academy @relation(fields: [academyId], references: [id])
+
+  @@map("subscription")
+}
+
 //
 //***************************************************   TYPES   ***************************************************
 //
@@ -935,6 +962,7 @@ enum TeachingMode {
   online
   offline
   hybrid
+
   @@map("teaching_mode")
 }
 
@@ -945,6 +973,7 @@ enum ContactStatus {
   customer
   churned
   high_prospect
+
   @@map("contact_status")
 }
 
@@ -1190,6 +1219,7 @@ enum ChessTitle {
   IM
   WIM
   WGM
+
   @@map("chess_title")
 }
 
@@ -1198,5 +1228,42 @@ enum ContactRole {
   Headcoach
   Subcoach
   Admin
+
   @@map("contact_role")
+}
+
+enum PlanType {
+  MONTHLY
+  ANNUAL
+
+  @@map("plan_type")
+}
+
+enum RenewalType {
+  MANUAL
+  AUTOMATIC
+
+  @@map("renewal_type")
+}
+
+enum SalesType {
+  UPSELL
+  NEW
+  RENEWAL
+  ONETIME
+  LIFETIME
+
+  @@map("sales_type")
+}
+
+enum PaymentMode {
+  stripeSingapore
+  stripeCanada
+  stripeUS
+  razorpayIndia
+  gPay
+  bankTransfer
+  other
+
+  @@map("payment_mode")
 }

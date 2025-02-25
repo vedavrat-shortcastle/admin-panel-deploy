@@ -91,6 +91,6 @@ export const contactAddressSchema = formSchema.pick({
 
 export const newCitySchema = z.object({
   city: z.string().min(1, { message: 'City is required' }),
-  state: z.string().optional().default(''), // Ensures it's always a string
+  state: z.string().optional().default(''),
   country: z.string().min(1, { message: 'Country is required' }),
 });
