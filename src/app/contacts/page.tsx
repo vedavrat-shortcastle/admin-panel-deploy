@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { debounce } from 'lodash';
 import { Contact, UsersRoundIcon } from 'lucide-react';
 
 import {
@@ -20,6 +21,7 @@ import TableSkeleton from '@/components/tableSkeleton';
 import { FilterBuilder } from '@/components/dynamic-filter/DynamicFilter';
 import { contactFilterFields } from '@/utils/Filter/filterEntities';
 import { EntityFilter, FilterGroup } from '@/types/dynamicFilter';
+import { addSearchConditions } from '@/utils/Filter/searchUtils';
 
 export default function ContactsLandingPage() {
   const [dialogOpen, setDialogOpen] = useState(false); // Modal state
@@ -38,6 +40,27 @@ export default function ContactsLandingPage() {
       direction: 'desc' as const,
     },
   });
+
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      setFilter((prev) => ({
+        ...prev,
+        filter: addSearchConditions(
+          prev.filter,
+          ['firstName', 'lastName', 'email'],
+          value
+        ),
+      }));
+    }, 300),
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    debouncedSearch(e.target.value);
+  };
 
   const { data, isLoading, error } = trpc.contacts.getFiltered.useQuery(
     filter,
@@ -70,6 +93,13 @@ export default function ContactsLandingPage() {
       {/* Search & Add Contact */}
       <div className="my-2 space-y-4">
         <div className="bg-white rounded-lg shadow p-4">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            placeholder="Search by First Name, Last Name, or Email"
+            className="w-full p-2 border rounded"
+          />
           <FilterBuilder
             fields={contactFilterFields}
             onChange={handleFilterChange}
