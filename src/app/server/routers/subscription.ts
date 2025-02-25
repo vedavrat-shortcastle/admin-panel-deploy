@@ -57,7 +57,11 @@ export const subscriptionRouter = router({
     .input(createSubscriptionSchema)
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.subscription.create({
-        data: { ...input },
+        data: {
+          ...input,
+          paidSeats: input.paidSeats ?? 0,
+          freeSeats: input.freeSeats ?? 0,
+        },
       });
     }),
 });
