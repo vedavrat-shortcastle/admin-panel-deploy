@@ -78,8 +78,7 @@ export default function AddContact() {
   });
 
   const onSubmit = (data: contactFormValues) => {
-    // onSubmit now receives form data
-    mutate(data); // Call the mutation with form data
+    mutate(data);
   };
 
   const handleSubmit = async () => {

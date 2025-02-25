@@ -67,7 +67,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
         />
       </div>
       <div className="col-span-12">
-        <AcademyNames form={form} />
+        <AcademyNames mode="multiple" form={form} />
       </div>
       <div className="col-span-12">
         <CurrentAcademy form={form} />
@@ -91,14 +91,14 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-      {/* Working Mode */}
+      {/* Teaching Mode */}
       <div className="col-span-12 space-y-2">
         <FormField
           control={form.control}
-          name="workingMode"
+          name="teachingMode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="font-medium">Working Mode</FormLabel>
+              <FormLabel className="font-medium">Teaching Mode</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}

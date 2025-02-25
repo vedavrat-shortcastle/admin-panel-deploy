@@ -16,10 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { custumerFormReturn } from '@/types/customerSection';
+import { subscriptionFormReturns } from '@/types/customerSection';
 
 interface customerDetailsProps {
-  form: custumerFormReturn;
+  form: subscriptionFormReturns;
 }
 
 export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {

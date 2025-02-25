@@ -1,28 +1,24 @@
-type Status =
-  | 'new'
-  | 'lead'
-  | 'prospect'
-  | 'customer'
-  | 'churned'
-  | 'high_prospect';
-type Gender = 'male' | 'female' | 'other';
-type WorkingMode = 'online' | 'offline' | 'hybrid';
-type Role = 'Headcoach' | 'Subcoach' | 'Admin' | 'Founder';
+import {
+  ContactRole,
+  ContactStatus,
+  GenderType,
+  TeachingMode,
+} from '@prisma/client';
 
 export const defaultFormValues = {
   firstName: '',
   lastName: '',
-  role: 'Subcoach' as Role,
+  role: 'Subcoach' as ContactRole,
   email: '',
   phoneNumber: '',
   academyIds: [],
   locationId: undefined,
   website: '',
   dateOfBirth: undefined,
-  gender: 'male' as Gender,
+  gender: 'male' as GenderType,
   languagesSpoken: [],
   currentAcademy: '',
-  workingMode: 'hybrid' as WorkingMode, // Set a default value (could be 'online', 'offline', or 'hybrid')
+  TeachingMode: 'hybrid' as TeachingMode, // Set a default value (could be 'online', 'offline', or 'hybrid')
   onlinePercentage: 0, // Default to 0
   offlinePercentage: 0, // Default to 0
   address: '',
@@ -45,6 +41,6 @@ export const defaultFormValues = {
   customTags: [],
   yearsInOperation: 0, // Default to 0
   numberOfCoaches: 0, // Default to 0
-  status: 'new' as Status, // Default to 'active' with the Status type
+  status: 'new' as ContactStatus, // Default to 'active' with the Status type
   profilePhoto: undefined, // Default to null since this is optional
 };

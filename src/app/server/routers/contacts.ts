@@ -99,60 +99,7 @@ export const contactsRouter = router({
     .input(contactFormSchema)
     .mutation(async ({ ctx, input }) => {
       return await ctx.db.$transaction(
-        async (tx: {
-          contact: {
-            create: (arg0: {
-              data: {
-                firstName: string;
-                lastName: string;
-                role: ContactRole;
-                email: string;
-                phone: string;
-                website: string | undefined;
-                dateOfBirth: Date;
-                gender: GenderType;
-                languagesSpoken: string[];
-                teachingMode: TeachingMode;
-                onlinePercentage: number | undefined;
-                offlinePercentage: number | undefined;
-                locationId: number | undefined;
-                address: string;
-                linkedinUrl: string | undefined;
-                facebookUrl: string | undefined;
-                instagramUrl: string | undefined;
-                twitterUrl: string | undefined;
-                classicRating: number | undefined;
-                rapidRating: number | undefined;
-                blitzRating: number | undefined;
-                fideId: string | undefined;
-                titles: ChessTitle[];
-                notes: string | undefined;
-                yearsInOperation: number;
-                numberOfCoaches: number;
-                currentStatus: ContactStatus;
-                imageUrl: string;
-                lastContacted: Date | undefined;
-              };
-            }) => any;
-          };
-          contactAcademy: {
-            createMany: (arg0: {
-              data: { contactId: any; academyId: string; isCurrent: boolean }[];
-            }) => any;
-          };
-          contactPhysicalLocation: {
-            createMany: (arg0: {
-              data: { contactId: any; locationId: number }[];
-            }) => any;
-          };
-          tag: {
-            findUnique: (arg0: { where: { name: string } }) => any;
-            create: (arg0: { data: { name: string } }) => any;
-          };
-          contactTag: {
-            create: (arg0: { data: { contactId: any; tagId: any } }) => any;
-          };
-        }) => {
+        async (tx) => {
           try {
             const inputAcademyIds = input.academyIds;
             const physicallyTaughtLocations = input.physicallyTaught;
@@ -168,7 +115,7 @@ export const contactsRouter = router({
                 dateOfBirth: input.dateOfBirth,
                 gender: input.gender as GenderType,
                 languagesSpoken: input.languagesSpoken,
-                teachingMode: input.workingMode as TeachingMode,
+                teachingMode: input.teachingMode as TeachingMode,
                 onlinePercentage: input.onlinePercentage,
                 offlinePercentage: input.offlinePercentage,
                 locationId: input.locationId,
