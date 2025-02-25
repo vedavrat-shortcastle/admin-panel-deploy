@@ -9,7 +9,10 @@ export const LanguagesSpoken: React.FC<{
 }> = ({ form, scrollableRef }) => {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const languageInput = form.watch('languagesSpokenInput') || '';
-
+  useEffect(() => {
+    const languagesFromForm = form.getValues('languagesSpoken') || [];
+    setSelectedLanguages(languagesFromForm);
+  }, [form]);
   useEffect(() => {
     requestAnimationFrame(() => {
       if (scrollableRef.current) {
@@ -39,7 +42,7 @@ export const LanguagesSpoken: React.FC<{
   return (
     <div>
       <SearchableSelect
-        label="Languages Spoken"
+        label="Languages poken"
         fieldName="languagesSpoken"
         onClick={handleAddLanguage}
         form={form}

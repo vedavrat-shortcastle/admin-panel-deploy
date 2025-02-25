@@ -36,8 +36,20 @@ export const formSchema = z.object({
     blitz: z.number().optional(),
   }),
   fideId: z.string().optional(),
-  titles: z.array(z.string()).min(1, { message: 'This field is required' }),
-  physicallyTaught: z.array(z.number()).optional(),
+  titles: z
+    .array(
+      z.enum([
+        'GM',
+        'IM',
+        'WGM',
+        'WIM',
+        'FIDETrainer',
+        'FIDEInstructor',
+        // ... any other ChessTitle enum values from your Prisma schema
+      ])
+    )
+    .min(1, { message: 'This field is required' })
+    .optional(),
   lastContacted: z.date().optional(),
   notes: z.string().optional(),
   customTags: z.array(z.string()).optional(),

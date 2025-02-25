@@ -47,7 +47,7 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
       {/* Searchable dropdown for existing tags */}
       <SearchableSelect<Tag>
         form={form}
-        fieldName="customTags"
+        fieldName="tags"
         label="Tags"
         placeholder="Search or add tags..."
         data={tagsData || []}
