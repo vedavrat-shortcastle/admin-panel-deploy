@@ -62,14 +62,14 @@ export const contactsRouter = router({
       },
     });
 
-    // const contactLocationData = await ctx.db.location.findUnique({
-    //   where: { id: contactTableData?.locationId ?? undefined },
-    //   select: {
-    //     country: true,
-    //     state: true,
-    //     city: true,
-    //   },
-    // });
+    const contactLocationData = await ctx.db.location.findUnique({
+      where: { id: contactTableData?.locationId ?? undefined },
+      select: {
+        country: true,
+        state: true,
+        city: true,
+      },
+    });
     if (!contactTableData) {
       throw new Error('Contact not found');
     }
@@ -81,7 +81,13 @@ export const contactsRouter = router({
       (pl) => pl.locationId
     ); // Extract the location IDs
 
-    return { ...contactTableData, academyNames, customTags, physicallyTaught };
+    return {
+      ...contactTableData,
+      academyNames,
+      customTags,
+      physicallyTaught,
+      contactLocationData,
+    };
   }),
 
   getFiltered: procedure

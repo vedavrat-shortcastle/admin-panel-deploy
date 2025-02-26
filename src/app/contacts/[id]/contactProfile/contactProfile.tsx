@@ -2,9 +2,8 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { formSchema } from '@/schemas/contacts';
-import { FormValues } from '@/types/contactSection';
 import { useForm } from 'react-hook-form';
+import { contactFormSchema } from '@/schemas/contacts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,13 +37,10 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
   const router = useRouter();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(contactFormSchema),
     defaultValues: contact || InitialData,
   });
   const formData = form.getValues();
-  console.log('form data:', formData);
-  // const city = form.watch("state");
-  //  form.setValue("cityInput",city);
   useEffect(() => {
     if (contact) {
       form.reset({
@@ -69,6 +65,8 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
       });
     }
   }, [contact, form]);
+  console.log(formData);
+  const ids = form.watch('physicallyTaught');
 
   const { mutate: updateContact, isLoading } =
     trpc.contacts.updateById.useMutation();
@@ -175,10 +173,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                   </div>
                   <Separator />
                   <ProfessionalChessInfo form={form} />
-                  <PhysicallyTaught
-                    form={form}
-                    physicallyTaughtIds={contact?.physicallyTaught} // Pass the IDs
-                  />
+                  <PhysicallyTaught form={form} initialLocationIds={ids} />
                   <Separator />
                   <ContactAddressInfo form={form} />
                   <Separator />

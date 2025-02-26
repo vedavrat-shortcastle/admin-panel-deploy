@@ -8,7 +8,6 @@ import {
 
 import { Input } from '@/components/ui/input';
 import { ContactFormReturn } from '@/types/contactSection';
-import { PhysicallyTaught } from '@/components/contacts/tagbasedfields/PhysicallyTaught';
 import { Titles } from '@/components/contacts/tagbasedfields/Titles';
 import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 import { CustomTagsField } from '@/components/contacts/tagbasedfields/CustomTagsField';
@@ -24,12 +23,13 @@ interface ProfessionalChessInfoProps {
 export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
   form,
 }) => {
+  // useEffect()
   return (
     <div>
       <div className="grid md:grid-cols-2 gap-6">
-        <AcademyNames form={form} />
+        <AcademyNames form={form} mode="multiple" />
 
-        <PhysicallyTaught form={form} />
+        {/* <PhysicallyTaught form={form} /> */}
       </div>
       <Separator />
 

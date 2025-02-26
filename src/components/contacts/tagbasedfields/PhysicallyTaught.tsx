@@ -1,4 +1,4 @@
-import AddLocation from '@/components/contacts/tagbasedfields/AddLocation'; // Make sure this import is correct
+import AddLocation from '@/components/contacts/tagbasedfields/AddLocation';
 import { SearchableSelect } from '@/components/SearchableSelect';
 import {
   Dialog,
@@ -8,71 +8,61 @@ import {
 } from '@/components/ui/dialog';
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
-
 interface Location {
   id: number;
   country: string | null;
   state: string | null;
   city: string;
 }
-
 export const PhysicallyTaught: React.FC<{
   form: UseFormReturn<any>;
-  physicallyTaughtIds?: number[]; // Add this prop
-}> = ({ form, physicallyTaughtIds }) => {
+  initialLocationIds?: number[]; // Add this prop
+}> = ({ form, initialLocationIds }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
-    useState<boolean>(false); // ADD THIS LINE - Modal state
+    useState<boolean>(false);
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
-
   const {
     data: locationsData,
     error,
     isLoading,
   } = trpc.location.getAllLocations.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
+    enabled: searchTerm.length > 0 && !initialLocationIds,
   });
-
-  const { data: fetchedLocations } = trpc.location.getByIds.useQuery(
-    physicallyTaughtIds || [],
-    { enabled: !!physicallyTaughtIds }
-  );
+  const { data: initialLocations, isLoading: initialLocationsLoading } =
+    trpc.location.getById.useQuery(initialLocationIds || [], {
+      enabled: !!initialLocationIds && initialLocationIds.length > 0,
+    });
   useEffect(() => {
-    if (fetchedLocations) {
-      setSelectedLocations(fetchedLocations);
+    if (initialLocations && initialLocations.length > 0) {
+      setSelectedLocations(initialLocations);
+      form.setValue(
+        'physicallyTaught',
+        initialLocations.map((location) => location.id)
+      );
     }
-  }, [fetchedLocations]);
-  useEffect(() => {
-    if (physicallyTaughtIds) {
-      form.setValue('physicallyTaught', physicallyTaughtIds);
-    }
-  }, [physicallyTaughtIds, form]);
+  }, [initialLocations, form]);
   const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
   }, []);
-
   const onClick = useCallback(() => {
     setIsAddLocationModalOpen(true);
   }, []);
-
   const handleLocationSelect = useCallback(
     (location: Location) => {
       setSelectedLocations((prevLocations) => {
-        // Prevent duplicates
         if (prevLocations.some((loc) => loc.id === location.id)) {
           return prevLocations;
         }
         return [...prevLocations, location];
       });
-
       const locationId = location.id;
       const currentPhysicallyTaughtIds = form.watch('physicallyTaught') || [];
       const physicallyTaughtIdsArray = Array.isArray(currentPhysicallyTaughtIds)
         ? currentPhysicallyTaughtIds
         : [];
-
       if (!physicallyTaughtIdsArray.includes(locationId)) {
         form.setValue('physicallyTaught', [
           ...physicallyTaughtIdsArray,
@@ -82,30 +72,30 @@ export const PhysicallyTaught: React.FC<{
     },
     [form]
   );
-
   const handleRemoveLocation = useCallback(
     (index: number) => {
       setSelectedLocations((prevLocations) => {
         const updatedLocations = [...prevLocations];
-        updatedLocations.splice(index, 1); // Remove location at index
+        updatedLocations.splice(index, 1);
         return updatedLocations;
       });
-
-      // Remove the corresponding location ID from the form field
       form.setValue(
         'physicallyTaught',
         selectedLocations
-          .filter((_, i) => i !== index) // Exclude the removed location
+          .filter((_, i) => i !== index)
           .map((location) => location.id)
       );
     },
     [form, selectedLocations]
   );
-
-  if (error) {
-    return <div>Error loading locations: {error.message}</div>;
+  if (error || initialLocationsLoading) {
+    return (
+      <div>
+        {error && <div>Error loading locations: {error.message}</div>}
+        {initialLocationsLoading && <div>Loading initial locations...</div>}
+      </div>
+    );
   }
-
   return (
     <div>
       <SearchableSelect<Location>
@@ -122,7 +112,6 @@ export const PhysicallyTaught: React.FC<{
         showButton
         isLoading={isLoading}
       />
-
       <div className="flex flex-wrap gap-2 mt-3">
         {selectedLocations.length > 0 ? (
           selectedLocations.map((location, index) => (
@@ -149,7 +138,6 @@ export const PhysicallyTaught: React.FC<{
           </div>
         )}
       </div>
-
       <Dialog
         open={isAddLocationModalOpen}
         onOpenChange={setIsAddLocationModalOpen}
