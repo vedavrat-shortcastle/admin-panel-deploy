@@ -162,6 +162,7 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
                 <FormControl>
                   <Input
                     {...field}
+                    value={value}
                     className="w-[240px]"
                     placeholder="Enter value"
                     onChange={(e) => {
