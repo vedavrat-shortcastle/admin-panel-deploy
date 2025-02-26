@@ -1,7 +1,7 @@
 'use client';
 import { Suspense } from 'react';
-import ContactProfile from '@/app/contacts/[id]/contactProfile/ContactProfile';
-import ContactProfileLoading from '@/app/contacts/[id]/ContactProfileLoading';
+import ContactProfile from '@/app/contacts/[id]/contactProfile/contactProfile';
+import ContactProfileLoading from '@/app/contacts/[id]/contactProfileLoading';
 import { trpc } from '@/hooks/trpc-provider';
 import { useParams } from 'next/navigation';
 

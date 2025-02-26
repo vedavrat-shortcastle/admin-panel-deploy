@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 
 interface Location {
@@ -18,9 +18,10 @@ interface Location {
   city: string;
 }
 
-export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
-  form,
-}) => {
+export const PhysicallyTaught: React.FC<{
+  form: UseFormReturn<any>;
+  physicallyTaughtIds?: number[]; // Add this prop
+}> = ({ form, physicallyTaughtIds }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
     useState<boolean>(false); // ADD THIS LINE - Modal state
@@ -34,6 +35,20 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
     enabled: searchTerm.length > 0,
   });
 
+  const { data: fetchedLocations } = trpc.location.getByIds.useQuery(
+    physicallyTaughtIds || [],
+    { enabled: !!physicallyTaughtIds }
+  );
+  useEffect(() => {
+    if (fetchedLocations) {
+      setSelectedLocations(fetchedLocations);
+    }
+  }, [fetchedLocations]);
+  useEffect(() => {
+    if (physicallyTaughtIds) {
+      form.setValue('physicallyTaught', physicallyTaughtIds);
+    }
+  }, [physicallyTaughtIds, form]);
   const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
   }, []);

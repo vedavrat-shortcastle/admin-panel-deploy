@@ -26,6 +26,7 @@ import { trpc } from '@/hooks/trpc-provider';
 import { PersonalContactInfo } from '@/app/contacts/[id]/contactProfile/personalDetails';
 import { ProfessionalChessInfo } from '@/app/contacts/[id]/contactProfile/professionalDetails';
 import { ContactAddressInfo } from '@/app/contacts/[id]/contactProfile/contactDetails';
+import { PhysicallyTaught } from '@/components/contacts/tagbasedfields/PhysicallyTaught';
 
 interface ContactProfileProps {
   contact: Contact;
@@ -40,30 +41,31 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     resolver: zodResolver(formSchema),
     defaultValues: contact || InitialData,
   });
-  // const formData = form.getValues();
-  // console.log("form data:",formData);
+  const formData = form.getValues();
+  console.log('form data:', formData);
   // const city = form.watch("state");
   //  form.setValue("cityInput",city);
   useEffect(() => {
     if (contact) {
       form.reset({
-        //       ...contact,
-        //       phoneNumber: contact.phone,
-        //       workingMode: contact.teachingMode,
-        //       social: {
-        //         linkedin: contact.linkedinUrl,
-        //         facebook: contact.facebookUrl,
-        //         instagram: contact.instagramUrl,
-        //         twitter: contact.twitterUrl,
-        //       },
-        //       rating: {
-        //         classic: contact.classicRating,
-        //         rapid: contact.rapidRating,
-        //         blitz: contact.blitzRating,
-        //       },
-        //       status: contact.currentStatus,
-        //      academyIds: contact.academies.map((ca) => ca.academy.id),
-        //       physicallyTaught: contact.physicallyLocationsTaught,
+        ...contact,
+        // phoneNumber: contact.phone,
+        // workingMode: contact.teachingMode,
+        // social: {
+        //   linkedin: contact.linkedinUrl,
+        //   facebook: contact.facebookUrl,
+        //   instagram: contact.instagramUrl,
+        //   twitter: contact.twitterUrl,
+        // },
+        // rating: {
+        //   classic: contact.classicRating,
+        //   rapid: contact.rapidRating,
+        //   blitz: contact.blitzRating,
+        // },
+        // status: contact.currentStatus,
+        academyIds: contact.academies?.map((ca) => ca.academy.name) || [], // Extract names
+        customTags: contact.tags.map((t) => t.tag.name),
+        // physicallyTaught: contactTableData.physicalLocationsTaught.map(pl => pl.locationId), // Return IDs
       });
     }
   }, [contact, form]);
@@ -75,7 +77,8 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     const isValid = await form.trigger();
 
     if (!isValid) {
-      console.log('Form validation failed!', formData);
+      const formData = form.getValues();
+      console.log('form data:', formData);
       toast({
         title: 'Error',
         description: 'Validation failed! Give proper inputs.',
@@ -172,7 +175,10 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                   </div>
                   <Separator />
                   <ProfessionalChessInfo form={form} />
-
+                  <PhysicallyTaught
+                    form={form}
+                    physicallyTaughtIds={contact?.physicallyTaught} // Pass the IDs
+                  />
                   <Separator />
                   <ContactAddressInfo form={form} />
                   <Separator />

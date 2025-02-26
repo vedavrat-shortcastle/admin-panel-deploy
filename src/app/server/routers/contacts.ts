@@ -1,7 +1,5 @@
 import { z } from 'zod';
 import { procedure, router } from '@/app/server/trpc';
-// import {} from @/schemas/contactUpdateSchema;
-
 import { formSchema } from '@/schemas/contacts';
 import {
   ChessTitle,
@@ -36,18 +34,53 @@ export const contactsRouter = router({
   getById: procedure.input(z.string()).query(async ({ ctx, input }) => {
     const contactTableData = await ctx.db.contact.findUnique({
       where: { id: parseInt(input) },
-    });
-
-    const contactLocationData = await ctx.db.location.findUnique({
-      where: { id: contactTableData?.locationId ?? undefined },
-      select: {
-        country: true,
-        state: true,
-        city: true,
+      include: {
+        academies: {
+          include: {
+            academy: true,
+          },
+        },
+        location: {
+          select: {
+            country: true,
+            state: true,
+            city: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        physicalLocationsTaught: {
+          // Include the relation
+          include: {
+            location: true, // Include the location relation to access the location details
+          },
+        },
       },
     });
 
-    return { ...contactTableData, ...contactLocationData };
+    // const contactLocationData = await ctx.db.location.findUnique({
+    //   where: { id: contactTableData?.locationId ?? undefined },
+    //   select: {
+    //     country: true,
+    //     state: true,
+    //     city: true,
+    //   },
+    // });
+    if (!contactTableData) {
+      throw new Error('Contact not found');
+    }
+    const academyNames = contactTableData.academies.map(
+      (ca) => ca.academy.name
+    );
+    const customTags = contactTableData.tags.map((t) => t.tag.name);
+    const physicallyTaught = contactTableData.physicalLocationsTaught.map(
+      (pl) => pl.locationId
+    ); // Extract the location IDs
+
+    return { ...contactTableData, academyNames, customTags, physicallyTaught };
   }),
 
   getFiltered: procedure

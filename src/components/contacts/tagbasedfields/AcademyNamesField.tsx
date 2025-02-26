@@ -9,6 +9,11 @@ interface getAcademyNamesRes {
   name: string;
 }
 
+// interface GetByIdResponse {
+//   id: number;
+//   academies: { academy: { id: number; name: string } }[];
+//   // ... other fields
+// }
 export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
@@ -21,6 +26,15 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
   } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
+
+  // const {
+  //   data: entityData,
+  //   isLoading: isEntityLoading,
+  //   error: entityError,
+  // } = trpc.contacts.getById.useQuery(id, {
+  //   enabled: !!id,
+  //   select: (data) => data as GetByIdResponse, // Type assertion
+  // });
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
@@ -51,6 +65,16 @@ export const AcademyNames: React.FC<{ form: UseFormReturn<any> }> = ({
       ]);
     }
   }, [selectedAcademyIds, academyNamesData, form]);
+
+  // useEffect(() => {
+  //   if (entityData) {
+  //     const entityAcademyIds = entityData.academies.map((ca) => ca.academy.id.toString());
+  //     const entityAcademyNames = entityData.academies.map((ca) => ca.academy.name);
+
+  //     form.setValue('academyIds', entityAcademyIds);
+  //     form.setValue('academyNames', entityAcademyNames);
+  //   }
+  // }, [entityData, form]);
 
   const handleOnSelect = (selectedAcademy: getAcademyNamesRes) => {
     const updatedIds = new Set([...selectedAcademyIds, selectedAcademy.id]);
