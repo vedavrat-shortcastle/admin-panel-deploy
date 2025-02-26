@@ -1,3 +1,5 @@
+import { savedFilterSchema } from '@/schemas/savedFilterSchema';
+
 export type FilterFieldType = 'string' | 'number' | 'date' | 'boolean';
 
 export type FilterOperator =
@@ -43,3 +45,5 @@ export type EntityFilter = {
 };
 
 export type FieldType = 'string' | 'number' | 'date' | 'boolean';
+
+export type SavedFilter = z.infer<typeof savedFilterSchema>;
