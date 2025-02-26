@@ -1,5 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
 import {
   FormControl,
   FormField,
@@ -8,16 +6,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+
 import { ContactFormReturn } from '@/types/contactSection';
 import { Address } from '@/components/contacts/Address';
+import DatePicker from '@/components/DatePickerForForm';
 
 interface ContactAddressProps {
   form: ContactFormReturn;
@@ -27,44 +19,11 @@ export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
   return (
     <div className="p6">
       <Address form={form} />
-      <div className="grid md:grid-cols-4 gap-6">
-        <FormField
-          control={form.control}
-          name="lastContacted"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Contacted</FormLabel>
-              <FormControl>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full md:w-[px] justify-start text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? (
-                        format(new Date(field.value), 'PPP')
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) => field.onChange(date)}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <div className="grid mt-2 md:grid-cols-2 gap-6">
+        <DatePicker
+          form={form}
+          label="Last Contacted"
+          fieldName="lastContacted"
         />
 
         <FormField
@@ -119,7 +78,7 @@ export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
           )}
         />
       </div>
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
           name="linkedinUrl"

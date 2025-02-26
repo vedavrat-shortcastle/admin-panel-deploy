@@ -1,3 +1,4 @@
+import type React from 'react';
 import {
   FormField,
   FormItem,
@@ -5,45 +6,59 @@ import {
   FormControl,
   FormMessage,
 } from '@/components/ui/form';
-
 import { Input } from '@/components/ui/input';
-import { ContactFormReturn } from '@/types/contactSection';
+import type { ContactFormReturn } from '@/types/contactSection';
 import { Titles } from '@/components/contacts/tagbasedfields/Titles';
 import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 import { CustomTagsField } from '@/components/contacts/tagbasedfields/CustomTagsField';
-import { CurrentAcademy } from '@/components/contacts/tagbasedfields/CurrentAcademyField';
-// import {CurrentAcademy} from '@/app/contacts/[id]/contactProfile/CurrentAcademyField'
+// import { CurrentAcademy } from '@/components/contacts/tagbasedfields/CurrentAcademyField';
 import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface ProfessionalChessInfoProps {
-  form: ContactFormReturn; // Ensure this type is correctly defined
+  form: ContactFormReturn;
 }
 
 export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
   form,
 }) => {
-  // useEffect()
+  const academyIds =
+    form.watch('academies')?.map((academy) => academy.academyId) || [];
+  console.log('this are the ids', academyIds);
   return (
-    <div>
+    <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
-        <AcademyNames form={form} mode="multiple" />
-
-        {/* <PhysicallyTaught form={form} /> */}
+        <AcademyNames initialIds={academyIds} form={form} mode="multiple" />
       </div>
-      <Separator />
 
-      {/* Working Mode */}
-      <div className="grid md:grid-cols-4 gap-6">
+      {/* <div className="mt-6">
+        <CurrentAcademy form={form} />
+      </div> */}
+
+      <Separator className="my-6" />
+
+      <div className="grid md:grid-cols-2 gap-6">
         <FormField
           control={form.control}
           name="teachingMode"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>
-                Working mode<span className="text-red-500">*</span>
-              </FormLabel>
+            <FormItem className="col-span-full md:col-span-1">
+              <FormLabel className="font-medium">Teaching Mode</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <RadioGroup
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  className="flex flex-wrap gap-4"
+                >
+                  {['online', 'offline', 'hybrid'].map((mode) => (
+                    <div key={mode} className="flex items-center space-x-2">
+                      <RadioGroupItem value={mode} id={mode} />
+                      <label className="font-medium capitalize" htmlFor={mode}>
+                        {mode}
+                      </label>
+                    </div>
+                  ))}
+                </RadioGroup>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -55,7 +70,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           name="fideId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>FIDE ID</FormLabel>
+              <FormLabel className="font-medium">FIDE ID</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -63,6 +78,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="onlinePercentage"
@@ -80,6 +96,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="offlinePercentage"
@@ -89,7 +106,6 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
               <FormControl>
                 <Input
                   type="number"
-                  className="w-full"
                   {...field}
                   onChange={(e) => field.onChange(e.target.valueAsNumber)}
                 />
@@ -99,8 +115,10 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
-      <Separator />
-      <div className="grid md:grid-cols-4 gap-6">
+
+      <Separator className="my-6" />
+
+      <div className="grid md:grid-cols-1 gap-6">
         <FormField
           control={form.control}
           name="website"
@@ -108,80 +126,48 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
             <FormItem>
               <FormLabel className="font-medium">Website</FormLabel>
               <FormControl>
-                <Input type="url" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="classicRating"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-medium">Classic Rating</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  className="w-full"
-                  {...field}
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="rapidRating"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-medium">Rapid Rating</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  className="w-full"
-                  {...field}
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
+                <Input type="url" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="blitzRating"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="font-medium">Blitz Rating</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  className="w-full"
-                  {...field}
-                  value={field.value ?? ''}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div>
+          {['classicRating', 'rapidRating', 'blitzRating'].map((ratingType) => (
+            <FormField
+              key={ratingType}
+              control={form.control}
+              name={ratingType}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium">
+                    {ratingType.replace('Rating', ' Rating')}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
       </div>
-      <Separator />
+
+      <Separator className="my-6" />
+
       <div className="grid md:grid-cols-2 gap-6">
         <Titles form={form} />
         <CustomTagsField form={form} />
       </div>
-      <div>
-        <CurrentAcademy form={form} />
-      </div>
-      <Separator />
+
+      <Separator className="my-6" />
     </div>
   );
 };

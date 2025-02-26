@@ -13,9 +13,14 @@ interface GetAcademyNamesRes {
 interface AcademyNamesProps {
   form: UseFormReturn<any>;
   mode: 'single' | 'multiple';
+  initialIds?: string[];
 }
 
-export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
+export const AcademyNames: React.FC<AcademyNamesProps> = ({
+  form,
+  mode,
+  initialIds,
+}) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const {
@@ -25,6 +30,33 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
   } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
+
+  const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
+    initialIds || [],
+    {
+      enabled: Array.isArray(initialIds) && initialIds.length > 0,
+      onSuccess: (data) => {
+        const initialNames = data.map((academy) => academy.name);
+        form.setValue('academyNames', initialNames);
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (initialAcademies && initialAcademies.length > 0) {
+      const validAcademies = initialAcademies.filter(
+        (academy): academy is GetAcademyNamesRes => academy !== null
+      );
+      form.setValue(
+        'academyIds',
+        validAcademies.map((academy) => academy.id)
+      );
+      form.setValue(
+        'academyNames',
+        validAcademies.map((academy) => academy.name)
+      );
+    }
+  }, [initialAcademies, form]);
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;

@@ -18,7 +18,7 @@ interface Location {
 }
 export const PhysicallyTaught: React.FC<{
   form: UseFormReturn<any>;
-  initialLocationIds?: number[]; // Add this prop
+  initialLocationIds?: number[];
 }> = ({ form, initialLocationIds }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
@@ -29,11 +29,13 @@ export const PhysicallyTaught: React.FC<{
     error,
     isLoading,
   } = trpc.location.getAllLocations.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0 && !initialLocationIds,
+    enabled: searchTerm.length > 0,
   });
+
   const { data: initialLocations, isLoading: initialLocationsLoading } =
     trpc.location.getById.useQuery(initialLocationIds || [], {
-      enabled: !!initialLocationIds && initialLocationIds.length > 0,
+      enabled:
+        Array.isArray(initialLocationIds) && initialLocationIds.length > 0,
     });
 
   useEffect(() => {
@@ -96,14 +98,14 @@ export const PhysicallyTaught: React.FC<{
     },
     [form, selectedLocations]
   );
-  if (error || initialLocationsLoading) {
-    return (
-      <div>
-        {error && <div>Error loading locations: {error.message}</div>}
-        {initialLocationsLoading && <div>Loading initial locations...</div>}
-      </div>
-    );
+  if (error) {
+    return <div>Error loading locations: {error.message}</div>;
   }
+
+  if (initialLocationsLoading && initialLocationIds?.length) {
+    return <div>Loading initial locations...</div>;
+  }
+
   return (
     <div>
       <SearchableSelect<Location>

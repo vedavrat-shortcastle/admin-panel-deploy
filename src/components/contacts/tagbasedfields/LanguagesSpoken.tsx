@@ -42,7 +42,7 @@ export const LanguagesSpoken: React.FC<{
   return (
     <div>
       <SearchableSelect
-        label="Languages poken"
+        label="Languages Spoken"
         fieldName="languagesSpoken"
         onClick={handleAddLanguage}
         form={form}
