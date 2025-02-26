@@ -130,7 +130,7 @@ export const PhysicallyTaught: React.FC<{ form: UseFormReturn<any> }> = ({
           ))
         ) : (
           <div className="text-gray-400 text-sm italic">
-            No languages added yet.
+            No Locations added yet.
           </div>
         )}
       </div>
