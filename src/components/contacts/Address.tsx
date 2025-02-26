@@ -34,7 +34,12 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
   const [locationsData, setLocationsData] = useState<Location[] | undefined>(
     undefined
-  ); // Store data locally
+  );
+
+  //for update and view
+  const initialCityInput = form.watch('location.city');
+  form.setValue('cityInput', initialCityInput);
+  //
 
   const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
     searchTerm,
@@ -102,7 +107,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
       <SearchableSelect<Location>
         form={form}
-        fieldName="location.city"
+        fieldName="city"
         label="City"
         placeholder="Search City..."
         data={locationsData || []}
