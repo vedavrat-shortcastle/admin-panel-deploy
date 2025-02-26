@@ -54,9 +54,8 @@ export const contactsRouter = router({
           },
         },
         physicalLocationsTaught: {
-          // Include the relation
           include: {
-            location: true, // Include the location relation to access the location details
+            location: true,
           },
         },
       },
@@ -79,7 +78,7 @@ export const contactsRouter = router({
     const customTags = contactTableData.tags.map((t) => t.tag.name);
     const physicallyTaught = contactTableData.physicalLocationsTaught.map(
       (pl) => pl.locationId
-    ); // Extract the location IDs
+    );
 
     return {
       ...contactTableData,
@@ -240,7 +239,6 @@ export const contactsRouter = router({
               customTags,
               ...rest
             } = input;
-            // Directly use the rest object, filtering out undefined values.
             const updateData = Object.fromEntries(
               Object.entries(rest).filter(([value]) => value !== undefined)
             );

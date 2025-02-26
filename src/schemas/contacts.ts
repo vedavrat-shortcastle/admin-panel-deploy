@@ -6,13 +6,24 @@ import {
   TeachingMode,
 } from '@prisma/client';
 import { z } from 'zod';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
+
+const phoneNumberSchema = z.string().refine(
+  (value) => {
+    const phoneNumber = parsePhoneNumberFromString(value);
+    return phoneNumber?.isValid();
+  },
+  {
+    message: 'Invalid phone number format.',
+  }
+);
 
 export const contactFormSchema = z.object({
   firstName: z.string().min(1, { message: 'This field is required' }),
   lastName: z.string().min(1, { message: 'This field is required' }),
   role: z.nativeEnum(ContactRole),
   email: z.string().email({ message: 'Invalid email address.' }),
-  phoneNumber: z.string().min(1, { message: 'This field is required' }),
+  phoneNumber: phoneNumberSchema,
   academyIds: z.array(z.string()).min(1, { message: 'This field is requierd' }),
   website: z
     .string()
@@ -99,64 +110,59 @@ export const contactUpdateSchema = z.object({
   firstName: z
     .string()
     .min(1, { message: 'This field is required' })
-    .optional(), // Made optional
-  lastName: z.string().min(1, { message: 'This field is required' }).optional(), // Made optional
-  role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']).optional(), // Made optional
-  email: z.string().email({ message: 'Invalid email address.' }).optional(), // Made optional
-  phone: z.string().min(1, { message: 'This field is required' }).optional(), // Made optional
+    .optional(),
+  lastName: z.string().min(1, { message: 'This field is required' }).optional(),
+  role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']).optional(),
+  email: z.string().email({ message: 'Invalid email address.' }).optional(),
+  phone: z.string().min(1, { message: 'This field is required' }).optional(),
   academyIds: z
     .array(z.string())
     .min(1, { message: 'This field is requierd' })
-    .optional(), // Made optional
+    .optional(),
   website: z.string().url({ message: 'Invalid URL.' }).optional(),
-  // .or(z.literal('')) - No need for .or(z.literal('')) as optional handles undefined already
   locationId: z
     .number()
     .min(1, { message: 'This field is required' })
     .optional(),
-  dateOfBirth: z.date().optional(), // Made optional
-  gender: z.enum(['male', 'female', 'other']).optional(), // Made optional
-  languagesSpoken: z.array(z.string()).optional(), // Made optional
+  dateOfBirth: z.date().optional(),
+  gender: z.enum(['male', 'female', 'other']).optional(),
+  languagesSpoken: z.array(z.string()).optional(),
   currentAcademy: z
     .string()
     .min(1, { message: 'This field is required' })
-    .optional(), // Made optional
-  teachingMode: z.enum(['online', 'offline', 'hybrid']).optional(), // Made optional
+    .optional(),
+  teachingMode: z.enum(['online', 'offline', 'hybrid']).optional(),
   onlinePercentage: z.number().min(0).max(100).optional(),
   offlinePercentage: z.number().min(0).max(100).optional(),
-  address: z.string().min(1, { message: 'This field is required' }).optional(), // Made optional
+  address: z.string().min(1, { message: 'This field is required' }).optional(),
   social: z
     .object({
       linkedin: z.string().url().optional(),
-      // .or(z.literal('')) - No need for .or(z.literal(''))
       facebook: z.string().url().optional(),
-      // .or(z.literal('')) - No need for .or(z.literal(''))
       instagram: z.string().url().optional(),
-      // .or(z.literal('')) - No need for .or(z.literal(''))
       twitter: z.string().url().optional(),
-      // .or(z.literal('')) - No need for .or(z.literal(''))
     })
-    .optional(), // Made social object itself optional
+    .optional(),
   rating: z
     .object({
       classic: z.number().optional(),
       rapid: z.number().optional(),
       blitz: z.number().optional(),
     })
-    .optional(), // Made rating object itself optional
+    .optional(),
   fideId: z.string().optional(),
   titles: z
     .array(z.string())
     .min(1, { message: 'This field is required' })
-    .optional(), // Made optional
+    .optional(),
   physicallyTaught: z.array(z.number()).optional(),
   lastContacted: z.date().optional(),
   notes: z.string().optional(),
   customTags: z.array(z.string()).optional(),
-  yearsInOperation: z.number().min(0).optional(), // Made optional
-  numberOfCoaches: z.number().min(0).optional(), // Made optional
+  yearsInOperation: z.number().min(0).optional(),
+  numberOfCoaches: z.number().min(0).optional(),
   currentStatus: z
     .enum(['new', 'lead', 'prospect', 'customer', 'churned', 'high_prospect'])
-    .optional(), // Made optional
+    .optional(),
   profilePhoto: z.instanceof(globalThis.File || Blob).optional(),
 });

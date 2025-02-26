@@ -36,8 +36,8 @@ export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
                 <Input
                   {...field}
                   type="number"
-                  onChange={(e) => field.onChange(Number(e.target.value))} // Convert input value to number
-                  value={field.value ?? ''} // Ensure value is controlled
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  value={field.value ?? ''}
                 />
               </FormControl>
               <FormMessage />
@@ -54,8 +54,8 @@ export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
                 <Input
                   {...field}
                   type="number"
-                  onChange={(e) => field.onChange(Number(e.target.value))} // Convert input value to number
-                  value={field.value ?? ''} // Ensure value is controlled
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  value={field.value ?? ''}
                 />
               </FormControl>
               <FormMessage />

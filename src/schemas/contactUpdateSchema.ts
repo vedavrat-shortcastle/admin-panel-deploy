@@ -1,15 +1,15 @@
 import { z } from 'zod';
-// import { parsePhoneNumberFromString } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 
-// const phoneNumberSchema = z.string().refine(
-//   (value) => {
-//     const phoneNumber = parsePhoneNumberFromString(value);
-//     return phoneNumber?.isValid();
-//   },
-//   {
-//     message: 'Invalid phone number format.',
-//   }
-// );
+const phoneNumberSchema = z.string().refine(
+  (value) => {
+    const phoneNumber = parsePhoneNumberFromString(value);
+    return phoneNumber?.isValid();
+  },
+  {
+    message: 'Invalid phone number format.',
+  }
+);
 
 const ChessTitle = z.enum([
   'FIDETrainer',
@@ -25,7 +25,7 @@ export const contactUpdateSchema = z.object({
   lastName: z.string().max(100).optional().default(''),
   role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']).optional(),
   email: z.string().email().optional().or(z.literal('')).optional(),
-  phone: z.string().optional(), // Adjusting field name to match expected structure
+  phone: phoneNumberSchema.optional(),
   website: z.string().url({ message: 'Invalid URL.' }).optional(),
   locationId: z.number().nullable().optional(),
   academyIds: z.array(z.string()).optional(),

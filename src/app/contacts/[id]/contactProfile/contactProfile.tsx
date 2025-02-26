@@ -33,7 +33,6 @@ interface ContactProfileProps {
 
 export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
   const [isEditing, setIsEditing] = useState(false);
-  // const scrollableRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
   const form = useForm({
@@ -53,8 +52,6 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     const isValid = await form.trigger();
 
     if (!isValid) {
-      const currentFormData = form.getValues(); // Get form data once
-      console.log('form data:', currentFormData); // If you must log for error case, use currentFormData
       toast({
         title: 'Error',
         description: 'Validation failed! Give proper inputs.',
@@ -64,7 +61,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     }
 
     try {
-      const currentFormData = form.getValues(); // Get form data once here as well
+      const currentFormData = form.getValues();
       if (!contact?.id) {
         toast({
           title: 'Error',
@@ -177,7 +174,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                   {isEditing && (
                     <div className="flex justify-end gap-2">
                       <Button
-                        type="button" // Change to "button"
+                        type="button"
                         variant="outline"
                         onClick={() => setIsEditing(false)}
                       >

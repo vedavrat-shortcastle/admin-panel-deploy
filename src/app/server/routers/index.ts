@@ -13,7 +13,6 @@ export const appRouter = router({
   location: locationRouter,
   tags: tagsRouter,
   subscription: subscriptionRouter,
-  // Add other routers here
 });
 
 export type AppRouter = typeof appRouter;

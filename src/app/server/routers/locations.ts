@@ -21,10 +21,9 @@ export const locationRouter = router({
           country: true,
         },
       });
-      return locations; // Return locations if query is successful
+      return locations;
     } catch (error) {
-      // Error handling block
-      console.error('Error fetching locations:', error); // Log the error on the server
+      console.error('Error fetching locations:', error);
     }
   }),
 
@@ -47,7 +46,6 @@ export const locationRouter = router({
     .query(async ({ ctx, input }) => {
       try {
         if (typeof input === 'number') {
-          // Single ID: Fetch one location
           const location = await ctx.db.location.findUnique({
             where: {
               id: input,
@@ -60,9 +58,8 @@ export const locationRouter = router({
             },
           });
 
-          return [location]; // Return as an array for consistency
+          return [location];
         } else if (Array.isArray(input) && input.length > 0) {
-          // Array of IDs: Fetch multiple locations
           const locations = await ctx.db.location.findMany({
             where: {
               id: {
@@ -79,7 +76,6 @@ export const locationRouter = router({
 
           return locations;
         } else {
-          // Empty array or invalid input
           return [];
         }
       } catch (error) {
