@@ -35,15 +35,23 @@ export const PhysicallyTaught: React.FC<{
     trpc.location.getById.useQuery(initialLocationIds || [], {
       enabled: !!initialLocationIds && initialLocationIds.length > 0,
     });
+
   useEffect(() => {
     if (initialLocations && initialLocations.length > 0) {
-      setSelectedLocations(initialLocations);
+      setSelectedLocations(
+        initialLocations.filter(
+          (location): location is Location => location !== null
+        )
+      );
       form.setValue(
         'physicallyTaught',
-        initialLocations.map((location) => location.id)
+        initialLocations
+          .map((location) => location?.id)
+          .filter((id) => id !== undefined)
       );
     }
   }, [initialLocations, form]);
+
   const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
   }, []);

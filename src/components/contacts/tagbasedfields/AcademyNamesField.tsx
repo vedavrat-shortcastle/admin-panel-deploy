@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
+
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
@@ -24,15 +25,6 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
   } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
-
-  // const {
-  //   data: entityData,
-  //   isLoading: isEntityLoading,
-  //   error: entityError,
-  // } = trpc.contacts.getById.useQuery(id, {
-  //   enabled: !!id,
-  //   select: (data) => data as GetByIdResponse, // Type assertion
-  // });
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;

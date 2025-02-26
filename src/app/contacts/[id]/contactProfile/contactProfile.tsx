@@ -1,9 +1,9 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { contactFormSchema } from '@/schemas/contacts';
+import { contactUpdateSchema } from '@/schemas/contacts';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -36,37 +36,15 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
   // const scrollableRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(contactFormSchema),
+  const form = useForm({
+    resolver: zodResolver(contactUpdateSchema),
     defaultValues: contact || InitialData,
   });
+
   const formData = form.getValues();
-  useEffect(() => {
-    if (contact) {
-      form.reset({
-        ...contact,
-        // phoneNumber: contact.phone,
-        // workingMode: contact.teachingMode,
-        // social: {
-        //   linkedin: contact.linkedinUrl,
-        //   facebook: contact.facebookUrl,
-        //   instagram: contact.instagramUrl,
-        //   twitter: contact.twitterUrl,
-        // },
-        // rating: {
-        //   classic: contact.classicRating,
-        //   rapid: contact.rapidRating,
-        //   blitz: contact.blitzRating,
-        // },
-        // status: contact.currentStatus,
-        academyIds: contact.academies?.map((ca) => ca.academy.name) || [], // Extract names
-        customTags: contact.tags.map((t) => t.tag.name),
-        // physicallyTaught: contactTableData.physicalLocationsTaught.map(pl => pl.locationId), // Return IDs
-      });
-    }
-  }, [contact, form]);
+
   console.log(formData);
-  const ids = form.watch('physicallyTaught');
+  const physicallyTaughtIds = form.watch('physicallyTaught');
 
   const { mutate: updateContact, isLoading } =
     trpc.contacts.updateById.useMutation();
@@ -75,8 +53,8 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     const isValid = await form.trigger();
 
     if (!isValid) {
-      const formData = form.getValues();
-      console.log('form data:', formData);
+      const currentFormData = form.getValues(); // Get form data once
+      console.log('form data:', currentFormData); // If you must log for error case, use currentFormData
       toast({
         title: 'Error',
         description: 'Validation failed! Give proper inputs.',
@@ -86,7 +64,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     }
 
     try {
-      const formData = form.getValues();
+      const currentFormData = form.getValues(); // Get form data once here as well
       if (!contact?.id) {
         toast({
           title: 'Error',
@@ -96,15 +74,15 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
         return;
       }
 
-      await updateContact(
-        { id: contact.id, ...formData },
+      const { ...restFormData } = currentFormData;
+      updateContact(
+        { id: contact.id, ...restFormData },
         {
           onSuccess: () => {
             toast({
               title: 'Contact updated',
               description: 'The contact has been successfully updated.',
             });
-
             router.refresh();
           },
           onError: () => {
@@ -173,7 +151,10 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                   </div>
                   <Separator />
                   <ProfessionalChessInfo form={form} />
-                  <PhysicallyTaught form={form} initialLocationIds={ids} />
+                  <PhysicallyTaught
+                    form={form}
+                    initialLocationIds={physicallyTaughtIds}
+                  />
                   <Separator />
                   <ContactAddressInfo form={form} />
                   <Separator />
@@ -196,7 +177,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                   {isEditing && (
                     <div className="flex justify-end gap-2">
                       <Button
-                        type="submit"
+                        type="button" // Change to "button"
                         variant="outline"
                         onClick={() => setIsEditing(false)}
                       >

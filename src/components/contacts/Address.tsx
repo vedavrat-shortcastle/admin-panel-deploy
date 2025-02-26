@@ -102,7 +102,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
       <SearchableSelect<Location>
         form={form}
-        fieldName="city"
+        fieldName="location.city"
         label="City"
         placeholder="Search City..."
         data={locationsData || []}
@@ -139,7 +139,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="state"
+          name="location.state"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">State/Region</FormLabel>
@@ -160,7 +160,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
         <FormField
           control={form.control}
-          name="country"
+          name="location.country"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">Country</FormLabel>

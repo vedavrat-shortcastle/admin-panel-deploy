@@ -17,7 +17,6 @@ import { Separator } from '@/components/ui/separator';
 
 interface ProfessionalChessInfoProps {
   form: ContactFormReturn; // Ensure this type is correctly defined
-  scrollableRef: React.RefObject<HTMLDivElement>;
 }
 
 export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
