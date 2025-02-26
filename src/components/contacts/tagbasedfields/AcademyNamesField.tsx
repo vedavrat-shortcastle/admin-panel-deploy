@@ -62,7 +62,6 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     return <div>Error loading academy names: {error.message}</div>;
   }
 
-  // Watch form fields based on mode
   const selectedIds = useWatch({
     control: form.control,
     name: mode === 'multiple' ? 'academyIds' : 'academyId',
@@ -75,7 +74,6 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     defaultValue: mode === 'multiple' ? [] : '',
   });
 
-  // Sync names with IDs when data is available
   useEffect(() => {
     if (academyNamesData && mode === 'multiple' && selectedIds.length > 0) {
       const currentNames = new Set(selectedNames as string[]);
@@ -88,12 +86,11 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
 
       const filteredNewNames = newNames.filter(
         (name: string): name is string => name !== ''
-      ); // Ensure non-empty strings
+      );
       form.setValue('academyNames', [
         ...new Set([...filteredNewNames, ...selectedNames]),
       ]);
 
-      // Only update if there are differences
       if (
         newNames.length !== currentNames.size ||
         !newNames.every((name: string) => currentNames.has(name))

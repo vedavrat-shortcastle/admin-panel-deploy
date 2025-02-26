@@ -39,10 +39,6 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     resolver: zodResolver(contactUpdateSchema),
     defaultValues: contact || InitialData,
   });
-
-  const formData = form.getValues();
-
-  console.log(formData);
   const physicallyTaughtIds = form.watch('physicallyTaught');
 
   const { mutate: updateContact, isLoading } =

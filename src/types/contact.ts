@@ -7,48 +7,35 @@ import {
   TeachingMode,
 } from '@prisma/client';
 
-// interface Academy {
-//   id: number;
-//   name: string;
-//   // Add other properties if needed
-// }
-
-// interface ContactAcademy {
-//   academyId: number;
-//   contactId: number;
-//   academy: Academy;
-//   // Add other properties if needed
-// }
-
 export interface Contact {
   id: number;
   firstName: string;
   lastName: string;
   role: ContactRole;
   email: string;
-  phoneNumber: string;
-  academyIds: string[];
+  phoneNumber?: string;
+  academyIds?: string[];
   academies?: ContactAcademy[];
   website?: string;
-  country: string;
-  yearOfBirth: number;
+  country?: string;
+  yearOfBirth?: number;
   dateOfBirth: Date;
   gender: GenderType;
   languagesSpoken: string[];
-  currentAcademy: string;
-  workingMode: TeachingMode;
+  currentAcademy?: string;
+  workingMode?: TeachingMode;
   onlinePercentage?: number;
   offlinePercentage?: number;
-  state: string;
-  city: string;
+  state?: string;
+  city?: string;
   address: string;
-  social: {
+  social?: {
     linkedin?: string;
     facebook?: string;
     instagram?: string;
     twitter?: string;
   };
-  rating: {
+  rating?: {
     classic?: number;
     rapid?: number;
     blitz?: number;
@@ -61,6 +48,6 @@ export interface Contact {
   customTags?: string[];
   yearsInOperation: number;
   numberOfCoaches: number;
-  status: ContactStatus;
+  status?: ContactStatus;
   profilePhoto?: File | undefined;
 }

@@ -36,10 +36,10 @@ export const CurrentAcademy: React.FC<{ form: UseFormReturn<any> }> = ({
   const academyData: getAcademyNamesRes[] = useMemo(() => {
     return academyNames
       .map((name: string, index: number) => ({
-        id: academyIds[index]?.trim() || `academy-${index}`, // Ensure a non-empty string
+        id: academyIds[index]?.trim() || `academy-${index}`,
         name: name,
       }))
-      .filter((academy) => academy.id); // Remove any entry with an empty id
+      .filter((academy: getAcademyNamesRes) => academy.id);
   }, [academyNames, academyIds]);
 
   const handleOnSelect = (selectedAcademy: getAcademyNamesRes | null) => {

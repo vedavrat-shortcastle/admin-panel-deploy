@@ -23,8 +23,10 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
   form,
 }) => {
   const academyIds =
-    form.watch('academies')?.map((academy) => academy.academyId) || [];
-  console.log('this are the ids', academyIds);
+    form
+      .watch('academies')
+      ?.map((academy: { academyId: string }) => academy.academyId) || [];
+
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">

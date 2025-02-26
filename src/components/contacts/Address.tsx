@@ -36,16 +36,14 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
     undefined
   );
 
-  //for update and view
   const initialCityInput = form.watch('location.city');
   form.setValue('cityInput', initialCityInput);
-  //
 
   const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
     searchTerm,
     {
       enabled: hasSearched,
-      onSuccess: (data) => setLocationsData(data), // Update local state on success
+      onSuccess: (data) => setLocationsData(data),
     }
   );
   useEffect(() => {
@@ -72,9 +70,9 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       form.setValue('state', selectedLocation.state || '');
       form.setValue('country', selectedLocation.country || '');
       setIsLocationSelected(true);
-      setSearchTerm(''); // Clear search for next search
-      setHasSearched(false); // Reset for next search
-      setLocationsData(undefined); // Clear displayed locations
+      setSearchTerm('');
+      setHasSearched(false);
+      setLocationsData(undefined);
     },
     [form]
   );
@@ -155,7 +153,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected} // Disable when a location is selected
+                  disabled={isLocationSelected}
                 />
               </FormControl>
               <FormMessage />
@@ -176,7 +174,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected} // Disable when a location is selected
+                  disabled={isLocationSelected}
                 />
               </FormControl>
               <FormMessage />
