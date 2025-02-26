@@ -1,9 +1,16 @@
+import {
+  ChessTitle,
+  ContactRole,
+  ContactStatus,
+  GenderType,
+  TeachingMode,
+} from '@prisma/client';
 import { z } from 'zod';
 
-export const formSchema = z.object({
+export const contactFormSchema = z.object({
   firstName: z.string().min(1, { message: 'This field is required' }),
   lastName: z.string().min(1, { message: 'This field is required' }),
-  role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']),
+  role: z.nativeEnum(ContactRole),
   email: z.string().email({ message: 'Invalid email address.' }),
   phoneNumber: z.string().min(1, { message: 'This field is required' }),
   academyIds: z.array(z.string()).min(1, { message: 'This field is requierd' }),
@@ -17,10 +24,10 @@ export const formSchema = z.object({
     .min(1, { message: 'This field is required' })
     .optional(),
   dateOfBirth: z.date(),
-  gender: z.enum(['male', 'female', 'other']),
+  gender: z.nativeEnum(GenderType),
   languagesSpoken: z.array(z.string()),
   currentAcademy: z.string().min(1, { message: 'This field is required' }),
-  workingMode: z.enum(['online', 'offline', 'hybrid']),
+  teachingMode: z.nativeEnum(TeachingMode),
   onlinePercentage: z.number().min(0).max(100).optional(),
   offlinePercentage: z.number().min(0).max(100).optional(),
   address: z.string().min(1, { message: 'This field is required' }),
@@ -36,37 +43,18 @@ export const formSchema = z.object({
     blitz: z.number().optional(),
   }),
   fideId: z.string().optional(),
-  titles: z
-    .array(
-      z.enum([
-        'GM',
-        'IM',
-        'WGM',
-        'WIM',
-        'FIDETrainer',
-        'FIDEInstructor',
-        // ... any other ChessTitle enum values from your Prisma schema
-      ])
-    )
-    .min(1, { message: 'This field is required' })
-    .optional(),
+  titles: z.array(z.nativeEnum(ChessTitle)),
+  physicallyTaught: z.array(z.number()).optional(),
   lastContacted: z.date().optional(),
   notes: z.string().optional(),
   customTags: z.array(z.string()).optional(),
   yearsInOperation: z.number().min(0),
   numberOfCoaches: z.number().min(0),
-  status: z.enum([
-    'new',
-    'lead',
-    'prospect',
-    'customer',
-    'churned',
-    'high_prospect',
-  ]),
+  status: z.nativeEnum(ContactStatus),
   profilePhoto: z.instanceof(globalThis.File || Blob).optional(),
 });
 
-export const personalInfoSchema = formSchema.pick({
+export const personalInfoSchema = contactFormSchema.pick({
   firstName: true,
   lastName: true,
   email: true,
@@ -77,11 +65,11 @@ export const personalInfoSchema = formSchema.pick({
 });
 
 // Professional Details Schema
-export const professionalInfoSchema = formSchema.pick({
+export const professionalInfoSchema = contactFormSchema.pick({
   role: true,
   currentAcademy: true,
   academyIds: true,
-  workingMode: true,
+  teachingMode: true,
   onlinePercentage: true,
   offlinePercentage: true,
   languagesSpoken: true,
@@ -93,7 +81,7 @@ export const professionalInfoSchema = formSchema.pick({
 });
 
 // Contact & Location Schema
-export const contactAddressSchema = formSchema.pick({
+export const contactAddressSchema = contactFormSchema.pick({
   locationId: true,
   address: true,
   social: true,

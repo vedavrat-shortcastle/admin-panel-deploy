@@ -1,4 +1,6 @@
+import { createSubscriptionSchema } from '@/schemas/subscription';
 import { UseFormReturn } from 'react-hook-form';
+import { z } from 'zod';
 
 export type CustomerTable = {
   contact: {
@@ -10,4 +12,6 @@ export type CustomerTable = {
   salesType: string;
 };
 
-export type costumerFormReturn = UseFormReturn<any>;
+export type subscriptionFormValues = z.infer<typeof createSubscriptionSchema>;
+
+export type subscriptionFormReturns = UseFormReturn<any>;
