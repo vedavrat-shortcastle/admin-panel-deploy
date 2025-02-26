@@ -35,10 +35,6 @@ export function SaveFilterDialog({ onSave }: SaveFilterDialogProps) {
     onSave(filterName);
     setOpen(false);
     setFilterName('');
-    toast({
-      title: 'Success',
-      description: 'Filter saved successfully',
-    });
   };
 
   return (
