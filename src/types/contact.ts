@@ -1,7 +1,9 @@
 import {
   ChessTitle,
+  ContactAcademy,
   ContactRole,
   ContactStatus,
+  GenderType,
   TeachingMode,
 } from '@prisma/client';
 
@@ -26,12 +28,12 @@ export interface Contact {
   email: string;
   phoneNumber: string;
   academyIds: string[];
-  // academies: ContactAcademy[];
+  academies?: ContactAcademy[];
   website?: string;
   country: string;
   yearOfBirth: number;
   dateOfBirth: Date;
-  gender: 'male' | 'female' | 'other';
+  gender: GenderType;
   languagesSpoken: string[];
   currentAcademy: string;
   workingMode: TeachingMode;
@@ -60,12 +62,5 @@ export interface Contact {
   yearsInOperation: number;
   numberOfCoaches: number;
   status: ContactStatus;
-  //   | 'new'
-  //   | 'lead'
-  //   | 'prospect'
-  //   | 'customer'
-  //   | 'churned'
-  //   | 'high_prospect'
-  //   | 'active';
   profilePhoto?: File | undefined;
 }
