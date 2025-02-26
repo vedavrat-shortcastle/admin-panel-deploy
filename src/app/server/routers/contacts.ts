@@ -232,8 +232,14 @@ export const contactsRouter = router({
       return await ctx.db.$transaction(
         async (tx) => {
           try {
-            const { id, academyIds, physicallyTaught, customTags, ...rest } =
-              input;
+            const {
+              id,
+              academyIds,
+              currentAcademy,
+              physicallyTaught,
+              customTags,
+              ...rest
+            } = input;
             // Directly use the rest object, filtering out undefined values.
             const updateData = Object.fromEntries(
               Object.entries(rest).filter(([value]) => value !== undefined)
@@ -254,7 +260,7 @@ export const contactsRouter = router({
                   data: academyIds.map((academyId) => ({
                     contactId: id,
                     academyId,
-                    isCurrent: academyId === input.currentAcademy,
+                    isCurrent: academyId === currentAcademy,
                   })),
                 });
               }

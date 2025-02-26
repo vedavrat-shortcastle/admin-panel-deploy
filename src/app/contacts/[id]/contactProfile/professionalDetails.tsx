@@ -11,7 +11,7 @@ import type { ContactFormReturn } from '@/types/contactSection';
 import { Titles } from '@/components/contacts/tagbasedfields/Titles';
 import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 import { CustomTagsField } from '@/components/contacts/tagbasedfields/CustomTagsField';
-// import { CurrentAcademy } from '@/components/contacts/tagbasedfields/CurrentAcademyField';
+import { CurrentAcademy } from '@/components/contacts/tagbasedfields/CurrentAcademyField';
 import { Separator } from '@/components/ui/separator';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
@@ -31,9 +31,9 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
         <AcademyNames initialIds={academyIds} form={form} mode="multiple" />
       </div>
 
-      {/* <div className="mt-6">
+      <div className="mt-6">
         <CurrentAcademy form={form} />
-      </div> */}
+      </div>
 
       <Separator className="my-6" />
 
