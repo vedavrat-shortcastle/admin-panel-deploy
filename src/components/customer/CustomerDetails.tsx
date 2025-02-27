@@ -1,4 +1,3 @@
-import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 import SearchContact from '@/components/customer/SearchContact';
 import {
   FormControl,
@@ -23,10 +22,10 @@ interface customerDetailsProps {
 }
 
 export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
-  const academyIds =
-    form
-      .watch('academies')
-      ?.map((academy: { academyId: string }) => academy.academyId) || [];
+  // const academyIds =
+  //   form
+  //     .watch('academies')
+  //     ?.map((academy: { academyId: string }) => academy.academyId) || [];
   return (
     <div>
       <div className="space-y-6">
@@ -38,7 +37,7 @@ export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
 
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-6">
-            <AcademyNames initialIds={academyIds} form={form} mode="single" />
+            {/* <AcademyNames  form={form} mode="single" initialIds={academyIds}/> */}
           </div>
           <div className="col-span-6">
             <FormField
