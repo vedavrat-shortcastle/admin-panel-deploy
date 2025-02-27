@@ -20,7 +20,6 @@ import { Separator } from '@/components/ui/separator';
 import type { Contact } from '@/types/contact';
 import { toast } from '@/hooks/use-toast';
 import { LanguagesSpoken } from '@/components/contacts/tagbasedfields/LanguagesSpoken';
-import { InitialData } from '@/app/contacts/[id]/contactProfile/contactData';
 import { trpc } from '@/hooks/trpc-provider';
 import { PersonalContactInfo } from '@/app/contacts/[id]/contactProfile/personalDetails';
 import { ProfessionalChessInfo } from '@/app/contacts/[id]/contactProfile/professionalDetails';
@@ -37,7 +36,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
 
   const form = useForm({
     resolver: zodResolver(contactUpdateSchema),
-    defaultValues: contact || InitialData,
+    defaultValues: contact,
   });
   const physicallyTaughtIds = form.watch('physicallyTaught');
 

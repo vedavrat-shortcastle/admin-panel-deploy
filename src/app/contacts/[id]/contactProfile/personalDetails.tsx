@@ -88,6 +88,7 @@ export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
             <FormItem>
               <FormLabel>
                 Phone Number<span className="text-red-500">*</span>
+                {/* //TODO: Add country picker here; store country code with phone number */}
               </FormLabel>
               <FormControl>
                 <Input {...field} />

@@ -21,8 +21,8 @@ const ChessTitle = z.enum([
 ]);
 
 export const contactUpdateSchema = z.object({
-  firstName: z.string().max(100).optional().default(''),
-  lastName: z.string().max(100).optional().default(''),
+  firstName: z.string().max(100).optional(),
+  lastName: z.string().max(100).optional(),
   role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']).optional(),
   email: z.string().email().optional().or(z.literal('')).optional(),
   phone: phoneNumberSchema.optional(),
