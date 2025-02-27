@@ -1,5 +1,6 @@
 'use client';
 
+import TrpcProvider from '@/hooks/trpc-provider';
 import { SessionProvider } from 'next-auth/react';
 
 interface ProvidersProps {
@@ -7,7 +8,11 @@ interface ProvidersProps {
 }
 
 function Providers({ children }: ProvidersProps) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <TrpcProvider>
+      <SessionProvider>{children}</SessionProvider>
+    </TrpcProvider>
+  );
 }
 
 export default Providers;

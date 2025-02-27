@@ -3,10 +3,11 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
+import { LoaderCircle } from 'lucide-react';
 
 interface AuthRedirectProps {
   children: React.ReactNode;
-  redirectToLogin?: boolean;
+  redirectToLogin?: boolean; // Optional prop to conditionally enable redirect to login
 }
 
 export default function AuthRedirect({
@@ -17,28 +18,30 @@ export default function AuthRedirect({
   const router = useRouter();
   const pathname = usePathname();
   const isAuthenticated = status === 'authenticated';
+  const loading = status === 'loading';
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      if (redirectToLogin && pathname !== '/login') {
+    if (!loading) {
+      if (redirectToLogin && !isAuthenticated && pathname !== '/login') {
         router.push('/login');
-      }
-    } else if (status === 'authenticated') {
-      if (pathname === '/login') {
-        router.push('/'); // Redirect to homepage if on login page when logged in
+      } else if (isAuthenticated && pathname === '/login') {
+        router.push('/contacts'); // Redirect to homepage after login if on login page
       }
     }
-  }, [isAuthenticated, pathname, router, redirectToLogin, status]); // Now include status in dependencies
+  }, [isAuthenticated, loading, pathname, router, redirectToLogin]); // Include redirectToLogin in dependencies
 
-  // **Conditional Rendering to Prevent FOAC:**
-  if (status === 'loading') {
-    return <div>Loading...</div>; // Still show loading state
+  if (loading) {
+    return (
+      <div className="h-screen flex justify-center items-center">
+        <LoaderCircle size={44} className="animate-spin text-primary" />
+      </div>
+    );
   }
 
-  if (redirectToLogin && status === 'unauthenticated') {
-    return null; // **Return null to prevent rendering children for unauthenticated users**
+  // If not redirecting and not loading, render children
+  if (!loading && ((redirectToLogin && isAuthenticated) || !redirectToLogin)) {
+    return <>{children}</>;
   }
 
-  // If authenticated or no redirectToLogin is needed, render children
-  return <>{children}</>;
+  return null; // Return null if redirecting
 }

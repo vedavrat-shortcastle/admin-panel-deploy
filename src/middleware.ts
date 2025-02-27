@@ -47,7 +47,6 @@ export const middleware = async (req: NextRequest) => {
 
   // Use NextAuth to verify authentication
   const token = await getToken({ req });
-  console.log('token forom gettoken', token);
 
   if (!token) {
     return NextResponse.json('Unauthorized', { status: 401 });
@@ -66,7 +65,7 @@ export const middleware = async (req: NextRequest) => {
       );
     }
     const hasPermission = await checkPermission(
-      token.permissions as Permission[], // Permissions should be in JWT from auth.ts
+      token.permissions as Permission[],
       requiredPermission
     );
     if (!hasPermission) {

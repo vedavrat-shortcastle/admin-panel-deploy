@@ -1,12 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import TrpcProvider from '@/hooks/trpc-provider';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { AdminSidebar } from '@/components/Sidebar';
-import { Toaster } from '@/components/ui/toaster';
 import Providers from '@/components/Providers';
-import AuthRedirect from '@/components/auth/AuthRedirect';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,23 +25,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <TrpcProvider>
-        <Providers>
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-            <AuthRedirect>
-              <div>
-                <SidebarProvider>
-                  <AdminSidebar />
-                  <main className="h-full w-full">{children}</main>
-                </SidebarProvider>
-              </div>
-              <Toaster />
-            </AuthRedirect>
-          </body>
-        </Providers>
-      </TrpcProvider>
+      <Providers>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+          {children}
+        </body>
+      </Providers>
     </html>
   );
 }
