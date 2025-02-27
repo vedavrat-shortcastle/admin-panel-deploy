@@ -781,6 +781,53 @@ model PaymentDetail {
 //***************************************************    ADMIN PANEL    ***************************************************
 //
 
+model AdminUser {
+  id          String                @id @default(uuid())
+  firstName   String                @map("first_name")
+  lastName    String                @map("last_name")
+  email       String                @unique
+  password    String
+  role        AdminRole
+  permissions AdminUserPermission[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("cl_admin_user")
+}
+
+model Permission {
+  id          String                @id @default(uuid())
+  name        String                @unique
+  code        String                @unique
+  description String?
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @default(now()) @map("updated_at")
+  adminUsers  AdminUserPermission[]
+
+  @@map("cl_admin_permission")
+}
+
+model AdminUserPermission {
+  adminUserId  String     @map("admin_user_id")
+  permissionId String     @map("permission_id")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @default(now()) @map("updated_at")
+  adminUser    AdminUser  @relation(fields: [adminUserId], references: [id])
+  permission   Permission @relation(fields: [permissionId], references: [id])
+
+  @@id([adminUserId, permissionId])
+  @@map("cl_admin_user_permission")
+}
+
+enum AdminRole {
+  ADMIN
+  MANAGER
+  EXECUTIVE
+
+  @@map("cl_admin_role")
+}
+
 model Location {
   id        Int      @id @default(autoincrement())
   country   String?  @db.VarChar(100)

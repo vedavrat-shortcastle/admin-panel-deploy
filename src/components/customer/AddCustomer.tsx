@@ -5,36 +5,47 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import {
-  contactAddressSchema,
-  contactFormSchema,
-  personalInfoSchema,
-  professionalInfoSchema,
-} from '@/schemas/contacts';
-import type { contactFormValues } from '@/types/contactSection';
 import { useToast } from '@/hooks/use-toast';
 
-import { ProfessionalChessInfo } from '@/components/contacts/ProfessionalInfo';
-import { ContactAddressInfo } from '@/components/contacts/ContactAddressInfo';
-import { defaultFormValues } from '@/utils/contactFormDefaults';
-import { PersonalContactInfo } from '@/components/contacts/PersonalContactInfo';
 import { trpc } from '@/utils/trpc';
-
-export default function AddContact() {
+import {
+  customerDetailsSchema,
+  subscriptionDetailsSchema,
+  subscriptionFormValues,
+  createSubscriptionSchema,
+} from '@/schemas/subscription';
+import { CustomerDetails } from '@/components/customer/CustomerDetails';
+import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
+import { subscriptionFormDefaults } from '@/utils/subscriptionFormDefaults';
+export default function AddCustomer() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
-  const form = useForm<contactFormValues>({
-    resolver: zodResolver(contactFormSchema),
+  const form = useForm<subscriptionFormValues>({
+    resolver: zodResolver(createSubscriptionSchema),
     mode: 'onTouched',
-    defaultValues: defaultFormValues,
+    defaultValues: subscriptionFormDefaults,
   });
 
-  const stepSchemas = [
-    personalInfoSchema,
-    professionalInfoSchema,
-    contactAddressSchema,
-  ];
+  const createCustomerMutation = trpc.subscription.create.useMutation({
+    onSuccess: () => {
+      toast({
+        title: 'Form Submitted',
+        description: 'Your form has been successfully submitted.',
+      });
+      form.reset();
+      setStep(1);
+    },
+    onError: () => {
+      toast({
+        title: 'Error',
+        description: 'There was an error submitting the form.',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const stepSchemas = [customerDetailsSchema, subscriptionDetailsSchema];
 
   const scrollableRef = useRef<HTMLDivElement>(null!);
 
@@ -49,7 +60,7 @@ export default function AddContact() {
     if (!isValid) {
       toast({
         title: 'Validation Error',
-        description: 'Please fill in the required fields for this step.',
+        description: 'Please fill in the required fields.',
         variant: 'destructive',
       });
       return false;
@@ -57,38 +68,18 @@ export default function AddContact() {
     return true;
   };
 
-  const { mutate, isLoading } = trpc.contacts.create.useMutation({
-    // Get mutate and isLoading
-    onSuccess: () => {
-      toast({
-        title: 'Success!',
-        description: 'Contact has been created.',
-      });
-      form.reset(); // Reset the form after successful submission
-      setStep(1); // Go back to step 1
-    },
-    onError: (error) => {
-      console.error('Error creating contact:', error);
-      toast({
-        title: 'Error!',
-        description: 'Failed to create contact. Please try again.',
-        variant: 'destructive',
-      });
-    },
-  });
-
-  const onSubmit = (data: contactFormValues) => {
-    mutate(data);
+  const onSubmit = () => {
+    createCustomerMutation.mutate(form.getValues());
   };
 
   const handleSubmit = async () => {
     const isValid = await form.trigger();
     if (isValid) {
-      form.handleSubmit(onSubmit)(); // Call form's handleSubmit which in turn calls our onSubmit
+      await form.handleSubmit(onSubmit)();
     } else {
       toast({
         title: 'Validation Error',
-        description: 'Please complete all required fields in all steps.',
+        description: 'Please complete all required fields.',
         variant: 'destructive',
       });
     }
@@ -106,12 +97,9 @@ export default function AddContact() {
 
   const prevStep = () => {
     setStep((prevStep) => Math.max(prevStep - 1, 1));
-    setTimeout(() => {
-      scrollableRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 0);
   };
 
-  const stepTitles = ['Personal Info', 'Professional Info', 'Address & Notes'];
+  const stepTitles = ['Basic Information', 'Subscription and Plan Information'];
 
   return (
     <div className="flex flex-col h-full">
@@ -123,11 +111,8 @@ export default function AddContact() {
       {/* Scrollable Content */}
       <div ref={scrollableRef} className="flex-grow overflow-y-auto p-3">
         <Form {...form}>
-          {step === 1 && <PersonalContactInfo form={form} />}
-          {step === 2 && (
-            <ProfessionalChessInfo scrollableRef={scrollableRef} form={form} />
-          )}
-          {step === 3 && <ContactAddressInfo form={form} />}
+          {step === 1 && <CustomerDetails form={form} />}
+          {step === 2 && <SubscriptionDetails form={form} />}
         </Form>
       </div>
 
@@ -138,7 +123,7 @@ export default function AddContact() {
             Previous
           </Button>
         )}
-        {step < 3 ? (
+        {step < 2 ? (
           <Button
             type="button"
             variant="default"
@@ -153,9 +138,8 @@ export default function AddContact() {
             variant="default"
             onClick={handleSubmit}
             className="ml-auto"
-            disabled={isLoading} // Disable button while submitting
           >
-            {isLoading ? 'Submitting...' : 'Submit'}
+            {createCustomerMutation.isLoading ? 'Submitting...' : 'Submit'}
           </Button>
         )}
       </div>

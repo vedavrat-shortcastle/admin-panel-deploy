@@ -58,9 +58,9 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       const locationId = selectedLocation.id;
 
       form.setValue('locationId', locationId);
-      form.setValue('cityLocation', selectedLocation.city);
-      form.setValue('cityLocationInput', selectedLocation.city);
-      form.setValue('stateRegion', selectedLocation.state || '');
+      form.setValue('city', selectedLocation.city);
+      form.setValue('cityInput', selectedLocation.city);
+      form.setValue('state', selectedLocation.state || '');
       form.setValue('country', selectedLocation.country || '');
       setIsLocationSelected(true);
       setSearchTerm(''); // Clear search for next search
@@ -98,7 +98,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
       <SearchableSelect<Location>
         form={form}
-        fieldName="cityLocation"
+        fieldName="city"
         label="City"
         placeholder="Search City..."
         data={locationsData || []}
@@ -135,7 +135,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="stateRegion"
+          name="state"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">State/Region</FormLabel>

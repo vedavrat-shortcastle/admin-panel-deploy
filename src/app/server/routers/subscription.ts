@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { procedure, router } from '@/app/server/trpc';
 import { createSubscriptionSchema } from '@/schemas/subscription';
 
+//subscription is a router that contains multiple procedures for customers management
+
 export const subscriptionRouter = router({
   getAll: procedure.query(async ({ ctx }) => {
     return await ctx.db.subscription.findMany({
