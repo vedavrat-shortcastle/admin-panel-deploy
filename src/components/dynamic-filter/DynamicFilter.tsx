@@ -18,6 +18,7 @@ import { FilterConditions } from '@/components/dynamic-filter/FilterCondition';
 import { trpc } from '@/utils/trpc';
 import { useToast } from '@/hooks/use-toast';
 import { Plus } from 'lucide-react';
+import { JsonValue } from '@prisma/client/runtime/library';
 
 interface FilterBuilderProps {
   fields: FilterField[];
@@ -34,7 +35,7 @@ const emptyFilters: FilterGroup = {
 interface FilterTab {
   id: string;
   name: string;
-  filter: { filter: FilterGroup } | JSON;
+  filter: { filter: FilterGroup } | JsonValue;
   createdat: Date;
 }
 
@@ -47,8 +48,8 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     () => initialFilters || emptyFilters
   );
   const [isDirty, setIsDirty] = useState(false);
-  const [filterTabs, setFilterTabs] = useState<FilterTab[]>([]);
-  const [activeTabId, setActiveTabId] = useState<string | null>('new-tab');
+  const [savedFilters, setFilterTabs] = useState<FilterTab[]>([]);
+  const [activeFilterId, setActiveTabId] = useState<string | null>('new-tab');
   const { toast } = useToast();
 
   const { data, isLoading, error } = trpc.filter.getFilters.useQuery();
@@ -64,14 +65,10 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   useEffect(() => {
     if (data && data.length > 0) {
       console.log('data: ', data);
-      const combinedData = [
-        {
-          id: 'new-tab',
-          name: 'New Tab',
-          filter: { filter: emptyFilters },
-        },
-        ...data,
-      ];
+      const combinedData = data.map((item) => ({
+        ...item,
+        createdat: item.createdat ? new Date(item.createdat) : new Date(),
+      }));
       setFilterTabs(combinedData);
     }
   }, [data]);
@@ -81,7 +78,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       toast({ title: 'Success', description: 'Filter saved successfully' });
       setFilterTabs((prev) =>
         prev.map((tab) =>
-          tab.id === activeTabId
+          tab.id === activeFilterId
             ? {
                 filter: {
                   filter: response.filter.filter as unknown as FilterGroup,
@@ -112,7 +109,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     setIsDirty(true);
   };
 
-  const handleAddCondition = () => {
+  const addFilterCondition = () => {
     const newCondition: FilterCondition = {
       fieldId: fields[0].id,
       operator: 'equals' as FilterOperator,
@@ -125,7 +122,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     });
   };
 
-  const handleConditionChange = (index: number, field: string, value: any) => {
+  const updateFilterCondition = (index: number, field: string, value: any) => {
     const newConditions = [...filters.conditions];
     newConditions[index] = {
       ...newConditions[index],
@@ -134,7 +131,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     updateFilters({ ...filters, conditions: newConditions });
   };
 
-  const handleRemoveCondition = (index: number) => {
+  const removeFilterCondition = (index: number) => {
     updateFilters({
       ...filters,
       conditions: filters.conditions.filter((_, i) => i !== index),
@@ -145,16 +142,14 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     updateFilters({ ...filters, logic });
   };
 
-  const handleSaveFilter = (name: string) => {
+  const saveFilter = (name: string) => {
     createFilter.mutate({
       name,
-      filter: {
-        filter: filters,
-      },
+      filter: filters,
     });
   };
 
-  const handleApplyFilters = () => {
+  const applyFilters = () => {
     onChange(filters);
     setIsDirty(false);
   };
@@ -171,7 +166,9 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       onChange(filters);
       setFilterTabs((prevTabs) =>
         prevTabs.map((tab) =>
-          tab.id === activeTabId ? { ...tab, filter: { filter: filters } } : tab
+          tab.id === activeFilterId
+            ? { ...tab, filter: { filter: filters } }
+            : tab
         )
       );
       setIsDirty(false);
@@ -191,7 +188,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
 
       setFilterTabs((prevTabs) => prevTabs.filter((tab) => tab.id !== id));
 
-      if (activeTabId === id) {
+      if (activeFilterId === id) {
         setActiveTabId(null);
         setFilters(emptyFilters);
         onChange(emptyFilters);
@@ -206,7 +203,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     },
   });
 
-  const handleAddNewTab = () => {
+  const createNewFilter = () => {
     const newTabId = 'new-tab';
     setFilterTabs([
       {
@@ -215,34 +212,34 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
         filter: { filter: emptyFilters },
         createdat: new Date(),
       },
-      ...filterTabs,
+      ...savedFilters,
     ]);
     setActiveTabId(newTabId);
     setFilters(emptyFilters);
   };
 
-  const handleUpdateFilter = () => {
-    const activeTab = filterTabs.find((tab) => tab.id === activeTabId);
+  const updateFilter = () => {
+    const activeTab = savedFilters.find((tab) => tab.id === activeFilterId);
 
     updateFilterMutation.mutate({
-      id: activeTabId || '',
+      id: activeFilterId || '',
       name: (activeTab && activeTab.name) || '',
       filterInputSchema: { filter: filters },
     });
   };
 
-  const handleDeleteTabFilter = (tabId: string) => {
+  const deleteFilter = (tabId: string) => {
     deleteFilterMutation.mutate({ id: tabId });
   };
 
-  const handleApplyTabFilters = (tabId: string) => {
-    if (activeTabId === tabId) return;
-    const selectedTab = filterTabs.find((tab) => tab.id === tabId);
+  const selectFilter = (tabId: string) => {
+    if (activeFilterId === tabId) return;
+    const selectedTab = savedFilters.find((tab) => tab.id === tabId);
     if (!selectedTab) return;
 
     setActiveTabId(tabId);
-    setFilters(selectedTab.filter.filter);
-    onChange(selectedTab.filter.filter);
+    setFilters((selectedTab.filter as { filter: FilterGroup }).filter);
+    onChange((selectedTab.filter as { filter: FilterGroup }).filter);
     setIsDirty(false);
   };
 
@@ -251,16 +248,16 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Filter Builder</h2>
         <div className="flex space-x-2">
-          {activeTabId !== 'new-tab' ? (
+          {activeFilterId !== 'new-tab' ? (
             <Button
               variant="secondary"
               disabled={!isDirty}
-              onClick={handleUpdateFilter}
+              onClick={updateFilter}
             >
               Update Filter
             </Button>
           ) : (
-            <SaveFilterDialog onSave={handleSaveFilter} />
+            <SaveFilterDialog onSave={saveFilter} />
           )}
 
           <Button
@@ -274,24 +271,26 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-1 overflow-x-auto whitespace-nowrap max-w-full">
-          {!filterTabs.some((tab) => tab.id === 'new-tab') && !isLoading && (
+          {!savedFilters.some((tab) => tab.id === 'new-tab') && !isLoading && (
             <Button
               variant="ghost"
-              disabled={activeTabId === null}
+              disabled={activeFilterId === null}
               className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-sm"
-              onClick={handleAddNewTab}
+              onClick={createNewFilter}
             >
               <Plus className="w-5 h-5" />
             </Button>
           )}
 
-          {filterTabs.map((tab) => (
+          {savedFilters.map((tab) => (
             <div
               key={tab.id}
               className={`flex items-center gap-3 h-9 pl-4 pr-1 rounded-sm cursor-pointer ${
-                activeTabId === tab.id ? 'bg-primary text-white' : 'bg-gray-100'
+                activeFilterId === tab.id
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100'
               }`}
-              onClick={() => handleApplyTabFilters(tab.id)}
+              onClick={() => selectFilter(tab.id)}
             >
               <span className="text-sm font-medium">{tab.name}</span>
 
@@ -301,7 +300,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                 className="p-0 m-0 hover:bg-transparent"
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent clicking tab when deleting
-                  handleDeleteTabFilter(tab.id);
+                  deleteFilter(tab.id);
                 }}
               >
                 ✕
@@ -335,24 +334,24 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                   operator={condition.operator}
                   value={condition.value}
                   onFieldChange={(fieldId) =>
-                    handleConditionChange(index, 'fieldId', fieldId)
+                    updateFilterCondition(index, 'fieldId', fieldId)
                   }
                   onOperatorChange={(operator) =>
-                    handleConditionChange(index, 'operator', operator)
+                    updateFilterCondition(index, 'operator', operator)
                   }
                   onValueChange={(value) =>
-                    handleConditionChange(index, 'value', value)
+                    updateFilterCondition(index, 'value', value)
                   }
-                  onRemove={() => handleRemoveCondition(index)}
+                  onRemove={() => removeFilterCondition(index)}
                 />
               );
             })}
           </div>
 
           <div className="flex justify-between items-center pt-4">
-            <Button onClick={handleAddCondition}>Add Condition</Button>
+            <Button onClick={addFilterCondition}>Add Condition</Button>
             <Button
-              onClick={handleApplyFilters}
+              onClick={applyFilters}
               disabled={!isDirty}
               variant="default"
             >
