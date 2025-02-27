@@ -23,6 +23,10 @@ interface customerDetailsProps {
 }
 
 export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
+  const academyIds =
+    form
+      .watch('academies')
+      ?.map((academy: { academyId: string }) => academy.academyId) || [];
   return (
     <div>
       <div className="space-y-6">
@@ -34,7 +38,7 @@ export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
 
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-6">
-            <AcademyNames mode="single" form={form} />
+            <AcademyNames initialIds={academyIds} form={form} mode="single" />
           </div>
           <div className="col-span-6">
             <FormField
