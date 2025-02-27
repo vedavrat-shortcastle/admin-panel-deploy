@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff } from 'lucide-react';
+import { signIn } from 'next-auth/react'; // Import signIn from next-auth/react
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,19 +18,14 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
-import { useToast } from '@/hooks/use-toast';
-import { trpc } from '@/hooks/trpc-provider';
-import { LoginFormValues, loginSchema } from '@/schemas/auth/loginForm.schema';
-
-const setCookie = (name: string, value: string, days: number) => {
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
-};
+import { useToast } from '@/hooks/use-toast'; // Keep useToast for notifications
+import { LoginFormValues, loginSchema } from '@/schemas/auth/loginForm.schema'; // Keep schema and types
 
 export default function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState<string | undefined>(undefined); // State to manage login error message
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -39,29 +35,33 @@ export default function LoginForm() {
     },
   });
 
-  const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: (data) => {
-      // Store auth data in cookie
-      setCookie('token', data.token, 7);
-
-      toast({
-        title: 'Login Successful',
-        description: 'Welcome back!',
-      });
-
-      router.push('/contacts');
-    },
-    onError: (error) => {
-      const errorData = JSON.parse(error.message);
-      form.setError(errorData.field, {
-        type: 'manual',
-        message: errorData.message,
-      });
-    },
-  });
-
   const onSubmit = async (values: LoginFormValues) => {
-    await loginMutation.mutateAsync(values);
+    setLoginError(undefined); // Clear any previous login errors
+    const result = await signIn('credentials', {
+      // Use signIn('credentials', ...)
+      email: values.email,
+      password: values.password,
+      redirect: false, // Prevent default redirect, handle it manually
+    });
+
+    if (result?.error) {
+      // Handle sign-in error
+      if (result.error === 'CredentialsSignin') {
+        // CredentialsSignin error likely means invalid email/password from authorize function
+        setLoginError('Invalid email or password.');
+      } else {
+        // Other errors from signIn (network, etc.)
+        setLoginError('Could not sign in. Please try again.');
+        console.error('Sign-in error:', result.error); // Log the error for debugging
+      }
+      return;
+    }
+
+    toast({
+      title: 'Login Successful',
+      description: 'Welcome back!',
+    });
+    router.push('/contacts'); // Redirect on successful login
   };
 
   return (
@@ -71,6 +71,11 @@ export default function LoginForm() {
       </h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+          {loginError && ( // Display login error message if it exists
+            <div className="rounded-md bg-red-50 p-4">
+              <div className="text-sm text-red-800">{loginError}</div>
+            </div>
+          )}
           <FormField
             control={form.control}
             name="email"

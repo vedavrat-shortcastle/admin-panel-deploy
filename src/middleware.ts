@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyJWT } from '@/utils/encoder';
 import { permissionMap } from '@/constants';
 import { Permission } from '@prisma/client';
+import { getToken } from 'next-auth/jwt'; // Import getToken to access JWT from NextAuth
 
 async function checkPermission(
   userPermissions: Permission[],
-  requiredPermission: string //user:read
+  requiredPermission: string
 ) {
   const [module, actions] = requiredPermission.split(':');
   const requiredActions = actions.split(',');
@@ -22,7 +22,6 @@ async function checkPermission(
   return hasPermission;
 }
 
-// Remove dbMiddleware and update middleware chain
 export const middleware = async (req: NextRequest) => {
   if (req.method === 'OPTIONS') {
     return NextResponse.json('ok', { status: 200 });
@@ -36,45 +35,49 @@ export const middleware = async (req: NextRequest) => {
     return NextResponse.next();
   }
 
-  const excludePaths = ['/api/trpc/auth.login'];
+  const excludePaths = ['/api/trpc/auth.login', '/api/auth']; // Exclude NextAuth API routes and login route
 
-  const isExcluded = excludePaths.some((path) => path === req.nextUrl.pathname);
+  const isExcluded = excludePaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
 
   if (isExcluded) {
     return NextResponse.next();
   }
 
-  // Auth check
-  const token = req.headers.get('authorization')?.split(' ')[1] || '';
-  const tokenData = await verifyJWT(token);
-  if (!tokenData.verify) {
+  // Use NextAuth to verify authentication
+  const token = await getToken({ req });
+  console.log('token forom gettoken', token);
+
+  if (!token) {
     return NextResponse.json('Unauthorized', { status: 401 });
   }
 
-  // RBAC check
+  // RBAC check based on permissions in the token from NextAuth
   const path = req.nextUrl.pathname;
   const method = req.method;
   const requiredPermission = permissionMap[path]?.[method];
 
-  if (!tokenData.permissions) {
-    return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
-  }
-
   if (requiredPermission) {
+    if (!token.permissions) {
+      return NextResponse.json(
+        { error: 'Permission denied - No permissions found in token' },
+        { status: 403 }
+      );
+    }
     const hasPermission = await checkPermission(
-      tokenData.permissions,
+      token.permissions as Permission[], // Permissions should be in JWT from auth.ts
       requiredPermission
     );
     if (!hasPermission) {
-      return NextResponse.json({ error: 'Permission denied' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Permission denied - RBAC check failed' },
+        { status: 403 }
+      );
     }
   }
 
-  return NextResponse.next({
-    headers: {
-      tokenData: JSON.stringify(tokenData),
-    },
-  });
+  return NextResponse.next();
 };
 
 export const config = {
