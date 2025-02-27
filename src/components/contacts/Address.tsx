@@ -1,6 +1,6 @@
 import AddLocation from '@/components/contacts/tagbasedfields/AddLocation';
 import { SearchableSelect } from '@/components/SearchableSelect';
-
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -34,16 +34,23 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
   const [locationsData, setLocationsData] = useState<Location[] | undefined>(
     undefined
-  ); // Store data locally
+  );
+
+  const initialCityInput = form.watch('location.city');
+  form.setValue('cityInput', initialCityInput);
 
   const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
     searchTerm,
     {
       enabled: hasSearched,
-      onSuccess: (data) => setLocationsData(data), // Update local state on success
+      onSuccess: (data) => setLocationsData(data),
     }
   );
-
+  useEffect(() => {
+    if (hasSearched) {
+      refetch();
+    }
+  }, [searchTerm, hasSearched, refetch]);
   const onSearch = useCallback(
     (search: string) => {
       setSearchTerm(search);
@@ -63,9 +70,9 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       form.setValue('state', selectedLocation.state || '');
       form.setValue('country', selectedLocation.country || '');
       setIsLocationSelected(true);
-      setSearchTerm(''); // Clear search for next search
-      setHasSearched(false); // Reset for next search
-      setLocationsData(undefined); // Clear displayed locations
+      setSearchTerm('');
+      setHasSearched(false);
+      setLocationsData(undefined);
     },
     [form]
   );
@@ -135,7 +142,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="state"
+          name="location.state"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">State/Region</FormLabel>
@@ -146,7 +153,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected} // Disable when a location is selected
+                  disabled={isLocationSelected}
                 />
               </FormControl>
               <FormMessage />
@@ -156,7 +163,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
         <FormField
           control={form.control}
-          name="country"
+          name="location.country"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">Country</FormLabel>
@@ -167,7 +174,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected} // Disable when a location is selected
+                  disabled={isLocationSelected}
                 />
               </FormControl>
               <FormMessage />

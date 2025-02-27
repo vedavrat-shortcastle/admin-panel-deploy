@@ -16,10 +16,9 @@ export const tagsRouter = router({
           name: true,
         },
       });
-      return tags; // Return tags if query is successful
+      return tags;
     } catch (error) {
-      // Error handling block
-      console.error('Error fetching tags:', error); // Log the error on the server
+      console.error('Error fetching tags:', error);
     }
   }),
 });

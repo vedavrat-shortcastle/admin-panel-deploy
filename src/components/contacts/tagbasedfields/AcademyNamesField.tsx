@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
+
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
@@ -12,9 +13,14 @@ interface GetAcademyNamesRes {
 interface AcademyNamesProps {
   form: UseFormReturn<any>;
   mode: 'single' | 'multiple';
+  initialIds?: string[];
 }
 
-export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
+export const AcademyNames: React.FC<AcademyNamesProps> = ({
+  form,
+  mode,
+  initialIds,
+}) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const {
@@ -25,11 +31,37 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
     enabled: searchTerm.length > 0,
   });
 
+  const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
+    initialIds || [],
+    {
+      enabled: Array.isArray(initialIds) && initialIds.length > 0,
+      onSuccess: (data) => {
+        const initialNames = data.map((academy) => academy.name);
+        form.setValue('academyNames', initialNames);
+      },
+    }
+  );
+
+  useEffect(() => {
+    if (initialAcademies && initialAcademies.length > 0) {
+      const validAcademies = initialAcademies.filter(
+        (academy): academy is GetAcademyNamesRes => academy !== null
+      );
+      form.setValue(
+        'academyIds',
+        validAcademies.map((academy) => academy.id)
+      );
+      form.setValue(
+        'academyNames',
+        validAcademies.map((academy) => academy.name)
+      );
+    }
+  }, [initialAcademies, form]);
+
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
   }
 
-  // Watch form fields based on mode
   const selectedIds = useWatch({
     control: form.control,
     name: mode === 'multiple' ? 'academyIds' : 'academyId',
@@ -42,7 +74,6 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
     defaultValue: mode === 'multiple' ? [] : '',
   });
 
-  // Sync names with IDs when data is available
   useEffect(() => {
     if (academyNamesData && mode === 'multiple' && selectedIds.length > 0) {
       const currentNames = new Set(selectedNames as string[]);
@@ -55,12 +86,11 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({ form, mode }) => {
 
       const filteredNewNames = newNames.filter(
         (name: string): name is string => name !== ''
-      ); // Ensure non-empty strings
+      );
       form.setValue('academyNames', [
         ...new Set([...filteredNewNames, ...selectedNames]),
       ]);
 
-      // Only update if there are differences
       if (
         newNames.length !== currentNames.size ||
         !newNames.every((name: string) => currentNames.has(name))

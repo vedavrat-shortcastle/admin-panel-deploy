@@ -13,6 +13,7 @@ import {
   filterInputSchema,
 } from '@/utils/Filter/filterBuilder';
 import { FilterGroup } from '@/types/dynamicFilter';
+import { contactUpdateSchema } from '@/schemas/contactUpdateSchema';
 import { contactFormSchema } from '@/schemas/contacts';
 
 export const contactsRouter = router({
@@ -34,6 +35,30 @@ export const contactsRouter = router({
   getById: procedure.input(z.string()).query(async ({ ctx, input }) => {
     const contactTableData = await ctx.db.contact.findUnique({
       where: { id: parseInt(input) },
+      include: {
+        academies: {
+          include: {
+            academy: true,
+          },
+        },
+        location: {
+          select: {
+            country: true,
+            state: true,
+            city: true,
+          },
+        },
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        physicalLocationsTaught: {
+          include: {
+            location: true,
+          },
+        },
+      },
     });
 
     const contactLocationData = await ctx.db.location.findUnique({
@@ -44,8 +69,24 @@ export const contactsRouter = router({
         city: true,
       },
     });
+    if (!contactTableData) {
+      throw new Error('Contact not found');
+    }
+    const academyNames = contactTableData.academies.map(
+      (ca) => ca.academy.name
+    );
+    const customTags = contactTableData.tags.map((t) => t.tag.name);
+    const physicallyTaught = contactTableData.physicalLocationsTaught.map(
+      (pl) => pl.locationId
+    );
 
-    return { ...contactTableData, ...contactLocationData };
+    return {
+      ...contactTableData,
+      academyNames,
+      customTags,
+      physicallyTaught,
+      contactLocationData,
+    };
   }),
 
   getFiltered: procedure
@@ -179,6 +220,85 @@ export const contactsRouter = router({
             return newContact;
           } catch (error) {
             throw new Error(`Error while creating contact:  ${error}`);
+          }
+        },
+        { timeout: 15000 }
+      );
+    }),
+  updateById: procedure
+    .input(contactUpdateSchema.extend({ id: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      return await ctx.db.$transaction(
+        async (tx) => {
+          try {
+            const {
+              id,
+              academyIds,
+              currentAcademy,
+              physicallyTaught,
+              customTags,
+              ...rest
+            } = input;
+            const updateData = Object.fromEntries(
+              Object.entries(rest).filter(([value]) => value !== undefined)
+            );
+            let updatedContact;
+            if (Object.keys(updateData).length > 0) {
+              updatedContact = await tx.contact.update({
+                where: { id },
+                data: updateData,
+              });
+            } else {
+              updatedContact = await tx.contact.findUnique({ where: { id } });
+            }
+            if (academyIds !== undefined) {
+              await tx.contactAcademy.deleteMany({ where: { contactId: id } });
+              if (academyIds.length > 0) {
+                await tx.contactAcademy.createMany({
+                  data: academyIds.map((academyId) => ({
+                    contactId: id,
+                    academyId,
+                    isCurrent: academyId === currentAcademy,
+                  })),
+                });
+              }
+            }
+            if (physicallyTaught !== undefined) {
+              await tx.contactPhysicalLocation.deleteMany({
+                where: { contactId: id },
+              });
+              if (physicallyTaught.length) {
+                await tx.contactPhysicalLocation.createMany({
+                  data: physicallyTaught.map((locationId) => ({
+                    contactId: id,
+                    locationId,
+                  })),
+                });
+              }
+            }
+            if (customTags !== undefined) {
+              await tx.contactTag.deleteMany({ where: { contactId: id } });
+              if (customTags.length > 0) {
+                const existingTags = await tx.tag.findMany({
+                  where: { name: { in: customTags } },
+                });
+                const existingTagNames = existingTags.map((tag) => tag.name);
+                const newTags = customTags
+                  .filter((tagName) => !existingTagNames.includes(tagName))
+                  .map((tagName) => tx.tag.create({ data: { name: tagName } }));
+                const createdTags = await Promise.all(newTags);
+                const allTags = [...existingTags, ...createdTags];
+                await tx.contactTag.createMany({
+                  data: allTags.map((tag) => ({
+                    contactId: id,
+                    tagId: tag.id,
+                  })),
+                });
+              }
+            }
+            return updatedContact;
+          } catch (error) {
+            throw new Error(`Error updating contact: ${error}`);
           }
         },
         { timeout: 15000 }
