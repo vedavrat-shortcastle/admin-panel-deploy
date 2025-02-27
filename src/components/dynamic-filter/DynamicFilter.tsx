@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import {
   FilterCondition,
-  FilterField,
   FilterGroup,
   FilterOperator,
+  FilterBuilderProps,
+  FilterTab,
 } from '@/types/dynamicFilter';
 import React, { useState, useEffect } from 'react';
 import {
@@ -18,26 +19,12 @@ import { FilterConditions } from '@/components/dynamic-filter/FilterCondition';
 import { trpc } from '@/utils/trpc';
 import { useToast } from '@/hooks/use-toast';
 import { Plus } from 'lucide-react';
-import { JsonValue } from '@prisma/client/runtime/library';
-
-interface FilterBuilderProps {
-  fields: FilterField[];
-  initialFilters?: FilterGroup;
-  onChange: (filters: FilterGroup) => void;
-}
 
 const emptyFilters: FilterGroup = {
   logic: 'AND',
   conditions: [],
   groups: [],
 };
-
-interface FilterTab {
-  id: string;
-  name: string;
-  filter: { filter: FilterGroup } | JsonValue;
-  createdat: Date;
-}
 
 export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   fields,
@@ -52,7 +39,9 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   const [activeFilterId, setActiveTabId] = useState<string | null>('new-tab');
   const { toast } = useToast();
 
-  const { data, isLoading, error } = trpc.filter.getFilters.useQuery();
+  const { data, isLoading, error } = trpc.filter.getFilters.useQuery({
+    sectionName: 'contacts',
+  });
 
   if (error) {
     toast({
@@ -64,7 +53,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
 
   useEffect(() => {
     if (data && data.length > 0) {
-      console.log('data: ', data);
       const combinedData = data.map((item) => ({
         ...item,
         createdat: item.createdat ? new Date(item.createdat) : new Date(),
@@ -146,6 +134,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     createFilter.mutate({
       name,
       filter: filters,
+      adminpanelSection: 'contacts',
     });
   };
 
@@ -224,7 +213,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     updateFilterMutation.mutate({
       id: activeFilterId || '',
       name: (activeTab && activeTab.name) || '',
-      filterInputSchema: { filter: filters },
+      filter: { filter: filters },
     });
   };
 
