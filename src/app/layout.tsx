@@ -5,6 +5,7 @@ import TrpcProvider from '@/hooks/trpc-provider';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { AdminSidebar } from '@/components/Sidebar';
 import { Toaster } from '@/components/ui/toaster';
+import { AuthProvider } from '@/hooks/auth-provider';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -27,20 +28,22 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <TrpcProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        >
-          <div>
-            <SidebarProvider>
-              <AdminSidebar />
-              <main className="h-full w-full">{children}</main>
-            </SidebarProvider>
-          </div>
-          <Toaster />
-        </body>
-      </html>
-    </TrpcProvider>
+    <html lang="en">
+      <TrpcProvider>
+        <AuthProvider>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          >
+            <div>
+              <SidebarProvider>
+                <AdminSidebar />
+                <main className="h-full w-full">{children}</main>
+              </SidebarProvider>
+            </div>
+            <Toaster />
+          </body>
+        </AuthProvider>
+      </TrpcProvider>
+    </html>
   );
 }

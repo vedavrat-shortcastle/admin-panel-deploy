@@ -6,6 +6,7 @@ import { createTRPCReact } from '@trpc/react-query';
 import { httpBatchLink } from '@trpc/client';
 import superjson from 'superjson';
 import { AppRouter } from '@/app/server/routers';
+import { getCookie } from '@/utils/encoder';
 
 export const trpc = createTRPCReact<AppRouter>();
 
@@ -13,6 +14,10 @@ const trpcClient = trpc.createClient({
   links: [
     httpBatchLink({
       url: '/api/trpc',
+      headers() {
+        const token = getCookie('token');
+        return token ? { Authorization: `Bearer ${token}` } : {};
+      },
     }),
   ],
   transformer: superjson,
