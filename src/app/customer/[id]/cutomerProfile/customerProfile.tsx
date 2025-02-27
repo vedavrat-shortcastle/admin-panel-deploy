@@ -16,6 +16,7 @@ import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
 import { Subscription } from '@/types/subscription';
 import { createSubscriptionSchema } from '@/schemas/subscription';
 import { Form } from '@/components/ui/form';
+import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 
 interface CustomerProfileProps {
   subscription: Subscription;
@@ -32,13 +33,14 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
     resolver: zodResolver(createSubscriptionSchema),
     defaultValues: subscription || initialSubscriptionData,
   });
+  // Access the subscription ID directly from the subscription prop
+  const subscriptionId = subscription?.id?.toString() || ''; // Ensure it's a string, handle potential undefined
   const watchedAcademyIds = form.watch('academyId');
   console.log('Watched Academy IDs:', watchedAcademyIds);
   const onSubmit = async (data: subscriptionFormValues) => {
     setIsEditing(true);
     try {
       console.log('Form Data:', data);
-
       await updateContact(contact.id, data);
 
       toast({
@@ -113,6 +115,13 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
               >
                 <div className="grid md:grid-cols-1 gap-6">
                   <CustomerDetails form={form}></CustomerDetails>
+                </div>
+                <div className="grid md:grid-cols-1 gap-6">
+                  <AcademyNames
+                    form={form}
+                    mode="single"
+                    subscriptionId={subscriptionId}
+                  />
                 </div>
                 <Separator />
                 <div className="grid md:grid-cols-1 gap-6">

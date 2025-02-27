@@ -13,12 +13,14 @@ interface GetAcademyNamesRes {
 interface AcademyNamesProps {
   form: UseFormReturn<any>;
   mode: 'single' | 'multiple';
-  initialIds?: string[];
+  subscriptionId?: string; // Change to subscriptionId for single mode
+  initialIds?: string[]; // Keep initialIds for multiple mode
 }
 
 export const AcademyNames: React.FC<AcademyNamesProps> = ({
   form,
   mode,
+  // subscriptionId, // Use subscriptionId
   initialIds,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -26,37 +28,51 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
   const {
     data: academyNamesData,
     error,
-    isLoading,
+    // isLoading,
   } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
+  if (mode === 'multiple') {
+    const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
+      initialIds || [],
+      {
+        enabled: Array.isArray(initialIds) && initialIds.length > 0,
+        onSuccess: (data) => {
+          const initialNames = data.map((academy) => academy.name);
+          form.setValue('academyNames', initialNames);
+        },
+      }
+    );
+    useEffect(() => {
+      if (initialAcademies && initialAcademies.length > 0) {
+        const validAcademies = initialAcademies.filter(
+          (academy): academy is GetAcademyNamesRes => academy !== null
+        );
 
-  const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
-    initialIds || [],
-    {
-      enabled: Array.isArray(initialIds) && initialIds.length > 0,
-      onSuccess: (data) => {
-        const initialNames = data.map((academy) => academy.name);
-        form.setValue('academyNames', initialNames);
-      },
-    }
-  );
-
-  useEffect(() => {
-    if (initialAcademies && initialAcademies.length > 0) {
-      const validAcademies = initialAcademies.filter(
-        (academy): academy is GetAcademyNamesRes => academy !== null
-      );
-      form.setValue(
-        'academyIds',
-        validAcademies.map((academy) => academy.id)
-      );
-      form.setValue(
-        'academyNames',
-        validAcademies.map((academy) => academy.name)
-      );
-    }
-  }, [initialAcademies, form]);
+        form.setValue(
+          'academyIds',
+          validAcademies.map((academy) => academy.id)
+        );
+        form.setValue(
+          'academyNames',
+          validAcademies.map((academy) => academy.name)
+        );
+      }
+    }, [initialAcademies, form, mode]);
+  }
+  // if (mode === 'single') {
+  // const { data: subscription, isLoading: subscriptionLoading } =
+  //   trpc.subscription.getById.useQuery(subscriptionId || '', {
+  //     enabled: mode === 'single' && !!subscriptionId,
+  //     onSuccess: (data) => {
+  //       if (data?.academy?.name) {
+  //         form.setValue('academyId', data.academyId);
+  //         form.setValue('academyName', data.academy.name);
+  //         form.setValue('academyNameInput', data.academy.name);
+  //       }
+  //     },
+  //   });
+  // }
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
@@ -138,15 +154,15 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     <div>
       <SearchableSelect<GetAcademyNamesRes>
         form={form}
-        fieldName={mode === 'multiple' ? 'academyNames' : 'academyName'}
+        fieldName={mode === 'multiple' ? 'academyNames' : 'academyNameInput'}
         label="Academy Names"
         placeholder="Search Academy and Select"
         data={academyNamesData || []}
         displayKey="name"
-        selectionMode="multiple"
+        selectionMode={mode}
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
-        isLoading={isLoading}
+        // isLoading={isLoading || subscriptionLoading}
       />
 
       {mode === 'multiple' && selectedNames.length > 0 && (
