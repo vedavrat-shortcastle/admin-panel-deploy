@@ -1,4 +1,5 @@
 import { savedFilterSchema } from '@/schemas/savedFilterSchema';
+import { JsonValue } from '@prisma/client/runtime/library';
 
 export type FilterFieldType = 'string' | 'number' | 'date' | 'boolean';
 
@@ -30,6 +31,19 @@ export interface FilterGroup {
   logic: 'AND' | 'OR';
   conditions: FilterCondition[];
   groups?: FilterGroup[];
+}
+
+export interface FilterBuilderProps {
+  fields: FilterField[];
+  initialFilters?: FilterGroup;
+  onChange: (filters: FilterGroup) => void;
+}
+
+export interface FilterTab {
+  id: string;
+  name: string;
+  filter: { filter: FilterGroup } | JsonValue;
+  createdat: Date;
 }
 
 export type EntityFilter = {
