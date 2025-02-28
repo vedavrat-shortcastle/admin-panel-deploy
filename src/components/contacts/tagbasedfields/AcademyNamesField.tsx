@@ -13,7 +13,7 @@ interface GetAcademyNamesRes {
 interface AcademyNamesProps {
   form: UseFormReturn<any>;
   mode: 'single' | 'multiple';
-  initialIds?: string | string[];
+  initialIds?: string[];
 }
 
 export const AcademyNames: React.FC<AcademyNamesProps> = ({
@@ -31,45 +31,32 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     enabled: searchTerm.length > 0,
   });
 
-  const fetchInitialAcademies = () => {
-    if (mode === 'single' && typeof initialIds === 'string' && initialIds) {
-      trpc.academy.getAcademyByIds.useQuery([initialIds], {
-        enabled: true,
-        onSuccess: (data) => {
-          if (data && data.length > 0 && data[0]) {
-            form.setValue('academyId', data[0].id);
-            form.setValue('academyName', data[0].name);
-            form.setValue('academyNameInput', data[0].name);
-          }
-        },
-      });
-    } else if (
-      mode === 'multiple' &&
-      Array.isArray(initialIds) &&
-      initialIds.length > 0
-    ) {
-      trpc.academy.getAcademyByIds.useQuery(initialIds, {
-        enabled: true,
-        onSuccess: (data) => {
-          const validAcademies = data.filter(
-            (academy): academy is GetAcademyNamesRes => academy !== null
-          );
-          form.setValue(
-            'academyIds',
-            validAcademies.map((academy) => academy.id)
-          );
-          form.setValue(
-            'academyNames',
-            validAcademies.map((academy) => academy.name)
-          );
-        },
-      });
+  const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
+    initialIds || [],
+    {
+      enabled: Array.isArray(initialIds) && initialIds.length > 0,
+      onSuccess: (data) => {
+        const initialNames = data.map((academy) => academy.name);
+        form.setValue('academyNames', initialNames);
+      },
     }
-  };
+  );
 
   useEffect(() => {
-    fetchInitialAcademies();
-  }, [initialIds, form, mode]);
+    if (initialAcademies && initialAcademies.length > 0) {
+      const validAcademies = initialAcademies.filter(
+        (academy): academy is GetAcademyNamesRes => academy !== null
+      );
+      form.setValue(
+        'academyIds',
+        validAcademies.map((academy) => academy.id)
+      );
+      form.setValue(
+        'academyNames',
+        validAcademies.map((academy) => academy.name)
+      );
+    }
+  }, [initialAcademies, form]);
 
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
@@ -88,13 +75,8 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
   });
 
   useEffect(() => {
-    if (
-      academyNamesData &&
-      mode === 'multiple' &&
-      Array.isArray(selectedIds) &&
-      selectedIds.length > 0
-    ) {
-      // const currentNames = new Set(Array.isArray(selectedNames) ? selectedNames : []);
+    if (academyNamesData && mode === 'multiple' && selectedIds.length > 0) {
+      const currentNames = new Set(selectedNames as string[]);
       const newNames = selectedIds
         .map(
           (id: string) =>
@@ -105,30 +87,27 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
       const filteredNewNames = newNames.filter(
         (name: string): name is string => name !== ''
       );
-
       form.setValue('academyNames', [
-        ...new Set([
-          ...filteredNewNames,
-          ...(Array.isArray(selectedNames) ? selectedNames : []),
-        ]),
+        ...new Set([...filteredNewNames, ...selectedNames]),
       ]);
+
+      if (
+        newNames.length !== currentNames.size ||
+        !newNames.every((name: string) => currentNames.has(name))
+      ) {
+        form.setValue(
+          'academyNames',
+          Array.from(new Set([...currentNames, ...newNames]))
+        );
+      }
     }
-  }, [selectedIds, academyNamesData, form, mode, selectedNames]);
+  }, [selectedIds, academyNamesData, form, mode]);
 
   const handleOnSelect = (selectedAcademy: GetAcademyNamesRes) => {
     if (mode === 'multiple') {
-      if (
-        Array.isArray(selectedNames) &&
-        !selectedNames.includes(selectedAcademy.name)
-      ) {
-        form.setValue('academyIds', [
-          ...(Array.isArray(selectedIds) ? selectedIds : []),
-          selectedAcademy.id,
-        ]);
-        form.setValue('academyNames', [
-          ...(Array.isArray(selectedNames) ? selectedNames : []),
-          selectedAcademy.name,
-        ]);
+      if (!selectedNames.includes(selectedAcademy.name)) {
+        form.setValue('academyIds', [...selectedIds, selectedAcademy.id]);
+        form.setValue('academyNames', [...selectedNames, selectedAcademy.name]);
       }
     } else {
       form.setValue('academyId', selectedAcademy.id);
@@ -140,10 +119,8 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
 
   const handleRemoveTag = (index: number) => {
     if (mode === 'multiple') {
-      const updatedIds = [...(Array.isArray(selectedIds) ? selectedIds : [])];
-      const updatedNames = [
-        ...(Array.isArray(selectedNames) ? selectedNames : []),
-      ];
+      const updatedIds = [...(selectedIds as string[])];
+      const updatedNames = [...(selectedNames as string[])];
 
       updatedIds.splice(index, 1);
       updatedNames.splice(index, 1);
@@ -166,40 +143,37 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
         placeholder="Search Academy and Select"
         data={academyNamesData || []}
         displayKey="name"
-        selectionMode={mode === 'multiple' ? 'multiple' : 'single'}
+        selectionMode="multiple"
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
         isLoading={isLoading}
       />
 
-      {mode === 'multiple' &&
-        Array.isArray(selectedNames) &&
-        selectedNames.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
-            {selectedNames.map((academy: string, index: number) => (
-              <div
-                key={index}
-                className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
-              >
-                <span>{academy}</span>
-                <button onClick={() => handleRemoveTag(index)} className="ml-2">
-                  <X
-                    size={14}
-                    className="text-gray-600 hover:text-red-500"
-                    strokeWidth={3}
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+      {mode === 'multiple' && selectedNames.length > 0 && (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {selectedNames.map((academy: string, index: number) => (
+            <div
+              key={index}
+              className="flex items-center bg-gray-200 px-3 py-1 rounded-lg"
+            >
+              <span>{academy}</span>
+              <button onClick={() => handleRemoveTag(index)} className="ml-2">
+                <X
+                  size={14}
+                  className="text-gray-600 hover:text-red-500"
+                  strokeWidth={3}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
-      {mode === 'multiple' &&
-        (!Array.isArray(selectedNames) || selectedNames.length === 0) && (
-          <div className="text-gray-400 text-sm italic mt-2">
-            No academies added yet.
-          </div>
-        )}
+      {mode === 'multiple' && selectedNames.length === 0 && (
+        <div className="text-gray-400 text-sm italic mt-2">
+          No academies added yet.
+        </div>
+      )}
     </div>
   );
 };

@@ -15,7 +15,7 @@ import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
 import { Subscription } from '@/types/subscription';
 import { Form } from '@/components/ui/form';
 import { trpc } from '@/utils/trpc';
-import { subscriptionUpdateSchema } from '@/schemas/subscriptionUpdateSchema';
+import { createSubscriptionSchema } from '@/schemas/subscription';
 
 interface CustomerProfileProps {
   subscription: Subscription;
@@ -29,12 +29,10 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   const router = useRouter();
 
   const form = useForm<subscriptionFormValues>({
-    resolver: zodResolver(subscriptionUpdateSchema),
+    resolver: zodResolver(createSubscriptionSchema),
     defaultValues: subscription || initialSubscriptionData,
   });
 
-  const watchedAcademyIds = form.watch('academyId');
-  console.log('Watched Academy IDs:', watchedAcademyIds);
   const { mutate: updateSubscription, isLoading } =
     trpc.subscription.update.useMutation();
 
@@ -42,7 +40,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
     const isValid = await form.trigger();
 
     if (!isValid) {
-      console.error('Validation Errors:', form.formState.errors); // Log errors in the console
+      console.error('Validation Errors:', form.formState.errors);
       toast({
         title: 'Error',
         description: 'Validation failed! Give proper inputs.',
@@ -64,7 +62,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
 
       const { ...restFormData } = currentFormData;
       updateSubscription(
-        { id: subscription.id.toString(), data: restFormData }, // Convert subscription.id to string
+        { id: subscription.id.toString(), data: restFormData },
         {
           onSuccess: () => {
             toast({
@@ -74,7 +72,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
             router.refresh();
           },
           onError: (error) => {
-            console.error('TRPC Error:', error); // Log the trpc error
+            console.error('TRPC Error:', error);
             toast({
               title: 'Error',
               description:
@@ -118,14 +116,6 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
                     className="rounded-full object-cover"
                   />
                 </label>
-                <input
-                  id="profile-upload"
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e)}
-                  disabled={!isEditing}
-                />
               </form>
 
               <div className="flex flex-col gap-2">
@@ -150,13 +140,6 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
               >
                 <div className="grid md:grid-cols-1 gap-6">
                   <CustomerDetails form={form}></CustomerDetails>
-                </div>
-                <div className="grid md:grid-cols-1 gap-6">
-                  {/* <AcademyNames
-                    form={form}
-                    mode="single"
-                    subscriptionId={subscriptionId}
-                  /> */}
                 </div>
                 <Separator />
                 <div className="grid md:grid-cols-1 gap-6">

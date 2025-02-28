@@ -17,7 +17,7 @@ interface SearchContactProps {
 
 const SearchContact = ({ form }: SearchContactProps) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const contactId = form.watch('contactId'); // Get the contactId from the form
+  const contactId = form.watch('contactId');
   const { data, isLoading, error } = trpc.contacts.getAll.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
@@ -27,7 +27,7 @@ const SearchContact = ({ form }: SearchContactProps) => {
     isLoading: isSelectedContactLoading,
     error: selectedContactError,
   } = trpc.contacts.getById.useQuery(String(contactId), {
-    enabled: !!contactId, // Only fetch if contactId is set
+    enabled: !!contactId,
   });
 
   useEffect(() => {
@@ -56,16 +56,15 @@ const SearchContact = ({ form }: SearchContactProps) => {
 
   const handleOnSelect = (selectedContact: GetContactsRes) => {
     form.setValue('contactId', selectedContact.id);
-    // form.setValue(
-    //   'contactInput',
-    //   selectedContact.firstName +
-    //     ' ' +
-    //     selectedContact.lastName +
-    //     ' (' +
-    //     selectedContact.email +
-    //     ')'
-    // );
-    // console.log(form.getValues('contactId'));
+    form.setValue(
+      'contactInput',
+      selectedContact.firstName +
+        ' ' +
+        selectedContact.lastName +
+        ' (' +
+        selectedContact.email +
+        ')'
+    );
 
     setSearchTerm('');
   };

@@ -6,15 +6,15 @@ export const initialSubscriptionData = {
   freeSeats: 5,
   planType: 'MONTHLY',
   renewalType: 'AUTOMATIC',
-  planStartDate: new Date(), // Current date
+  planStartDate: new Date(),
   planEndDate: new Date(
     new Date().getFullYear() + 1,
     new Date().getMonth(),
     new Date().getDate()
-  ), // One year from now
-  paymentMode: 1, // Example number for payment mode
-  salesType: ['New'], // Example string array for sales type
-  currency: ['USD'], // Example string array for currency
+  ),
+  paymentMode: 1,
+  salesType: ['New'],
+  currency: ['USD'],
   amount: 100,
   salesPerson: 'John Doe',
   notes: 'Initial subscription setup.',
