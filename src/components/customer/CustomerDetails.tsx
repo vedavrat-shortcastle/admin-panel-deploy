@@ -16,16 +16,14 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { subscriptionFormReturns } from '@/types/customerSection';
+import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 
 interface customerDetailsProps {
   form: subscriptionFormReturns;
 }
 
 export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
-  // const academyIds =
-  //   form
-  //     .watch('academies')
-  //     ?.map((academy: { academyId: string }) => academy.academyId) || [];
+  const academyId = form.watch('academyId');
   return (
     <div>
       <div className="space-y-6">
@@ -37,7 +35,7 @@ export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
 
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-6">
-            {/* <AcademyNames  form={form} mode="single" initialIds={academyIds}/> */}
+            <AcademyNames form={form} mode="single" initialIds={academyId} />
           </div>
           <div className="col-span-6">
             <FormField
