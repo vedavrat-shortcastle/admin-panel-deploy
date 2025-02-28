@@ -7,16 +7,15 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-// import { updateContact } from '@/app/contacts/[contactprofile]/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { initialSubscriptionData } from '@/app/customer/[id]/cutomerProfile/customerData';
 import { subscriptionFormValues } from '@/types/customerSection';
 import { CustomerDetails } from '@/components/customer/CustomerDetails';
 import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
 import { Subscription } from '@/types/subscription';
-import { createSubscriptionSchema } from '@/schemas/subscription';
 import { Form } from '@/components/ui/form';
-import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
+import { trpc } from '@/utils/trpc';
+import { subscriptionUpdateSchema } from '@/schemas/subscriptionUpdateSchema';
 
 interface CustomerProfileProps {
   subscription: Subscription;
@@ -30,30 +29,66 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
   const router = useRouter();
 
   const form = useForm<subscriptionFormValues>({
-    resolver: zodResolver(createSubscriptionSchema),
+    resolver: zodResolver(subscriptionUpdateSchema),
     defaultValues: subscription || initialSubscriptionData,
   });
-  // Access the subscription ID directly from the subscription prop
-  const subscriptionId = subscription?.id?.toString() || ''; // Ensure it's a string, handle potential undefined
+
   const watchedAcademyIds = form.watch('academyId');
   console.log('Watched Academy IDs:', watchedAcademyIds);
-  const onSubmit = async (data: subscriptionFormValues) => {
-    setIsEditing(true);
-    try {
-      console.log('Form Data:', data);
-      await updateContact(contact.id, data);
+  const { mutate: updateSubscription, isLoading } =
+    trpc.subscription.update.useMutation();
 
-      toast({
-        title: 'Contact updated',
-        description: 'The contact has been successfully updated.',
-      });
+  const handleSaveChanges = async () => {
+    const isValid = await form.trigger();
 
-      router.refresh();
-    } catch (error) {
-      console.error('Error submitting form:', error);
+    if (!isValid) {
+      console.error('Validation Errors:', form.formState.errors); // Log errors in the console
       toast({
         title: 'Error',
-        description: 'Failed to update the contact. Please try again.',
+        description: 'Validation failed! Give proper inputs.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const currentFormData = form.getValues();
+      if (!subscription?.id) {
+        toast({
+          title: 'Error',
+          description: 'Invalid subscription ID',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const { ...restFormData } = currentFormData;
+      updateSubscription(
+        { id: subscription.id.toString(), data: restFormData }, // Convert subscription.id to string
+        {
+          onSuccess: () => {
+            toast({
+              title: 'Subscription updated',
+              description: 'The subscription has been successfully updated.',
+            });
+            router.refresh();
+          },
+          onError: (error) => {
+            console.error('TRPC Error:', error); // Log the trpc error
+            toast({
+              title: 'Error',
+              description:
+                'Failed to update the subscription. Please try again.',
+              variant: 'destructive',
+            });
+          },
+        }
+      );
+    } catch (error) {
+      console.error('Error updating subscription:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred.',
         variant: 'destructive',
       });
     } finally {
@@ -96,7 +131,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
               <div className="flex flex-col gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setIsEditing(!isEditing)}
+                  onClick={() => setIsEditing(true)}
                   className="w-full"
                 >
                   <Pencil className="h-4 w-4 mr-2" />
@@ -110,18 +145,18 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
           <fieldset disabled={!isEditing} className="p6">
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={form.handleSubmit(handleSaveChanges)}
                 className="space-y-6"
               >
                 <div className="grid md:grid-cols-1 gap-6">
                   <CustomerDetails form={form}></CustomerDetails>
                 </div>
                 <div className="grid md:grid-cols-1 gap-6">
-                  <AcademyNames
+                  {/* <AcademyNames
                     form={form}
                     mode="single"
                     subscriptionId={subscriptionId}
-                  />
+                  /> */}
                 </div>
                 <Separator />
                 <div className="grid md:grid-cols-1 gap-6">
@@ -139,12 +174,8 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
                     >
                       Cancel
                     </Button>
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      onClick={() => setIsEditing(false)}
-                    >
-                      Save Changes
+                    <Button type="submit" onClick={handleSaveChanges}>
+                      {isLoading ? 'Saving...' : 'Save Changes'}
                     </Button>
                   </div>
                 )}

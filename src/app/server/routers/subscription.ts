@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { procedure, router } from '@/app/server/trpc';
 import { createSubscriptionSchema } from '@/schemas/subscription';
+import { subscriptionUpdateSchema } from '@/schemas/subscriptionUpdateSchema';
 
 //subscription is a router that contains multiple procedures for customers management
 
@@ -26,6 +27,7 @@ export const subscriptionRouter = router({
       where: { id: parseInt(input) },
       select: {
         id: true,
+        contactId: true, // Include contactId in the select
         adminName: true,
         academyId: true,
         salesType: true,
@@ -65,5 +67,26 @@ export const subscriptionRouter = router({
           freeSeats: input.freeSeats ?? 0,
         },
       });
+    }),
+  update: procedure
+    .input(
+      z.object({
+        id: z.string(),
+        data: subscriptionUpdateSchema.partial(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updatedSubscription = await ctx.db.subscription.update({
+        where: { id: parseInt(input.id) },
+        data: {
+          ...input.data,
+        },
+      });
+
+      if (!updatedSubscription) {
+        throw new Error('Subscription update failed');
+      }
+
+      return updatedSubscription;
     }),
 });
