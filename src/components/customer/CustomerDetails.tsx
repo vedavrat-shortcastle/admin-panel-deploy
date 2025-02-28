@@ -35,7 +35,7 @@ export const CustomerDetails: React.FC<customerDetailsProps> = ({ form }) => {
 
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-6">
-            <AcademyNames form={form} mode="single" initialIds={academyId} />
+            <AcademyNames form={form} mode="single" initialIds={[academyId]} />
           </div>
           <div className="col-span-6">
             <FormField

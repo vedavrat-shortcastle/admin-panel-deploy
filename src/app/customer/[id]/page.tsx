@@ -14,9 +14,9 @@ export default function SubscriptionPage() {
     isLoading,
     error,
   } = trpc.subscription.getById.useQuery(id!, {
-    enabled: !!id, // Ensures the query only runs when `id` exists
+    enabled: !!id,
   });
-  console.log('subscription data', subscription);
+
   if (!id) return <p>Invalid subscription ID.</p>;
   if (isLoading) return <CustomerProfileLoading />;
   if (error) return <p>Error fetching subscription: {error.message}</p>;
