@@ -3,8 +3,9 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 
 import { db } from '@/lib/db';
 import { verifyPassword } from '@/utils/encoder';
+import { AuthOptions } from 'next-auth';
 
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -73,6 +74,8 @@ const handler = NextAuth({
       return session;
     },
   },
-});
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

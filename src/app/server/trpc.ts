@@ -6,7 +6,6 @@ import superjson from 'superjson';
 export const createContext = async () => {
   return {
     db,
-    // Add any other context items here
   };
 };
 
