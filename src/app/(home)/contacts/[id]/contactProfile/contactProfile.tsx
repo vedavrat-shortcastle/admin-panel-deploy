@@ -21,9 +21,9 @@ import type { Contact } from '@/types/contact';
 import { toast } from '@/hooks/use-toast';
 import { LanguagesSpoken } from '@/components/contacts/tagbasedfields/LanguagesSpoken';
 import { trpc } from '@/hooks/trpc-provider';
-import { PersonalContactInfo } from '@/app/contacts/[id]/contactProfile/personalDetails';
-import { ProfessionalChessInfo } from '@/app/contacts/[id]/contactProfile/professionalDetails';
-import { ContactAddressInfo } from '@/app/contacts/[id]/contactProfile/contactDetails';
+import { PersonalContactInfo } from '@/app/(home)/contacts/[id]/contactProfile/personalDetails';
+import { ProfessionalChessInfo } from '@/app/(home)/contacts/[id]/contactProfile/professionalDetails';
+import { ContactAddressInfo } from '@/app/(home)/contacts/[id]/contactProfile/contactDetails';
 import { PhysicallyTaught } from '@/components/contacts/tagbasedfields/PhysicallyTaught';
 
 interface ContactProfileProps {
@@ -65,8 +65,9 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
         });
         return;
       }
-
-      const { ...restFormData } = currentFormData;
+      const restFormData = Object.fromEntries(
+        Object.entries(currentFormData).filter(([key]) => key !== 'id')
+      );
       updateContact(
         { id: contact.id, ...restFormData },
         {
@@ -158,7 +159,7 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                         <FormItem>
                           <FormLabel>Notes</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input {...field} value={field.value ?? ''} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

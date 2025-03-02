@@ -25,7 +25,7 @@ export default function AuthRedirect({
       if (redirectToLogin && !isAuthenticated && pathname !== '/login') {
         router.push('/login');
       } else if (isAuthenticated && pathname === '/login') {
-        router.push('/contacts'); // Redirect to homepage after login if on login page
+        router.push('/contacts');
       }
     }
   }, [isAuthenticated, loading, pathname, router, redirectToLogin]); // Include redirectToLogin in dependencies

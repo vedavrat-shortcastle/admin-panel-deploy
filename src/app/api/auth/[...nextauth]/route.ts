@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 import { verifyPassword } from '@/utils/encoder';
 import { AuthOptions } from 'next-auth';
 
-export const authOptions: AuthOptions = {
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',

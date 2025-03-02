@@ -18,7 +18,7 @@ interface Location {
 }
 export const PhysicallyTaught: React.FC<{
   form: UseFormReturn<any>;
-  initialLocationIds?: number[];
+  initialLocationIds?: number[] | null;
 }> = ({ form, initialLocationIds }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
