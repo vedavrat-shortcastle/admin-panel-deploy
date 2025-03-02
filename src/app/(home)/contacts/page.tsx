@@ -12,7 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import AddContact from '@/components/contacts/AddContact';
-import { columns } from '@/app/contacts/columns';
+import { columns } from '@/app/(home)/contacts/columns';
 import { trpc } from '@/utils/trpc';
 import { Button } from '@/components/ui/button';
 
