@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { procedure, router } from '@/app/server/trpc';
 import { createSubscriptionSchema } from '@/schemas/subscription';
-import { subscriptionUpdateSchema } from '@/schemas/subscriptionUpdateSchema';
+import { subscriptionUpdateSchema } from '@/schemas/subscription';
 
 //subscription is a router that contains multiple procedures for customers management
 
@@ -78,9 +78,7 @@ export const subscriptionRouter = router({
     .mutation(async ({ ctx, input }) => {
       const updatedSubscription = await ctx.db.subscription.update({
         where: { id: parseInt(input.id) },
-        data: {
-          ...input.data,
-        },
+        data: input.data,
       });
 
       if (!updatedSubscription) {
