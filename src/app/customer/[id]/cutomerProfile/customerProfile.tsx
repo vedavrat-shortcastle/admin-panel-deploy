@@ -8,11 +8,10 @@ import { ArrowLeft, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { initialSubscriptionData } from '@/app/customer/[id]/cutomerProfile/customerData';
 import { subscriptionFormValues } from '@/types/customerSection';
 import { CustomerDetails } from '@/components/customer/CustomerDetails';
 import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
-import { Subscription } from '@/types/subscription';
+import { Subscription } from '@/types/d';
 import { Form } from '@/components/ui/form';
 import { trpc } from '@/utils/trpc';
 import { createSubscriptionSchema } from '@/schemas/subscription';
@@ -30,7 +29,7 @@ export const CustomerProfile: React.FC<CustomerProfileProps> = ({
 
   const form = useForm<subscriptionFormValues>({
     resolver: zodResolver(createSubscriptionSchema),
-    defaultValues: subscription || initialSubscriptionData,
+    defaultValues: subscription,
   });
 
   const { mutate: updateSubscription, isLoading } =
