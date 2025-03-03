@@ -999,7 +999,7 @@ model SavedFilter {
   name              String
   filter            Json
   createdAt         DateTime?          @default(now()) @map("created_at")
-  adminPanelSection AdminPanelSection? @map("adminpanel_section")
+  adminPanelSection AdminPanelSection? @map("admin_panel_section")
   userId            String             @map("user_id")
 
   @@map("saved_filter")
