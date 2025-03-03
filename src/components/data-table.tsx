@@ -17,6 +17,13 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import React from 'react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -24,7 +31,8 @@ interface DataTableProps<TData, TValue> {
   pagination?: {
     pageCount: number;
     page: number;
-    onPageChange: (page: number) => void;
+    onPageChange: (page: number, pageSize: number) => void;
+    pageSize: number;
   };
   onRowClick?: (record: TData) => void;
 }
@@ -35,6 +43,8 @@ export function DataTable<TData, TValue>({
   pagination,
   onRowClick,
 }: DataTableProps<TData, TValue>) {
+  const [pageSize, setPageSize] = React.useState(pagination?.pageSize ?? 10);
+
   const table = useReactTable({
     data,
     columns,
@@ -101,10 +111,32 @@ export function DataTable<TData, TValue>({
       </div>
       {pagination && (
         <div className="flex items-center justify-end space-x-2">
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              const newSize = Number(value);
+              setPageSize(newSize);
+              pagination.onPageChange(1, newSize); // Reset to page 1 on size change
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select page size" />
+            </SelectTrigger>
+            <SelectContent>
+              {[10, 20, 30, 40, 50].map((pageSize) => (
+                <SelectItem key={pageSize} value={pageSize.toString()}>
+                  Show {pageSize}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <Button
             variant="outline"
             size="sm"
-            onClick={() => pagination.onPageChange(pagination.page - 1)}
+            onClick={() =>
+              pagination.onPageChange(pagination.page - 1, pageSize)
+            }
             disabled={pagination.page === 1}
           >
             Previous
@@ -115,7 +147,9 @@ export function DataTable<TData, TValue>({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => pagination.onPageChange(pagination.page + 1)}
+            onClick={() =>
+              pagination.onPageChange(pagination.page + 1, pageSize)
+            }
             disabled={pagination.page === pagination.pageCount}
           >
             Next
