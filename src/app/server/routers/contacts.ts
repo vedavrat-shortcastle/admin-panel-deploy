@@ -61,17 +61,10 @@ export const contactsRouter = router({
       },
     });
 
-    const contactLocationData = await ctx.db.location.findUnique({
-      where: { id: contactTableData?.locationId ?? undefined },
-      select: {
-        country: true,
-        state: true,
-        city: true,
-      },
-    });
     if (!contactTableData) {
       throw new Error('Contact not found');
     }
+
     const academyNames = contactTableData.academies.map(
       (ca) => ca.academy.name
     );
@@ -85,7 +78,7 @@ export const contactsRouter = router({
       academyNames,
       customTags,
       physicallyTaught,
-      contactLocationData,
+      contactLocationData: contactTableData.location,
     };
   }),
 

@@ -131,6 +131,7 @@ export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
             form={form}
             label="Date Of Birth"
             fieldName="dateOfBirth"
+            allowFuture={false}
           />
         </div>
       </div>

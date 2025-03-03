@@ -4,6 +4,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { z } from 'zod';
 
 export type ContactsTable = {
+  id?: number | null;
   firstName: string | null;
   lastName: string | null;
   email: string | null;
