@@ -161,13 +161,14 @@ export default function ContactsLandingPage() {
           pagination={{
             pageCount: data.pageCount,
             page: filter.pagination?.page ?? 1,
-            onPageChange: (page) =>
+            pageSize: filter.pagination?.limit ?? 10,
+            onPageChange: (page, pageSize) =>
               setFilter((prev) => ({
                 ...prev,
                 pagination: {
                   ...prev.pagination,
                   page,
-                  limit: prev.pagination?.limit ?? 20,
+                  limit: pageSize,
                 },
               })),
           }}
