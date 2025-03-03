@@ -17,7 +17,11 @@ import {
 import { CustomerDetails } from '@/components/customer/CustomerDetails';
 import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
 import { subscriptionFormDefaults } from '@/utils/subscriptionFormDefaults';
-export default function AddCustomer() {
+
+interface AddCustomeProps {
+  onSuccess: () => void;
+}
+export default function AddCustomer({ onSuccess }: AddCustomeProps) {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
@@ -33,6 +37,7 @@ export default function AddCustomer() {
         title: 'Form Submitted',
         description: 'Your form has been successfully submitted.',
       });
+      onSuccess();
       form.reset();
       setStep(1);
     },

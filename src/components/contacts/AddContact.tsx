@@ -20,7 +20,11 @@ import { defaultFormValues } from '@/utils/contactFormDefaults';
 import { PersonalContactInfo } from '@/components/contacts/PersonalContactInfo';
 import { trpc } from '@/utils/trpc';
 
-export default function AddContact() {
+interface AddContactProps {
+  onSuccess: () => void;
+}
+
+export default function AddContact({ onSuccess }: AddContactProps) {
   const [step, setStep] = useState(1);
   const { toast } = useToast();
 
@@ -62,6 +66,7 @@ export default function AddContact() {
         title: 'Success!',
         description: 'Contact has been created.',
       });
+      onSuccess();
       form.reset(); // Reset the form after successful submission
       setStep(1); // Go back to step 1
     },
