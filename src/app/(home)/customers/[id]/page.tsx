@@ -22,9 +22,17 @@ export default function SubscriptionPage() {
   if (error) return <p>Error fetching subscription: {error.message}</p>;
   if (!subscription) return <p>No subscription found</p>;
 
+  const cleanedSubscription = {
+    ...subscription,
+    adminName: subscription.adminName ?? undefined,
+    amount: subscription?.amount ?? undefined,
+    salesPerson: subscription.salesPerson ?? undefined,
+    notes: subscription.notes ?? undefined,
+  };
+
   return (
     <Suspense fallback={<CustomerProfileLoading />}>
-      <CustomerProfile subscription={subscription} />
+      <CustomerProfile subscription={cleanedSubscription} />
     </Suspense>
   );
 }

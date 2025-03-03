@@ -10,7 +10,7 @@ import {
 export interface Subscription {
   id: number;
   contactId: number;
-  academyId: string;
+  academyId?: string;
   academies?: ContactAcademy[];
   adminName?: string;
   paidSeats?: number;
