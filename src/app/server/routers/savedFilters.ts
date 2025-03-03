@@ -9,7 +9,12 @@ export const filterRouter = router({
   createFilter: procedure
     .input(savedFilterSchema)
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.decoded?.user?.id;
+      const userDetails = ctx.userDetails;
+      if (!userDetails) {
+        throw new Error('Unauthorized: No user details found');
+      }
+      const userId = userDetails.user.id;
+      console.log('session', userDetails);
       if (!userId) {
         throw new Error('Unauthorized: No user ID found');
       }
@@ -18,7 +23,7 @@ export const filterRouter = router({
           userId,
           name: input.name,
           filter: input.filter,
-          adminpanelSection: input.adminpanelSection as AdminPanelSection,
+          adminPanelSection: input.adminPanelSection as AdminPanelSection,
         },
       });
 
@@ -29,15 +34,18 @@ export const filterRouter = router({
   getFilters: procedure
     .input(z.object({ sectionName: z.string() }))
     .query(async ({ ctx, input }) => {
-      const userId = ctx.decoded?.user?.id;
-      if (!userId) {
-        throw new Error('Unauthorized: No user ID found');
+      const userDetails = ctx.userDetails;
+
+      if (!userDetails) {
+        throw new Error('Unauthorized: No user details found');
       }
+      const userId = userDetails.user.id;
+      console.log('session', userDetails);
 
       const filters = await ctx.db.savedFilter.findMany({
         where: {
           userId,
-          adminpanelSection: input.sectionName as AdminPanelSection,
+          adminPanelSection: input.sectionName as AdminPanelSection,
         },
       });
 
@@ -48,7 +56,7 @@ export const filterRouter = router({
   getFilterById: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
-      const userId = ctx.decoded?.user?.id;
+      const userId = ctx.userDetails?.user.id;
       if (!userId) {
         throw new Error('Unauthorized: No user ID found');
       }
@@ -69,7 +77,7 @@ export const filterRouter = router({
       z.object({ id: z.string(), name: z.string(), filter: filterInputSchema })
     )
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.decoded?.user?.id;
+      const userId = ctx.userDetails?.user.id;
       if (!userId) {
         throw new Error('Unauthorized: No user ID found');
       }
@@ -89,7 +97,7 @@ export const filterRouter = router({
   deleteFilter: procedure
     .input(z.object({ id: z.string() })) // Expect an ID
     .mutation(async ({ ctx, input }) => {
-      const userId = ctx.decoded?.user?.id;
+      const userId = ctx.userDetails?.user.id;
       if (!userId) {
         throw new Error('Unauthorized: No user ID found');
       }

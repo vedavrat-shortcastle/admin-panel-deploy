@@ -1,4 +1,5 @@
 // types/next-auth.d.ts
+import { Permission } from '@prisma/client';
 import 'next-auth';
 
 declare module 'next-auth' {
@@ -19,7 +20,7 @@ declare module 'next-auth' {
     firstName?: string;
     lastName?: string;
     role?: string;
-    permissions?: any[];
+    permissions?: Permission[];
   }
 
   interface JWT {
@@ -28,6 +29,6 @@ declare module 'next-auth' {
     firstName?: string;
     lastName?: string;
     role?: string;
-    permissions?: any[];
+    permissions?: Permission[];
   }
 }

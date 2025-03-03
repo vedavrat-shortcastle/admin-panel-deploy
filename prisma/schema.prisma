@@ -998,8 +998,8 @@ model SavedFilter {
   id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name              String
   filter            Json
-  createdat         DateTime?          @default(now()) @db.Timestamptz(6)
-  adminpanelSection AdminPanelSection? @map("adminpanel_section")
+  createdAt         DateTime?          @default(now()) @map("created_at")
+  adminPanelSection AdminPanelSection? @map("adminpanel_section")
   userId            String             @map("user_id")
 
   @@map("saved_filter")
@@ -1331,5 +1331,5 @@ enum AdminPanelSection {
   contacts
   customers
 
-  @@map("adminpanel_section")
+  @@map("admin_panel_section")
 }

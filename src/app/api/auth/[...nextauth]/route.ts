@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 import { verifyPassword } from '@/utils/encoder';
 import { AuthOptions } from 'next-auth';
 
-const authOptions: AuthOptions = {
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -64,14 +64,7 @@ const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      session.user = session.user || {};
-      session.user.role = token.role as string;
-      session.user.permissions = token.permissions as any[];
-      session.user.id = token.sub as string;
-      session.user.email = token.email as string;
-      session.user.firstName = token.firstName as string;
-      session.user.lastName = token.lastName as string;
-      return session;
+      return { ...session, ...token, id: token.sub };
     },
   },
 };

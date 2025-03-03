@@ -4,9 +4,9 @@ import {
   FilterGroup,
   FilterOperator,
   FilterBuilderProps,
-  FilterTab,
+  SavedFilter,
 } from '@/types/dynamicFilter';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Select,
   SelectContent,
@@ -35,34 +35,36 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     () => initialFilters || emptyFilters
   );
   const [isDirty, setIsDirty] = useState(false);
-  const [savedFilters, setFilterTabs] = useState<FilterTab[]>([]);
+  const [savedFilters, setFilterTabs] = useState<SavedFilter[]>([]);
   const [activeFilterId, setActiveTabId] = useState<string | null>('new-tab');
   const { toast } = useToast();
 
   const { data, isLoading, error } = trpc.filter.getFilters.useQuery({
-    sectionName: 'contacts',
+    sectionName: 'contacts', //TODO: Remove hardcoding of section across the file
   });
 
-  if (error) {
-    toast({
-      variant: 'destructive',
-      title: 'Error',
-      description: error.message || 'Failed to get filters',
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to get filters',
+      });
+    }
+  }, [error, toast]);
 
   useEffect(() => {
     if (data && data.length > 0) {
-      const combinedData = data.map((item) => ({
+      const combinedData: SavedFilter[] = data.map((item: any) => ({
         ...item,
-        createdat: item.createdat ? new Date(item.createdat) : new Date(),
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
       }));
       setFilterTabs(combinedData);
     }
   }, [data]);
 
   const createFilter = trpc.filter.createFilter.useMutation({
-    onSuccess: async (response) => {
+    onSuccess: (response) => {
       toast({ title: 'Success', description: 'Filter saved successfully' });
       setFilterTabs((prev) =>
         prev.map((tab) =>
@@ -73,8 +75,8 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                 },
                 id: response.filter.id,
                 name: response.filter.name,
-                createdat: response.filter.createdat
-                  ? new Date(response.filter.createdat)
+                createdAt: response.filter.createdAt
+                  ? new Date(response.filter.createdAt)
                   : new Date(),
               }
             : tab
@@ -92,65 +94,72 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     },
   });
 
-  const updateFilters = (newFilters: FilterGroup) => {
-    setFilters(newFilters);
-    setIsDirty(true);
-  };
-
-  const addFilterCondition = () => {
+  const addFilterCondition = useCallback(() => {
     const newCondition: FilterCondition = {
       fieldId: fields[0].id,
       operator: 'equals' as FilterOperator,
       value: null,
     };
 
-    updateFilters({
-      ...filters,
-      conditions: [...filters.conditions, newCondition],
-    });
-  };
+    setFilters((prev) => ({
+      ...prev,
+      conditions: [...prev.conditions, newCondition],
+    }));
+    setIsDirty(true);
+  }, [fields]);
 
-  const updateFilterCondition = (index: number, field: string, value: any) => {
-    const newConditions = [...filters.conditions];
-    newConditions[index] = {
-      ...newConditions[index],
-      [field]: value,
-    };
-    updateFilters({ ...filters, conditions: newConditions });
-  };
+  const updateFilterCondition = useCallback(
+    (index: number, field: string, value: any) => {
+      setFilters((prev) => {
+        const newConditions = [...prev.conditions];
+        newConditions[index] = {
+          ...newConditions[index],
+          [field]: value,
+        };
+        return { ...prev, conditions: newConditions };
+      });
+      setIsDirty(true);
+    },
+    []
+  );
 
-  const removeFilterCondition = (index: number) => {
-    updateFilters({
-      ...filters,
-      conditions: filters.conditions.filter((_, i) => i !== index),
-    });
-  };
+  const removeFilterCondition = useCallback((index: number) => {
+    setFilters((prev) => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== index),
+    }));
+    setIsDirty(true);
+  }, []);
 
-  const handleLogicChange = (logic: 'AND' | 'OR') => {
-    updateFilters({ ...filters, logic });
-  };
+  const handleLogicChange = useCallback((logic: 'AND' | 'OR') => {
+    setFilters((prev) => ({ ...prev, logic }));
+    setIsDirty(true);
+  }, []);
 
-  const saveFilter = (name: string) => {
-    createFilter.mutate({
-      name,
-      filter: filters,
-      adminpanelSection: 'contacts',
-    });
-  };
+  const saveFilter = useCallback(
+    (name: string) => {
+      createFilter.mutate({
+        name,
+        filter: filters,
+        adminPanelSection: 'contacts',
+      });
+    },
+    [createFilter, filters]
+  );
 
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     onChange(filters);
     setIsDirty(false);
-  };
+  }, [onChange, filters]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setFilters(emptyFilters);
     onChange(emptyFilters);
     setIsDirty(false);
-  };
+  }, [onChange]);
 
   const updateFilterMutation = trpc.filter.updateFilter.useMutation({
-    onSuccess: async () => {
+    onSuccess: () => {
       toast({ title: 'Success', description: 'Filter updated successfully' });
       onChange(filters);
       setFilterTabs((prevTabs) =>
@@ -172,11 +181,9 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   });
 
   const deleteFilterMutation = trpc.filter.deleteFilter.useMutation({
-    onSuccess: async (_, { id }) => {
+    onSuccess: (_, { id }) => {
       toast({ title: 'Success', description: 'Filter deleted successfully' });
-
       setFilterTabs((prevTabs) => prevTabs.filter((tab) => tab.id !== id));
-
       if (activeFilterId === id) {
         setActiveTabId(null);
         setFilters(emptyFilters);
@@ -187,50 +194,83 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: error.message || 'Failed to delete filter',
+        description: error.message || 'Failed to update filter',
       });
     },
   });
 
-  const createNewFilter = () => {
+  const createNewFilter = useCallback(() => {
     const newTabId = 'new-tab';
-    setFilterTabs([
+    setFilterTabs((prev) => [
       {
         id: newTabId,
         name: 'New Tab',
         filter: { filter: emptyFilters },
-        createdat: new Date(),
+        createdAt: new Date(),
       },
-      ...savedFilters,
+      ...prev,
     ]);
     setActiveTabId(newTabId);
     setFilters(emptyFilters);
-  };
+  }, []);
 
-  const updateFilter = () => {
+  const updateFilter = useCallback(() => {
     const activeTab = savedFilters.find((tab) => tab.id === activeFilterId);
+    if (!activeTab || !activeFilterId) return;
 
     updateFilterMutation.mutate({
-      id: activeFilterId || '',
-      name: (activeTab && activeTab.name) || '',
+      id: activeFilterId,
+      name: activeTab.name,
       filter: { filter: filters },
     });
-  };
+  }, [activeFilterId, savedFilters, filters, updateFilterMutation]);
 
-  const deleteFilter = (tabId: string) => {
-    deleteFilterMutation.mutate({ id: tabId });
-  };
+  const deleteFilter = useCallback(
+    (tabId: string) => {
+      deleteFilterMutation.mutate({ id: tabId });
+    },
+    [deleteFilterMutation]
+  );
 
-  const selectFilter = (tabId: string) => {
-    if (activeFilterId === tabId) return;
-    const selectedTab = savedFilters.find((tab) => tab.id === tabId);
-    if (!selectedTab) return;
+  const selectFilter = useCallback(
+    (tabId: string) => {
+      if (activeFilterId === tabId) return;
 
-    setActiveTabId(tabId);
-    setFilters((selectedTab.filter as { filter: FilterGroup }).filter);
-    onChange((selectedTab.filter as { filter: FilterGroup }).filter);
-    setIsDirty(false);
-  };
+      const selectedTab = savedFilters.find((tab) => tab.id === tabId);
+      if (!selectedTab) return;
+
+      setActiveTabId(tabId);
+      const newFilters = (selectedTab.filter as { filter: FilterGroup }).filter;
+      setFilters(newFilters);
+      onChange(newFilters);
+      setIsDirty(false);
+    },
+    [activeFilterId, savedFilters, onChange]
+  );
+
+  const filterConditions = useMemo(
+    () =>
+      filters.conditions.map((condition, index) => (
+        <FilterConditions
+          key={`${index}-${condition.fieldId}`}
+          fields={fields}
+          fieldId={condition.fieldId}
+          operator={condition.operator}
+          value={condition.value}
+          onFieldChange={(fieldId) =>
+            updateFilterCondition(index, 'fieldId', fieldId)
+          }
+          onOperatorChange={(operator) =>
+            updateFilterCondition(index, 'operator', operator)
+          }
+          onValueChange={(value) =>
+            updateFilterCondition(index, 'value', value)
+          }
+          onRemove={() => removeFilterCondition(index)}
+        />
+      )),
+    [filters.conditions, fields, updateFilterCondition, removeFilterCondition]
+  );
 
   return (
     <div className="space-y-4">
@@ -288,7 +328,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                 size="icon"
                 className="p-0 m-0 hover:bg-transparent"
                 onClick={(e) => {
-                  e.stopPropagation(); // Prevent clicking tab when deleting
+                  e.stopPropagation();
                   deleteFilter(tab.id);
                 }}
               >
@@ -313,29 +353,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
             <span>of the following conditions:</span>
           </div>
 
-          <div className="space-y-2">
-            {filters.conditions.map((condition, index) => {
-              return (
-                <FilterConditions
-                  key={index}
-                  fields={fields}
-                  fieldId={condition.fieldId}
-                  operator={condition.operator}
-                  value={condition.value}
-                  onFieldChange={(fieldId) =>
-                    updateFilterCondition(index, 'fieldId', fieldId)
-                  }
-                  onOperatorChange={(operator) =>
-                    updateFilterCondition(index, 'operator', operator)
-                  }
-                  onValueChange={(value) =>
-                    updateFilterCondition(index, 'value', value)
-                  }
-                  onRemove={() => removeFilterCondition(index)}
-                />
-              );
-            })}
-          </div>
+          <div className="space-y-2">{filterConditions}</div>
 
           <div className="flex justify-between items-center pt-4">
             <Button onClick={addFilterCondition}>Add Condition</Button>
@@ -352,3 +370,5 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     </div>
   );
 };
+
+export default FilterBuilder;
