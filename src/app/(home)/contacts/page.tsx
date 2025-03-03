@@ -24,7 +24,7 @@ import { EntityFilter, FilterGroup } from '@/types/dynamicFilter';
 import { addSearchConditions } from '@/utils/Filter/searchUtils';
 
 export default function ContactsLandingPage() {
-  const [dialogOpen, setDialogOpen] = useState(false); // Modal state
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [filter, setFilter] = useState<EntityFilter>({
     filter: {
       logic: 'AND',
