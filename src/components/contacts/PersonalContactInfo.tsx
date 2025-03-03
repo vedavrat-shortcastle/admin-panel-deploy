@@ -8,8 +8,8 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-
 import { ContactFormReturn } from '@/types/contactSection';
+import { PhoneInput } from '@/components/CustomPhoneField';
 
 interface PersonalContactProps {
   form: ContactFormReturn;
@@ -83,7 +83,7 @@ export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input type="text" {...field} value={field.value ?? ''} />
+                  <PhoneInput defaultCountry="IN" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

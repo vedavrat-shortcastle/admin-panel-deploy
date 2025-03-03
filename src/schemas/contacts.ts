@@ -6,24 +6,13 @@ import {
   TeachingMode,
 } from '@prisma/client';
 import { z } from 'zod';
-import { parsePhoneNumberFromString } from 'libphonenumber-js';
-
-const phoneNumberSchema = z.string().refine(
-  (value) => {
-    const phoneNumber = parsePhoneNumberFromString(value);
-    return phoneNumber?.isValid();
-  },
-  {
-    message: 'Invalid phone number format.',
-  }
-);
 
 export const contactFormSchema = z.object({
   firstName: z.string().min(1, { message: 'This field is required' }),
   lastName: z.string().min(1, { message: 'This field is required' }),
   role: z.nativeEnum(ContactRole),
   email: z.string().email({ message: 'Invalid email address.' }),
-  phoneNumber: phoneNumberSchema,
+  phoneNumber: z.string(),
   academyIds: z.array(z.string()).min(1, { message: 'This field is requierd' }),
   website: z
     .string()
@@ -107,34 +96,22 @@ export const newCitySchema = z.object({
 });
 
 export const contactUpdateSchema = z.object({
-  firstName: z
-    .string()
-    .min(1, { message: 'This field is required' })
-    .optional(),
-  lastName: z.string().min(1, { message: 'This field is required' }).optional(),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
   role: z.enum(['Headcoach', 'Admin', 'Subcoach', 'Founder']).optional(),
   email: z.string().email({ message: 'Invalid email address.' }).optional(),
-  phone: z.string().min(1, { message: 'This field is required' }).optional(),
-  academyIds: z
-    .array(z.string())
-    .min(1, { message: 'This field is requierd' })
-    .optional(),
+  phoneNumber: z.string().optional(),
+  academyIds: z.array(z.string()).optional(),
   website: z.string().url({ message: 'Invalid URL.' }).optional(),
-  locationId: z
-    .number()
-    .min(1, { message: 'This field is required' })
-    .optional(),
+  locationId: z.number().optional(),
   dateOfBirth: z.date().optional(),
   gender: z.enum(['male', 'female', 'other']).optional(),
   languagesSpoken: z.array(z.string()).optional(),
-  currentAcademy: z
-    .string()
-    .min(1, { message: 'This field is required' })
-    .optional(),
+  currentAcademy: z.string().optional(),
   teachingMode: z.enum(['online', 'offline', 'hybrid']).optional(),
   onlinePercentage: z.number().min(0).max(100).optional(),
   offlinePercentage: z.number().min(0).max(100).optional(),
-  address: z.string().min(1, { message: 'This field is required' }).optional(),
+  address: z.string().optional(),
   social: z
     .object({
       linkedin: z.string().url().optional(),
@@ -151,10 +128,7 @@ export const contactUpdateSchema = z.object({
     })
     .optional(),
   fideId: z.string().optional(),
-  titles: z
-    .array(z.string())
-    .min(1, { message: 'This field is required' })
-    .optional(),
+  titles: z.array(z.string()).optional(),
   physicallyTaught: z.array(z.number()).optional(),
   lastContacted: z.date().optional(),
   notes: z.string().optional(),

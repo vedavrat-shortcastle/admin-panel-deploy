@@ -17,6 +17,7 @@ interface SearchContactProps {
 
 const SearchContact = ({ form }: SearchContactProps) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+
   const { data, isLoading, error } = trpc.contacts.getAll.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
@@ -36,8 +37,6 @@ const SearchContact = ({ form }: SearchContactProps) => {
         selectedContact.email +
         ')'
     );
-    console.log(form.getValues('contactId'));
-
     setSearchTerm('');
   };
 
