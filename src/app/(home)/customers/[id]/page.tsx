@@ -2,8 +2,8 @@
 import { Suspense } from 'react';
 import { trpc } from '@/hooks/trpc-provider';
 import { useParams } from 'next/navigation';
-import { CustomerProfile } from '@/app/customer/[id]/cutomerProfile/customerProfile';
-import CustomerProfileLoading from '@/app/customer/[id]/customerProfileLoading';
+import { CustomerProfile } from '@/app/(home)/customers/[id]/cutomerProfile/customerProfile';
+import CustomerProfileLoading from '@/app/(home)/customers/[id]/customerProfileLoading';
 
 export default function SubscriptionPage() {
   const params = useParams();
