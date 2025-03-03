@@ -34,10 +34,12 @@ export const CurrentAcademy: React.FC<{ form: UseFormReturn<any> }> = ({
   });
 
   const academyData: getAcademyNamesRes[] = useMemo(() => {
-    return academyNames.map((name: string, index: number) => ({
-      id: academyIds[index] || '',
-      name: name,
-    }));
+    return academyNames
+      .map((name: string, index: number) => ({
+        id: academyIds[index]?.trim() || `academy-${index}`,
+        name: name,
+      }))
+      .filter((academy: getAcademyNamesRes) => academy.id);
   }, [academyNames, academyIds]);
 
   const handleOnSelect = (selectedAcademy: getAcademyNamesRes | null) => {

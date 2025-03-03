@@ -1,16 +1,15 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { db } from '@/lib/db';
-import { CustomRequest } from '@/types/apiTypes';
-import { getDecodedData } from '@/utils/getUser';
+
 import { initTRPC } from '@trpc/server';
+import { getServerSession } from 'next-auth';
 import superjson from 'superjson';
 
-export const createContext = async ({ req }: { req: CustomRequest }) => {
-  const decoded = await getDecodedData(req.headers);
-
+export const createContext = async () => {
+  const userDetails = await getServerSession(authOptions);
   return {
     db,
-    decoded,
-    // Add any other context items here
+    userDetails,
   };
 };
 

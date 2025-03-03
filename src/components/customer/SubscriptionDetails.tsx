@@ -215,7 +215,7 @@ const SubscriptionDetails: React.FC<customerDetailsProps> = ({ form }) => {
       </div>
 
       <div className="grid grid-cols-12 gap-6">
-        <div className="col-span-12 lg:col-span-6 space-y-2">
+        <div className="col-span-6 lg:col-span-6 space-y-2">
           <FormField
             control={form.control}
             name="amount"
@@ -229,6 +229,22 @@ const SubscriptionDetails: React.FC<customerDetailsProps> = ({ form }) => {
                     value={field.value}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="col-span-6">
+          <FormField
+            control={form.control}
+            name="saleChannel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sales Channel</FormLabel>
+                <FormControl>
+                  <Input type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

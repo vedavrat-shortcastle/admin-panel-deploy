@@ -13,15 +13,12 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch available tags based on search input
   const { data: tagsData, isLoading } = trpc.tags.getTags.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
 
-  // Get currently selected tags from the form
   const selectedTags = form.watch('customTags') || [];
 
-  // Handle selecting a tag from the dropdown
   const handleTagSelect = (selectedTag: Tag) => {
     if (!selectedTags.includes(selectedTag.name)) {
       form.setValue('customTags', [...selectedTags, selectedTag.name]);
@@ -30,7 +27,6 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
     setSearchTerm('');
   };
 
-  // Handle removing a selected tag
   const handleRemoveTag = (tag: string) => {
     form.setValue(
       'customTags',
@@ -44,10 +40,9 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
 
   return (
     <div>
-      {/* Searchable dropdown for existing tags */}
       <SearchableSelect<Tag>
         form={form}
-        fieldName="customTags"
+        fieldName="tags"
         label="Tags"
         placeholder="Search or add tags..."
         data={tagsData || []}
@@ -60,7 +55,6 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
         isLoading={isLoading}
       />
 
-      {/* Show selected tags */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap mt-3 gap-2">
           {selectedTags.map((tag: string) => (

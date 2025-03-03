@@ -18,4 +18,22 @@ export const academyRouter = router({
     });
     return academies;
   }),
+
+  getAcademyByIds: procedure
+    .input(z.union([z.string(), z.array(z.string())]))
+    .query(async ({ ctx, input }) => {
+      const ids = Array.isArray(input) ? input : [input];
+      const academies = await ctx.db.academy.findMany({
+        where: {
+          id: {
+            in: ids,
+          },
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      });
+      return academies;
+    }),
 });

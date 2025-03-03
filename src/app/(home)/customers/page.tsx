@@ -13,10 +13,11 @@ import {
 } from '@/components/ui/dialog';
 
 import { DataTable } from '@/components/data-table';
-import { columns } from '@/app/customer/columns';
+
 import { trpc } from '@/utils/trpc';
 import TableSkeleton from '@/components/tableSkeleton';
 import AddCustomer from '@/components/customer/AddCustomer';
+import { columns } from '@/app/(home)/customers/columns';
 
 export default function CustomersLandingPage() {
   const [open, setOpen] = useState(false); // Modal state

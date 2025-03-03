@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import logo from '@/../public/assets/logo.png';
+import { signOut, useSession } from 'next-auth/react'; // Import useSession
 
 const navItems = [
   {
@@ -27,9 +28,9 @@ const navItems = [
     href: '/contacts',
   },
   {
-    title: 'Customer',
+    title: 'Customers',
     icon: Users,
-    href: '/customer',
+    href: '/customers',
   },
   {
     title: 'Churn',
@@ -61,12 +62,30 @@ const navItems = [
 export function AdminSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession(); // Use useSession hook
 
   useEffect(() => {
     if (window.innerWidth < 768) {
       setIsCollapsed(true);
     }
   }, []);
+
+  // Loading state handling
+  if (status === 'loading') {
+    return (
+      <aside className="flex h-screen sticky top-0 flex-col bg-[rgb(75,75,75)] text-white transition-all duration-300 w-[240px]">
+        <div className="flex h-14 items-center px-4 font-semibold justify-center">
+          Loading Session...
+        </div>
+      </aside>
+    );
+  }
+
+  const userName = session?.user
+    ? `${session.user.firstName} ${session.user.lastName}`
+    : 'ADMIN';
+  const userImage = session?.user?.image; // Get user image if available
+
   return (
     <aside
       className={cn(
@@ -99,12 +118,23 @@ export function AdminSidebar() {
 
       <div className={cn('px-4 py-3', isCollapsed && 'flex justify-center')}>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
-            A
-          </div>
+          {userImage ? ( // Conditionally render user image or placeholder
+            <img
+              src={userImage}
+              alt={userName}
+              className="h-10 w-10 rounded-full object-cover"
+            />
+          ) : (
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+              {userName.charAt(0).toUpperCase()}{' '}
+              {/* First letter as placeholder if no image */}
+            </div>
+          )}
+
           {!isCollapsed && (
             <div className="flex flex-col">
-              <p className="text-sm font-bold">ADMIN</p>
+              <p className="text-sm font-bold">{userName}</p>
+              {/* You can display user role or other info here if available in session */}
             </div>
           )}
         </div>
@@ -146,7 +176,7 @@ export function AdminSidebar() {
             isCollapsed && 'justify-center px-2'
           )}
           title={isCollapsed ? 'Logout Account' : undefined}
-          onClick={() => console.log('add logout logic')}
+          onClick={() => signOut()}
         >
           <LogOut className="h-4 w-4" />
           {!isCollapsed && 'Logout Account'}

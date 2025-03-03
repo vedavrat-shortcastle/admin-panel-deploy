@@ -1,5 +1,8 @@
 import { savedFilterSchema } from '@/schemas/savedFilterSchema';
+<<<<<<< HEAD
 import { JsonValue } from '@prisma/client/runtime/library';
+=======
+>>>>>>> 9ce9ff48f1172a85acb968b33439ef2f2f20d3a4
 
 export type FilterFieldType = 'string' | 'number' | 'date' | 'boolean';
 
@@ -39,6 +42,7 @@ export interface FilterBuilderProps {
   onChange: (filters: FilterGroup) => void;
 }
 
+<<<<<<< HEAD
 export interface FilterTab {
   id: string;
   name: string;
@@ -46,6 +50,8 @@ export interface FilterTab {
   createdat: Date;
 }
 
+=======
+>>>>>>> 9ce9ff48f1172a85acb968b33439ef2f2f20d3a4
 export type EntityFilter = {
   filter: FilterGroup;
   pagination?: {
