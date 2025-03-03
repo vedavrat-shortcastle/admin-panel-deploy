@@ -44,6 +44,7 @@ export const LanguagesSpoken: React.FC<{
       <SearchableSelect
         label="Languages Spoken"
         fieldName="languagesSpoken"
+        placeholder="Type and Click on Add"
         onClick={handleAddLanguage}
         form={form}
         displayKey={languageInput}

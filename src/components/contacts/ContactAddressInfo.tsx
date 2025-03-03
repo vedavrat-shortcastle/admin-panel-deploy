@@ -26,6 +26,7 @@ export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
             form={form}
             label="Last Contacted"
             fieldName="lastContacted"
+            allowFuture={false}
           />
         </div>
 

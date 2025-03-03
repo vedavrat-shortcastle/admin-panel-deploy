@@ -26,6 +26,8 @@ interface SearchableSelectWithTagsProps<T extends Record<string, any>> {
   onClick?: (searchTerm: string) => void;
   showButton?: boolean;
   isLoading?: boolean;
+  onFocus?: () => void; // Add onFocus prop
+  onBlur?: () => void; // Add onBlur prop
 }
 
 export const SearchableSelect = <T extends Record<string, any>>({
@@ -41,9 +43,12 @@ export const SearchableSelect = <T extends Record<string, any>>({
   onClick,
   showButton = false,
   isLoading = false,
+  onFocus,
+  onBlur,
 }: SearchableSelectWithTagsProps<T>) => {
   const [apiData, setApiData] = useState<T[]>(initialData || []);
   const [searchedItems, setSearchedItems] = useState<T[]>(initialData || []);
+  const [isFocused, setIsFocused] = useState(false);
   const isMounted = useRef(true);
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const selectedItems =
@@ -53,14 +58,13 @@ export const SearchableSelect = <T extends Record<string, any>>({
   useEffect(() => {
     setApiData(initialData || []);
     setSearchedItems(initialData || []);
-    // setShowDropdown((initialData ?? []).length > 0);
   }, [initialData]);
 
   useEffect(() => {
     const trimmedInput = inputValue.trim().toLowerCase();
-    if (!trimmedInput) {
+    if (!trimmedInput || !isFocused) {
       setSearchedItems(apiData);
-      setShowDropdown(apiData.length > 0);
+      setShowDropdown(apiData.length > 0 && isFocused);
     } else {
       const filteredItems = apiData.filter((item) =>
         Array.isArray(displayKey)
@@ -72,15 +76,18 @@ export const SearchableSelect = <T extends Record<string, any>>({
       setSearchedItems(filteredItems);
       setShowDropdown(filteredItems.length > 0);
     }
-  }, [inputValue, apiData, displayKey]);
+  }, [inputValue, apiData, displayKey, isFocused]);
 
   const handleItemSearch = useCallback(
     debounce((value: string) => {
-      setInputValue(value);
-      onSearch?.(value.trim());
-      setShowDropdown(true);
+      if (isFocused) {
+        // Only search when focused
+        setInputValue(value);
+        onSearch?.(value.trim());
+        setShowDropdown(true);
+      }
     }, 500),
-    [onSearch]
+    [onSearch, isFocused]
   );
 
   const handleSelectItem = (item: T) => {
@@ -103,7 +110,21 @@ export const SearchableSelect = <T extends Record<string, any>>({
     onSelectItem?.(item);
   };
 
-  // Inside SearchableSelect
+  const handleFocus = () => {
+    setIsFocused(true);
+    onFocus?.(); // Call parent onFocus if provided
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => {
+      if (isMounted.current) {
+        setShowDropdown(false);
+        setIsFocused(false);
+        setInputValue(''); // Reset input on blur
+        onBlur?.(); // Call parent onBlur if provided
+      }
+    }, 200);
+  };
 
   return (
     <div className="flex gap-3">
@@ -122,14 +143,9 @@ export const SearchableSelect = <T extends Record<string, any>>({
                     onChange={(e) => {
                       field.onChange(e.target.value);
                       handleItemSearch(e.target.value);
-                      setShowDropdown(true);
                     }}
-                    onBlur={() =>
-                      setTimeout(
-                        () => isMounted.current && setShowDropdown(false),
-                        200
-                      )
-                    }
+                    onFocus={handleFocus} // Add focus handler
+                    onBlur={handleBlur} // Update blur handler
                     name={field.name}
                     ref={field.ref}
                   />

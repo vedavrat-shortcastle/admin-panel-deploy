@@ -10,12 +10,14 @@ import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { UseFormReturn } from 'react-hook-form';
+
 interface Location {
   id: number;
   country: string | null;
   state: string | null;
   city: string;
 }
+
 export const PhysicallyTaught: React.FC<{
   form: UseFormReturn<any>;
   initialLocationIds?: number[] | null;
@@ -24,12 +26,14 @@ export const PhysicallyTaught: React.FC<{
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
     useState<boolean>(false);
   const [selectedLocations, setSelectedLocations] = useState<Location[]>([]);
+  const [isFocused, setIsFocused] = useState(false); // Add focus state
+
   const {
     data: locationsData,
     error,
     isLoading,
   } = trpc.location.getAllLocations.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
+    enabled: isFocused,
   });
 
   const { data: initialLocations, isLoading: initialLocationsLoading } =
@@ -57,9 +61,11 @@ export const PhysicallyTaught: React.FC<{
   const onSearch = useCallback((search: string) => {
     setSearchTerm(search);
   }, []);
+
   const onClick = useCallback(() => {
     setIsAddLocationModalOpen(true);
   }, []);
+
   const handleLocationSelect = useCallback(
     (location: Location) => {
       setSelectedLocations((prevLocations) => {
@@ -82,6 +88,7 @@ export const PhysicallyTaught: React.FC<{
     },
     [form]
   );
+
   const handleRemoveLocation = useCallback(
     (index: number) => {
       setSelectedLocations((prevLocations) => {
@@ -98,6 +105,16 @@ export const PhysicallyTaught: React.FC<{
     },
     [form, selectedLocations]
   );
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    setSearchTerm(''); // Reset search term on blur
+  }, []);
+
   if (error) {
     return <div>Error loading locations: {error.message}</div>;
   }
@@ -121,6 +138,8 @@ export const PhysicallyTaught: React.FC<{
         onClick={onClick}
         showButton
         isLoading={isLoading}
+        onFocus={handleFocus} // Pass focus handler
+        onBlur={handleBlur} // Pass blur handler
       />
       <div className="flex flex-wrap gap-2 mt-3">
         {selectedLocations.length > 0 ? (
