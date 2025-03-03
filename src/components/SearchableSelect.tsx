@@ -95,6 +95,7 @@ export const SearchableSelect = <T extends Record<string, any>>({
       ? displayKey.map((key) => String(item[key])).join(' ')
       : String(item[displayKey]);
     form.setValue(`${fieldName}Input`, '');
+    setInputValue('');
 
     if (selectionMode === 'multiple') {
       if (!(selectedItems as string[]).includes(displayValue)) {
