@@ -49,7 +49,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                   className="flex flex-wrap gap-4"
                 >
                   {['online', 'offline', 'hybrid'].map((mode) => (
@@ -91,7 +91,11 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => {
+                    const value = e.target.valueAsNumber;
+                    field.onChange(value);
+                    form.setValue('offlinePercentage', 100 - value);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -109,7 +113,11 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                 <Input
                   type="number"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => {
+                    const value = e.target.valueAsNumber;
+                    field.onChange(value);
+                    form.setValue('onlinePercentage', 100 - value);
+                  }}
                 />
               </FormControl>
               <FormMessage />

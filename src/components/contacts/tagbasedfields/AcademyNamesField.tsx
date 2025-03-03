@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
@@ -22,13 +21,14 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
   initialIds,
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isFocused, setIsFocused] = useState(false);
 
   const {
     data: academyNamesData,
     error,
     isLoading,
   } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
+    enabled: isFocused,
   });
 
   const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
@@ -134,6 +134,14 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     }
   };
 
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setSearchTerm('');
+  };
+
   return (
     <div>
       <SearchableSelect<GetAcademyNamesRes>
@@ -147,6 +155,8 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
         isLoading={isLoading}
+        onFocus={handleFocus} // Add focus handler
+        onBlur={handleBlur} // Add blur handler
       />
 
       {mode === 'multiple' && selectedNames.length > 0 && (

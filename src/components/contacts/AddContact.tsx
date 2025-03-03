@@ -42,9 +42,7 @@ export default function AddContact() {
     const schema = stepSchemas[step - 1];
     const fieldsToValidate = Object.keys(schema.shape);
 
-    const isValid = await form.trigger(fieldsToValidate as any, {
-      shouldFocus: true,
-    });
+    const isValid = await form.trigger(fieldsToValidate as any);
 
     if (!isValid) {
       toast({
