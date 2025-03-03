@@ -22,7 +22,8 @@ import { columns } from '@/app/(home)/customers/columns';
 export default function CustomersLandingPage() {
   const [open, setOpen] = useState(false); // Modal state
 
-  const { data, isLoading, error } = trpc.subscription.getAll.useQuery();
+  const { data, isLoading, error, refetch } =
+    trpc.subscription.getAll.useQuery();
 
   return (
     <div className="container py-5 px-10">
@@ -59,7 +60,7 @@ export default function CustomersLandingPage() {
               className="overflow-y-auto flex-grow"
               style={{ maxHeight: 'calc(100vh - 150px)' }}
             >
-              <AddCustomer />
+              <AddCustomer onSuccess={refetch} />
             </div>
           </DialogContent>
         </Dialog>

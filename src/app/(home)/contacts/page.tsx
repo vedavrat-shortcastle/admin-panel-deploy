@@ -64,13 +64,11 @@ export default function ContactsLandingPage() {
     debouncedSearch(e.target.value);
   };
 
-  const { data, isLoading, error } = trpc.contacts.getFiltered.useQuery(
-    filter,
-    {
+  const { data, isLoading, error, refetch } =
+    trpc.contacts.getFiltered.useQuery(filter, {
       keepPreviousData: true,
       enabled: true,
-    }
-  );
+    });
 
   const handleFilterChange = (newFilter: FilterGroup) => {
     setFilter((prev) => ({
@@ -135,7 +133,7 @@ export default function ContactsLandingPage() {
               className="overflow-y-auto flex-grow"
               style={{ maxHeight: 'calc(100vh - 150px)' }}
             >
-              <AddContact />
+              <AddContact onSuccess={refetch} />
             </div>
           </DialogContent>
         </Dialog>
