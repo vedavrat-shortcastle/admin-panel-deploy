@@ -995,10 +995,10 @@ model Subscription {
 }
 
 model SavedFilter {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  filter    Json
-  createdat DateTime? @default(now()) @db.Timestamptz(6)
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  filter     Json
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
 
   @@map("saved_filter")
 }
