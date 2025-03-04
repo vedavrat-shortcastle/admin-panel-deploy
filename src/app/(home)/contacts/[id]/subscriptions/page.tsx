@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Users } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 import {
@@ -17,19 +17,27 @@ import { DataTable } from '@/components/data-table';
 import { trpc } from '@/utils/trpc';
 import TableSkeleton from '@/components/tableSkeleton';
 import AddCustomer from '@/components/customer/AddCustomer';
-import { columns } from '@/app/(home)/customers/columns';
+import { columns } from '@/app/(home)/contacts/[id]/subscriptions/columns';
+import { useParams } from 'next/navigation';
 
-export default function CustomersLandingPage() {
+export default function SubscriptionViewPage() {
   const [open, setOpen] = useState(false); // Modal state
+  const params = useParams();
+  const id = params?.id as string;
 
-  const { data, isLoading, error } = trpc.subscription.getAll.useQuery();
+  const { data, isLoading, error } = trpc.subscription.getbyContactId.useQuery(
+    id,
+    {
+      enabled: !!id,
+    }
+  );
 
   return (
     <div className="container py-5 px-10">
       {/* Header */}
       <div className="flex items-center">
-        <Users className="text-primary" size={36} strokeWidth={2} />
-        <h1 className="text-3xl font-semibold px-2 py-1">Customers</h1>
+        <Star className="text-primary" size={36} strokeWidth={2} />
+        <h1 className="text-3xl font-semibold px-2 py-1">Subscriptions</h1>
       </div>
 
       {/* Search & Add Contact */}
@@ -40,7 +48,7 @@ export default function CustomersLandingPage() {
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="default" className="font-semibold">
-              Add Customer
+              Add Subscription
             </Button>
           </DialogTrigger>
 
@@ -48,8 +56,8 @@ export default function CustomersLandingPage() {
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold ">
                 <div className="flex items-center">
-                  <Users className="text-primary" size={36} />
-                  <div className="ml-2 mt-1">Add Customer</div>
+                  <Star className="text-primary" size={36} />
+                  <div className="ml-2 mt-1">Add Subscription</div>
                 </div>
               </DialogTitle>
             </DialogHeader>
@@ -71,11 +79,11 @@ export default function CustomersLandingPage() {
         </div>
       ) : error ? ( // Handle error case
         <div className="flex justify-center py-10 text-red-500">
-          <p className="ml-2">Error fetching contacts: {error.message}</p>
+          <p className="ml-2">Error fetching Subscriptions: {error.message}</p>
         </div>
       ) : !data || data.length === 0 ? ( // Handle empty data case
         <div className="flex justify-center py-10">
-          <p className="ml-2">No contacts found.</p>
+          <p className="ml-2">No Subscriptions Found.</p>
         </div>
       ) : (
         <DataTable columns={columns} data={data} />

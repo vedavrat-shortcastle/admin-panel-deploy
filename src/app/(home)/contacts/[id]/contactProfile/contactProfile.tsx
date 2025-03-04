@@ -92,6 +92,12 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
     }
   };
 
+  const handleViewSubscription = () => {
+    if (contact?.id) {
+      router.push(`/contacts/${contact.id}/subscriptions`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto py-6">
@@ -122,6 +128,9 @@ export const ContactProfile: React.FC<ContactProfileProps> = ({ contact }) => {
                 >
                   <Pencil className="h-4 w-4 mr-2" />
                   Edit details
+                </Button>
+                <Button onClick={handleViewSubscription} className="w-full">
+                  View Subscriptions
                 </Button>
                 <Button variant="destructive" className="w-full">
                   <Trash2 className="h-4 w-4 mr-2" />
