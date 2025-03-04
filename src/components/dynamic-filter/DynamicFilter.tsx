@@ -40,7 +40,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   const { toast } = useToast();
 
   const { data, isLoading, error } = trpc.filter.getFilters.useQuery({
-    sectionName: 'contacts', //TODO: Remove hardcoding of section across the file
+    sectionName: 'contacts',
   });
 
   useEffect(() => {
@@ -57,6 +57,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     if (data && data.length > 0) {
       const combinedData: SavedFilter[] = data.map((item: any) => ({
         ...item,
+        filter: item.filter ?? { filter: emptyFilters },
         createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
       }));
       setFilterTabs(combinedData);
@@ -66,22 +67,17 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   const createFilter = trpc.filter.createFilter.useMutation({
     onSuccess: (response) => {
       toast({ title: 'Success', description: 'Filter saved successfully' });
-      setFilterTabs((prev) =>
-        prev.map((tab) =>
-          tab.id === activeFilterId
-            ? {
-                filter: {
-                  filter: response.filter.filter as unknown as FilterGroup,
-                },
-                id: response.filter.id,
-                name: response.filter.name,
-                createdAt: response.filter.created_at
-                  ? new Date(response.filter.created_at)
-                  : new Date(),
-              }
-            : tab
-        )
-      );
+      setFilterTabs((prev) => [
+        {
+          id: response.filter.id,
+          name: response.filter.name,
+          filter: { filter: response.filter.filter },
+          createdAt: response.filter.created_at
+            ? new Date(response.filter.created_at)
+            : new Date(),
+        },
+        ...prev,
+      ]);
       setActiveTabId(response.filter.id);
       setIsDirty(false);
     },
@@ -100,7 +96,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       operator: 'equals' as FilterOperator,
       value: null,
     };
-
     setFilters((prev) => ({
       ...prev,
       conditions: [...prev.conditions, newCondition],
@@ -112,10 +107,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     (index: number, field: string, value: any) => {
       setFilters((prev) => {
         const newConditions = [...prev.conditions];
-        newConditions[index] = {
-          ...newConditions[index],
-          [field]: value,
-        };
+        newConditions[index] = { ...newConditions[index], [field]: value };
         return { ...prev, conditions: newConditions };
       });
       setIsDirty(true);
@@ -240,7 +232,9 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       if (!selectedTab) return;
 
       setActiveTabId(tabId);
-      const newFilters = (selectedTab.filter as { filter: FilterGroup }).filter;
+      const filterData = selectedTab.filter as { filter?: FilterGroup };
+      const newFilters = filterData?.filter ?? emptyFilters;
+      console.log('this is selected filter', newFilters);
       setFilters(newFilters);
       onChange(newFilters);
       setIsDirty(false);
@@ -250,7 +244,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
 
   const filterConditions = useMemo(
     () =>
-      filters.conditions.map((condition, index) => (
+      filters?.conditions?.map((condition, index) => (
         <FilterConditions
           key={`${index}-${condition.fieldId}`}
           fields={fields}
@@ -268,9 +262,13 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
           }
           onRemove={() => removeFilterCondition(index)}
         />
-      )),
-    [filters.conditions, fields, updateFilterCondition, removeFilterCondition]
+      )) || [],
+    [filters?.conditions, fields, updateFilterCondition, removeFilterCondition]
   );
+
+  if (isLoading) {
+    return <div>Loading filters...</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -288,7 +286,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
           ) : (
             <SaveFilterDialog onSave={saveFilter} />
           )}
-
           <Button
             variant="secondary"
             onClick={handleClearFilters}
@@ -310,7 +307,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
               <Plus className="w-5 h-5" />
             </Button>
           )}
-
           {savedFilters.map((tab) => (
             <div
               key={tab.id}
@@ -322,7 +318,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
               onClick={() => selectFilter(tab.id)}
             >
               <span className="text-sm font-medium">{tab.name}</span>
-
               <Button
                 variant="ghost"
                 size="icon"
@@ -337,7 +332,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
             </div>
           ))}
         </div>
-
         <div className="space-y-4 p-4 border rounded-lg">
           <div className="flex items-center space-x-2">
             <span>Match</span>
@@ -352,9 +346,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
             </Select>
             <span>of the following conditions:</span>
           </div>
-
           <div className="space-y-2">{filterConditions}</div>
-
           <div className="flex justify-between items-center pt-4">
             <Button onClick={addFilterCondition}>Add Condition</Button>
             <Button

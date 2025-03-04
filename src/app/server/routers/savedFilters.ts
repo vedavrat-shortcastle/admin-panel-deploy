@@ -23,7 +23,7 @@ export const filterRouter = router({
           userId,
           name: input.name,
           filter: input.filter,
-          adminpanelSection: input.adminPanelSection as AdminPanelSection,
+          adminPanelSection: input.adminPanelSection as AdminPanelSection,
         },
       });
 
@@ -40,13 +40,12 @@ export const filterRouter = router({
         throw new Error('Unauthorized: No user details found');
       }
       const userId = userDetails.user.id;
-      console.log(userId);
       console.log('session', userDetails);
 
       const filters = await ctx.db.savedFilter.findMany({
         where: {
           userId,
-          adminpanelSection: input.sectionName as AdminPanelSection,
+          adminPanelSection: input.sectionName as AdminPanelSection,
         },
       });
 

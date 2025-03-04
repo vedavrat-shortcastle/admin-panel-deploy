@@ -1,4 +1,4 @@
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { authOptions } from '@/lib/authOptions';
 import { db } from '@/lib/db';
 
 import { initTRPC } from '@trpc/server';
