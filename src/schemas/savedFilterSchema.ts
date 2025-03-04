@@ -3,4 +3,5 @@ import { z } from 'zod';
 
 export const savedFilterSchema = filterInputSchema.extend({
   name: z.string(),
+  adminPanelSection: z.string(),
 });

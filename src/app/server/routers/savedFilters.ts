@@ -1,6 +1,7 @@
 import { procedure, router } from '@/app/server/trpc';
 import { savedFilterSchema } from '@/schemas/savedFilterSchema';
 import { filterInputSchema } from '@/utils/Filter/filterBuilder';
+import { AdminPanelSection } from '@prisma/client';
 import { z } from 'zod';
 
 export const filterRouter = router({
@@ -8,10 +9,21 @@ export const filterRouter = router({
   createFilter: procedure
     .input(savedFilterSchema)
     .mutation(async ({ ctx, input }) => {
+      const userDetails = ctx.userDetails;
+      if (!userDetails) {
+        throw new Error('Unauthorized: No user details found');
+      }
+      const userId = userDetails.user.id;
+      console.log('session', userDetails);
+      if (!userId) {
+        throw new Error('Unauthorized: No user ID found');
+      }
       const filter = await ctx.db.savedFilter.create({
         data: {
+          userId,
           name: input.name,
-          filter: input.filter, // Ensure it's correctly structured
+          filter: input.filter,
+          adminpanelSection: input.adminPanelSection as AdminPanelSection,
         },
       });
 
@@ -19,15 +31,36 @@ export const filterRouter = router({
     }),
 
   // ✅ Get all filters
-  getFilters: procedure.query(async ({ ctx }) => {
-    const filters = await ctx.db.savedFilter.findMany();
-    return filters;
-  }),
+  getFilters: procedure
+    .input(z.object({ sectionName: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const userDetails = ctx.userDetails;
+
+      if (!userDetails) {
+        throw new Error('Unauthorized: No user details found');
+      }
+      const userId = userDetails.user.id;
+      console.log(userId);
+      console.log('session', userDetails);
+
+      const filters = await ctx.db.savedFilter.findMany({
+        where: {
+          userId,
+          adminpanelSection: input.sectionName as AdminPanelSection,
+        },
+      });
+
+      return filters;
+    }),
 
   // ✅ Get a single filter by ID
   getFilterById: procedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
+      const userId = ctx.userDetails?.user.id;
+      if (!userId) {
+        throw new Error('Unauthorized: No user ID found');
+      }
       const filter = await ctx.db.savedFilter.findUnique({
         where: { id: input.id },
       });
@@ -41,13 +74,20 @@ export const filterRouter = router({
 
   // ✅ Update a filter by ID
   updateFilter: procedure
-    .input(z.object({ id: z.string(), name: z.string(), filterInputSchema })) // Expect ID, name, and filter updates
+    .input(
+      z.object({ id: z.string(), name: z.string(), filter: filterInputSchema })
+    )
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.userDetails?.user.id;
+      if (!userId) {
+        throw new Error('Unauthorized: No user ID found');
+      }
+
       const updatedFilter = await ctx.db.savedFilter.update({
         where: { id: input.id },
         data: {
           name: input.name,
-          filter: input.filterInputSchema,
+          filter: input.filter,
         },
       });
 
@@ -58,6 +98,11 @@ export const filterRouter = router({
   deleteFilter: procedure
     .input(z.object({ id: z.string() })) // Expect an ID
     .mutation(async ({ ctx, input }) => {
+      const userId = ctx.userDetails?.user.id;
+      if (!userId) {
+        throw new Error('Unauthorized: No user ID found');
+      }
+
       await ctx.db.savedFilter.delete({
         where: { id: input.id },
       });

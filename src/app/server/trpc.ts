@@ -1,11 +1,15 @@
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { db } from '@/lib/db';
 
 import { initTRPC } from '@trpc/server';
+import { getServerSession } from 'next-auth';
 import superjson from 'superjson';
 
 export const createContext = async () => {
+  const userDetails = await getServerSession(authOptions);
   return {
     db,
+    userDetails,
   };
 };
 

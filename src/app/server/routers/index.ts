@@ -3,11 +3,11 @@ import { authRouter } from '@/app/server/routers/auth';
 import { contactsRouter } from '@/app/server/routers/contacts';
 import { tagsRouter } from '@/app/server/routers/customTags';
 import { locationRouter } from '@/app/server/routers/locations';
-import { filterRouter } from '@/app/server/routers/savedFilters';
 import { subscriptionRouter } from '@/app/server/routers/subscription';
 import { superUserRouter } from '@/app/server/routers/superUser';
 import { usersRouter } from '@/app/server/routers/users';
 import { router } from '@/app/server/trpc';
+import { filterRouter } from '@/app/server/routers/savedFilters';
 
 export const appRouter = router({
   users: usersRouter,

@@ -85,10 +85,8 @@ export const contactsRouter = router({
   getFiltered: procedure
     .input(filterInputSchema)
     .query(async ({ ctx, input }) => {
-      console.log('input', JSON.stringify(input));
       try {
         const where = buildPrismaFilter(input.filter as FilterGroup);
-        console.log('where', JSON.stringify(where));
         const skip = input.pagination
           ? (input.pagination.page - 1) * input.pagination.limit
           : 0;

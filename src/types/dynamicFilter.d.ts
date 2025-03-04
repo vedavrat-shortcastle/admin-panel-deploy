@@ -32,6 +32,12 @@ export interface FilterGroup {
   groups?: FilterGroup[];
 }
 
+export interface FilterBuilderProps {
+  fields: FilterField[];
+  initialFilters?: FilterGroup;
+  onChange: (filters: FilterGroup) => void;
+}
+
 export type EntityFilter = {
   filter: FilterGroup;
   pagination?: {
