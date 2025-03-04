@@ -1,6 +1,6 @@
 import AddLocation from '@/components/contacts/tagbasedfields/AddLocation';
 import { SearchableSelect } from '@/components/SearchableSelect';
-
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -28,50 +28,50 @@ interface Location {
 
 export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
     useState<boolean>(false);
-  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
-  const [locationsData, setLocationsData] = useState<Location[] | undefined>(
-    undefined
-  ); // Store data locally
+  const [isFocused, setIsFocused] = useState<boolean>(false); // Add focus state
 
-  const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
-    searchTerm,
-    {
-      enabled: hasSearched,
-      onSuccess: (data) => setLocationsData(data), // Update local state on success
+  const { data: locationsData, isLoading } =
+    trpc.location.getAllLocations.useQuery(searchTerm, {
+      enabled: isFocused && searchTerm.length > 0, // Fetch only when focused and search term exists
+    });
+
+  // Set initial city input only once on mount or when it changes
+  const initialCityInput = form.watch('location.city');
+  useEffect(() => {
+    if (initialCityInput) {
+      form.setValue('cityInput', initialCityInput);
     }
-  );
+  }, [initialCityInput, form]);
 
-  const onSearch = useCallback(
-    (search: string) => {
-      setSearchTerm(search);
-      setHasSearched(true);
-      refetch();
-    },
-    [refetch]
-  );
+  const onSearch = useCallback((search: string) => {
+    setSearchTerm(search);
+  }, []);
 
   const handleLocationSelect = useCallback(
     (selectedLocation: Location) => {
       const locationId = selectedLocation.id;
-
       form.setValue('locationId', locationId);
-      form.setValue('city', selectedLocation.city);
+      form.setValue('location.city', selectedLocation.city);
       form.setValue('cityInput', selectedLocation.city);
-      form.setValue('state', selectedLocation.state || '');
-      form.setValue('country', selectedLocation.country || '');
-      setIsLocationSelected(true);
-      setSearchTerm(''); // Clear search for next search
-      setHasSearched(false); // Reset for next search
-      setLocationsData(undefined); // Clear displayed locations
+      form.setValue('location.state', selectedLocation.state || '');
+      form.setValue('location.country', selectedLocation.country || '');
     },
     [form]
   );
 
   const onClick = useCallback(() => {
     setIsAddLocationModalOpen(true);
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    setSearchTerm(''); // Reset search term on blur
   }, []);
 
   return (
@@ -109,6 +109,8 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
         showButton
         onClick={onClick}
         isLoading={isLoading}
+        onFocus={handleFocus} // Pass focus handler
+        onBlur={handleBlur} // Pass blur handler
       />
 
       <Dialog
@@ -135,7 +137,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
       <div className="grid grid-cols-2 gap-4">
         <FormField
           control={form.control}
-          name="state"
+          name="location.state"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">State/Region</FormLabel>
@@ -146,7 +148,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected} // Disable when a location is selected
                 />
               </FormControl>
               <FormMessage />
@@ -156,7 +157,7 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
 
         <FormField
           control={form.control}
-          name="country"
+          name="location.country"
           render={({ field }) => (
             <FormItem>
               <FormLabel className="font-medium">Country</FormLabel>
@@ -167,7 +168,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected} // Disable when a location is selected
                 />
               </FormControl>
               <FormMessage />

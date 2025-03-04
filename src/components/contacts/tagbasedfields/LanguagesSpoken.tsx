@@ -5,14 +5,17 @@ import { UseFormReturn } from 'react-hook-form';
 
 export const LanguagesSpoken: React.FC<{
   form: UseFormReturn<any>;
-  scrollableRef: React.RefObject<HTMLDivElement>;
+  scrollableRef?: React.RefObject<HTMLDivElement>;
 }> = ({ form, scrollableRef }) => {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const languageInput = form.watch('languagesSpokenInput') || '';
-
+  useEffect(() => {
+    const languagesFromForm = form.getValues('languagesSpoken') || [];
+    setSelectedLanguages(languagesFromForm);
+  }, [form]);
   useEffect(() => {
     requestAnimationFrame(() => {
-      if (scrollableRef.current) {
+      if (scrollableRef?.current) {
         scrollableRef.current.scrollTop = scrollableRef.current.scrollHeight;
       }
     });
@@ -41,6 +44,7 @@ export const LanguagesSpoken: React.FC<{
       <SearchableSelect
         label="Languages Spoken"
         fieldName="languagesSpoken"
+        placeholder="Type and Click on Add"
         onClick={handleAddLanguage}
         form={form}
         displayKey={languageInput}

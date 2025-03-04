@@ -26,6 +26,7 @@ export const createSubscriptionSchema = z.object({
   ]),
   currency: z.enum(['CAD', 'EUR', 'INR', 'USD']),
   amount: z.number().int().optional(),
+  saleChannel: z.string().max(50).optional(),
 });
 
 export type subscriptionFormValues = z.infer<typeof createSubscriptionSchema>;

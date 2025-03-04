@@ -166,7 +166,11 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   type="number"
                   className="w-full"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => {
+                    const newValue = e.target.valueAsNumber;
+                    field.onChange(newValue);
+                    form.setValue('offlinePercentage', 100 - newValue);
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -186,7 +190,11 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   type="number"
                   className="w-full"
                   {...field}
-                  onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                  onChange={(e) => {
+                    const newValue = e.target.valueAsNumber;
+                    field.onChange(newValue);
+                    form.setValue('onlinePercentage', 100 - newValue);
+                  }}
                 />
               </FormControl>
               <FormMessage />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { debounce } from 'lodash';
 import { Contact, UsersRoundIcon } from 'lucide-react';
 
@@ -12,7 +13,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import AddContact from '@/components/contacts/AddContact';
-import { columns } from '@/app/contacts/columns';
+import { columns } from '@/app/(home)/contacts/columns';
 import { trpc } from '@/utils/trpc';
 import { Button } from '@/components/ui/button';
 
@@ -22,9 +23,10 @@ import { FilterBuilder } from '@/components/dynamic-filter/DynamicFilter';
 import { contactFilterFields } from '@/utils/Filter/filterEntities';
 import { EntityFilter, FilterGroup } from '@/types/dynamicFilter';
 import { addSearchConditions } from '@/utils/Filter/searchUtils';
+import { ContactsTable } from '@/types/contactSection';
 
 export default function ContactsLandingPage() {
-  const [dialogOpen, setDialogOpen] = useState(false); // Modal state
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [filter, setFilter] = useState<EntityFilter>({
     filter: {
       logic: 'AND',
@@ -80,6 +82,12 @@ export default function ContactsLandingPage() {
         limit: prev.pagination?.limit ?? 20,
       }, // Reset to first page on filter change
     }));
+  };
+
+  const router = useRouter();
+
+  const handleRowClick = (rowData: ContactsTable) => {
+    router.push(`/contacts/${rowData.id}`);
   };
 
   return (
@@ -153,16 +161,18 @@ export default function ContactsLandingPage() {
           pagination={{
             pageCount: data.pageCount,
             page: filter.pagination?.page ?? 1,
-            onPageChange: (page) =>
+            pageSize: filter.pagination?.limit ?? 10,
+            onPageChange: (page, pageSize) =>
               setFilter((prev) => ({
                 ...prev,
                 pagination: {
                   ...prev.pagination,
                   page,
-                  limit: prev.pagination?.limit ?? 20,
+                  limit: pageSize,
                 },
               })),
           }}
+          onRowClick={handleRowClick}
         />
       )}
     </div>

@@ -30,9 +30,8 @@ export default function AddLocation() {
     },
   });
 
-  // ✅ Function to handle form submission
   const handleAddLocation = async () => {
-    const values = form.getValues(); // Get form values manually
+    const values = form.getValues();
 
     try {
       await createLocationMutation.mutateAsync({
@@ -41,16 +40,14 @@ export default function AddLocation() {
         country: values.country,
       });
 
-      // ✅ Show success toast
       toast({
         title: 'Location Created!',
         description: 'You can now add the location',
       });
-      form.reset(); // ✅ Reset form after successful submission
+      form.reset();
     } catch (error: any) {
       console.error('Error creating location:', error);
 
-      // ✅ Show error toast
       toast({
         title: 'Error creating location',
         variant: 'destructive',
@@ -61,7 +58,6 @@ export default function AddLocation() {
   return (
     <Form {...form}>
       <div className="space-y-4">
-        {/* ✅ City Input */}
         <FormField
           control={form.control}
           name="city"
@@ -76,7 +72,6 @@ export default function AddLocation() {
           )}
         />
 
-        {/* ✅ State Input (Optional) */}
         <FormField
           control={form.control}
           name="state"
@@ -95,7 +90,6 @@ export default function AddLocation() {
           )}
         />
 
-        {/* ✅ Country Input */}
         <FormField
           control={form.control}
           name="country"
@@ -110,10 +104,9 @@ export default function AddLocation() {
           )}
         />
 
-        {/* ✅ Add Location Button */}
         <Button
           type="button"
-          onClick={handleAddLocation} // Manually trigger the function
+          onClick={handleAddLocation}
           disabled={createLocationMutation.isLoading}
         >
           {createLocationMutation.isLoading ? 'Creating...' : 'Add Location'}

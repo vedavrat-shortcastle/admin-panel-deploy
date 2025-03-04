@@ -1,7 +1,14 @@
 'use client';
 
 import * as React from 'react';
-import { format, getYear, getMonth, eachYearOfInterval } from 'date-fns';
+import {
+  format,
+  getYear,
+  getMonth,
+  eachYearOfInterval,
+  isBefore,
+  isAfter,
+} from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -32,10 +39,14 @@ export default function DatePicker({
   form,
   label,
   fieldName,
+  allowFuture = true,
+  allowPast = true,
 }: {
   label: string;
   fieldName: string;
   form: UseFormReturn<any>;
+  allowFuture?: boolean;
+  allowPast?: boolean;
 }) {
   const [date, setDate] = React.useState<Date | undefined>(
     form.getValues(fieldName) || new Date()
@@ -97,6 +108,17 @@ export default function DatePicker({
   const displayedDate = React.useMemo(() => {
     return new Date(year, month - 1, 1); // First day of the selected month and year
   }, [month, year]);
+
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    if (!allowFuture && isAfter(date, today)) {
+      return true;
+    }
+    if (!allowPast && isBefore(date, today)) {
+      return true;
+    }
+    return false;
+  };
 
   return (
     <FormField
@@ -167,6 +189,7 @@ export default function DatePicker({
                   }}
                   initialFocus
                   month={displayedDate} // Only use month prop, no year prop
+                  disabled={isDateDisabled}
                 />
               </PopoverContent>
             </Popover>

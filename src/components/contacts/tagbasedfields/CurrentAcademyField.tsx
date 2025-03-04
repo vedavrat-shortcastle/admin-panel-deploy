@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
 
 interface getAcademyNamesRes {
   id: string;
@@ -34,10 +35,12 @@ export const CurrentAcademy: React.FC<{ form: UseFormReturn<any> }> = ({
   });
 
   const academyData: getAcademyNamesRes[] = useMemo(() => {
-    return academyNames.map((name: string, index: number) => ({
-      id: academyIds[index] || '',
-      name: name,
-    }));
+    return academyNames
+      .map((name: string, index: number) => ({
+        id: academyIds[index]?.trim() || `academy-${index}`,
+        name: name,
+      }))
+      .filter((academy: getAcademyNamesRes) => academy.id);
   }, [academyNames, academyIds]);
 
   const handleOnSelect = (selectedAcademy: getAcademyNamesRes | null) => {
@@ -51,7 +54,8 @@ export const CurrentAcademy: React.FC<{ form: UseFormReturn<any> }> = ({
   };
 
   return (
-    <div>
+    <div className="space-y-2">
+      <Label htmlFor="current-academy-select">Current Academy</Label>
       <Select
         onValueChange={(value) => {
           if (value === 'clear') {
@@ -67,7 +71,7 @@ export const CurrentAcademy: React.FC<{ form: UseFormReturn<any> }> = ({
         }}
         value={currentAcademy}
       >
-        <SelectTrigger>
+        <SelectTrigger id="current-academy-select">
           <SelectValue placeholder="Select Current Academy" />
         </SelectTrigger>
 

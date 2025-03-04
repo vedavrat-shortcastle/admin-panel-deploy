@@ -12,25 +12,21 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFocused, setIsFocused] = useState(false); // Add focus state
 
-  // Fetch available tags based on search input
   const { data: tagsData, isLoading } = trpc.tags.getTags.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
+    enabled: isFocused,
   });
 
-  // Get currently selected tags from the form
   const selectedTags = form.watch('customTags') || [];
 
-  // Handle selecting a tag from the dropdown
   const handleTagSelect = (selectedTag: Tag) => {
     if (!selectedTags.includes(selectedTag.name)) {
       form.setValue('customTags', [...selectedTags, selectedTag.name]);
     }
-
     setSearchTerm('');
   };
 
-  // Handle removing a selected tag
   const handleRemoveTag = (tag: string) => {
     form.setValue(
       'customTags',
@@ -42,12 +38,20 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
     form.setValue('customTags', [...selectedTags, value]);
   };
 
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    setSearchTerm(''); // Reset search term on blur
+  };
+
   return (
     <div>
-      {/* Searchable dropdown for existing tags */}
       <SearchableSelect<Tag>
         form={form}
-        fieldName="customTags"
+        fieldName="tags"
         label="Tags"
         placeholder="Search or add tags..."
         data={tagsData || []}
@@ -58,9 +62,10 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
         showButton
         onClick={onClick}
         isLoading={isLoading}
+        onFocus={handleFocus} // Pass focus handler
+        onBlur={handleBlur} // Pass blur handler
       />
 
-      {/* Show selected tags */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap mt-3 gap-2">
           {selectedTags.map((tag: string) => (
