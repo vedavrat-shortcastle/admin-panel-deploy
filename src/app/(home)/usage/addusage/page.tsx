@@ -16,6 +16,7 @@ import { createUsageSchema, usageFormValues } from '@/schemas/usage';
 import { usageFormDefaults } from '@/utils/usageFormDefaults';
 import { GaugeCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { AcademyNames } from '@/components/contacts/tagbasedfields/AcademyNamesField';
 
 export default function UsageForm() {
   // form initialisation
@@ -52,20 +53,9 @@ export default function UsageForm() {
           {/* Form */}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* FORM FIELD */}
-              <FormField
-                control={form.control}
-                name="academy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Academy Name *</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Academy name" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* FORM FIELDS */}
+
+              <AcademyNames mode="single" form={form} />
               <FormField
                 control={form.control}
                 name="coach"

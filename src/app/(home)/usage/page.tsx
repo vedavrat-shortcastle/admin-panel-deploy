@@ -20,29 +20,31 @@ import { DataTable } from '@/components/data-table';
 import { columns } from './columns';
 import { useRouter } from 'next/navigation';
 
-const data = Array.from({ length: 20 }, (_, i) => ({
-  academy: 'A2C Academy',
-  coach: `Coach ${i + 1}`,
-  usage: (i + 1) * 5,
-  classroom: '40%',
-  tournament: '40%',
-  courses: '40%',
-  gameArea: '40%',
-  quiz: '40%',
-  assignment: '40%',
-  database: '40%',
+const colors = ['0%', '20%', '40%', '60%', '80%', '100%'];
+
+const dummyUsageDataArray = Array.from({ length: 15 }, (_, index) => ({
+  academy: `Academy ${index + 1}`,
+  coach: `Coach ${index + 1}`,
+  overallUsageColor: colors[Math.floor(Math.random() * colors.length)],
+  classroomColor: colors[Math.floor(Math.random() * colors.length)],
+  tournamentColor: colors[Math.floor(Math.random() * colors.length)],
+  coursesColor: colors[Math.floor(Math.random() * colors.length)],
+  gameAreaColor: colors[Math.floor(Math.random() * colors.length)],
+  quizColor: colors[Math.floor(Math.random() * colors.length)],
+  assignmentColor: colors[Math.floor(Math.random() * colors.length)],
+  databaseColor: colors[Math.floor(Math.random() * colors.length)],
 }));
 
 export default function UsageTable() {
-  console.log(data);
-  const paginatedData = data;
+  const data = dummyUsageDataArray;
   const [isLoading, setIsLoading] = useState(false);
 
   // redirect to addUsage page
   const router = useRouter();
-  setIsLoading(true);
+
   const handleRedirect = () => {
     router.push('/usage/addusage'); // Redirect to /dashboard
+    setIsLoading(false);
   };
 
   return (
@@ -120,7 +122,7 @@ export default function UsageTable() {
             </Popover>
           </div>
           <div className="flex  mt-6 items-end w-full h-15 justify-end">
-            <Button onClick={handleRedirect}>Add Tools</Button>
+            <Button onClick={handleRedirect}>Add Usage</Button>
           </div>
         </div>
       </div>
@@ -130,17 +132,18 @@ export default function UsageTable() {
         <div className="flex justify-center py-10">
           <TableSkeleton />
         </div>
-      ) : //  : error ? ( // Handle error case
-      //    <div className="flex justify-center py-10 text-red-500">
-      //      <p className="ml-2">Error fetching contacts: {error.message}</p>
-      //    </div>
-      //  )
-      !data || data.length === 0 ? ( // Handle empty data case
-        <div className="flex justify-center py-10">
-          <p className="ml-2">No contacts found.</p>
-        </div>
       ) : (
-        <DataTable columns={columns} data={paginatedData} />
+        //  : error ? ( // Handle error case
+        //    <div className="flex justify-center py-10 text-red-500">
+        //      <p className="ml-2">Error fetching contacts: {error.message}</p>
+        //    </div>
+        //  )
+        // !data || data.length === 0 ? ( // Handle empty data case
+        //   <div className="flex justify-center py-10">
+        //     <p className="ml-2">No contacts found.</p>
+        //   </div>
+        // ):
+        <DataTable columns={columns} data={data} />
       )}
 
       {/* pagination */}
