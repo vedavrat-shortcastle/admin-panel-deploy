@@ -14,7 +14,6 @@ export const filterRouter = router({
         throw new Error('Unauthorized: No user details found');
       }
       const userId = userDetails.user.id;
-      console.log('session', userDetails);
       if (!userId) {
         throw new Error('Unauthorized: No user ID found');
       }
@@ -40,7 +39,6 @@ export const filterRouter = router({
         throw new Error('Unauthorized: No user details found');
       }
       const userId = userDetails.user.id;
-      console.log('session', userDetails);
 
       const filters = await ctx.db.savedFilter.findMany({
         where: {

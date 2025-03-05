@@ -193,15 +193,21 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
 
   const createNewFilter = useCallback(() => {
     const newTabId = 'new-tab';
-    setFilterTabs((prev) => [
-      {
-        id: newTabId,
-        name: 'New Tab',
-        filter: { filter: emptyFilters },
-        createdAt: new Date(),
-      },
-      ...prev,
-    ]);
+
+    setFilterTabs((prev) => {
+      const prevTabs = prev.filter((tab) => tab.id !== 'new-tab');
+
+      return [
+        {
+          id: newTabId,
+          name: 'New Tab',
+          filter: { filter: emptyFilters },
+          createdAt: new Date(),
+        },
+        ...prevTabs,
+      ];
+    });
+
     setActiveTabId(newTabId);
     setFilters(emptyFilters);
   }, []);
@@ -234,7 +240,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       setActiveTabId(tabId);
       const filterData = selectedTab.filter as { filter?: FilterGroup };
       const newFilters = filterData?.filter ?? emptyFilters;
-      console.log('this is selected filter', newFilters);
       setFilters(newFilters);
       onChange(newFilters);
       setIsDirty(false);
