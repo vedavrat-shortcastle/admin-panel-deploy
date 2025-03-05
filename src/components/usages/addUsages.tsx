@@ -11,9 +11,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from '@/hooks/use-toast';
 import { createUsageSchema, usageFormValues } from '@/schemas/usage';
 import { usageFormDefaults } from '@/utils/usageFormDefaults';
-import { AcademyNames } from '../contacts/tagbasedfields/AcademyNamesField';
 
 export default function UsageForm() {
   const form = useForm<usageFormValues>({
@@ -24,16 +24,35 @@ export default function UsageForm() {
 
   const onSubmit = (data: any) => {
     console.log('Form Data:', data);
+    toast({
+      title: 'succuessfull submited',
+      description: 'form  submited succuessfull',
+      variant: 'default',
+    });
   };
 
   return (
     <div className="flex flex-col items-center   p-4">
       <div className="w-full max-w-3xl p-0 border rounded-lg shadow-md">
-        {/* <div className="bg-gray-900 text-white p-4 rounded-t-lg text-lg font-bold">Usage</div> */}
         <div className="p-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <AcademyNames mode="single" form={form} />
+              {/* <AcademyNames mode="single" form={form}  Not working , if this is there onsubmit not triggering   / */}
+              <FormField
+                control={form.control}
+                name="academy"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Academy Name <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Academy Name" required />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="coach"
