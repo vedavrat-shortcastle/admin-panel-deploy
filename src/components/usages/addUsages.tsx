@@ -13,6 +13,7 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { createUsageSchema, usageFormValues } from '@/schemas/usage';
 import { usageFormDefaults } from '@/utils/usageFormDefaults';
+import { AcademyNames } from '../contacts/tagbasedfields/AcademyNamesField';
 
 export default function UsageForm() {
   const form = useForm<usageFormValues>({
@@ -32,21 +33,7 @@ export default function UsageForm() {
         <div className="p-4">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="academy"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Academy Name <span className="text-red-500">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Academy name" required />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <AcademyNames mode="single" form={form} />
               <FormField
                 control={form.control}
                 name="coach"
