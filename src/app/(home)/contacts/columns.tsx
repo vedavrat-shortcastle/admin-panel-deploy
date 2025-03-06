@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { PencilIcon, TrashIcon } from 'lucide-react';
 import { ContactsTable } from '@/types/contactSection';
 import { ChessTitle } from '@prisma/client';
+import { redirect } from 'next/navigation';
 
 export const columns: ColumnDef<ContactsTable>[] = [
   {
@@ -89,11 +90,9 @@ export const columns: ColumnDef<ContactsTable>[] = [
 ];
 
 const handleEdit = (contact: ContactsTable) => {
-  // Implement edit functionality here
-  console.log('Edit contact', contact);
+  redirect(`/contacts/${contact.id}`);
 };
 
 const handleDelete = (contact: ContactsTable) => {
-  // Implement delete functionality here
   console.log('Delete contact', contact);
 };

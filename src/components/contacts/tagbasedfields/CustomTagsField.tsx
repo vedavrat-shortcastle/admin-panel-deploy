@@ -12,9 +12,10 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
   form,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isFocused, setIsFocused] = useState(false); // Add focus state
 
   const { data: tagsData, isLoading } = trpc.tags.getTags.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0,
+    enabled: isFocused,
   });
 
   const selectedTags = form.watch('customTags') || [];
@@ -23,7 +24,6 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
     if (!selectedTags.includes(selectedTag.name)) {
       form.setValue('customTags', [...selectedTags, selectedTag.name]);
     }
-
     setSearchTerm('');
   };
 
@@ -36,6 +36,15 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
 
   const onClick = (value: string) => {
     form.setValue('customTags', [...selectedTags, value]);
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsFocused(false);
+    setSearchTerm(''); // Reset search term on blur
   };
 
   return (
@@ -53,6 +62,8 @@ export const CustomTagsField: React.FC<{ form: UseFormReturn<any> }> = ({
         showButton
         onClick={onClick}
         isLoading={isLoading}
+        onFocus={handleFocus} // Pass focus handler
+        onBlur={handleBlur} // Pass blur handler
       />
 
       {selectedTags.length > 0 && (

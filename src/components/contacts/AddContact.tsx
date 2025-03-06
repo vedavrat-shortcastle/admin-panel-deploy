@@ -19,6 +19,7 @@ import { ContactAddressInfo } from '@/components/contacts/ContactAddressInfo';
 import { defaultFormValues } from '@/utils/contactFormDefaults';
 import { PersonalContactInfo } from '@/components/contacts/PersonalContactInfo';
 import { trpc } from '@/utils/trpc';
+import { useRouter } from 'next/navigation';
 
 export default function AddContact() {
   const [step, setStep] = useState(1);
@@ -56,16 +57,18 @@ export default function AddContact() {
     }
     return true;
   };
+  const router = useRouter();
 
   const { mutate, isLoading } = trpc.contacts.create.useMutation({
     // Get mutate and isLoading
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: 'Success!',
         description: 'Contact has been created.',
       });
       form.reset(); // Reset the form after successful submission
       setStep(1); // Go back to step 1
+      router.push(`/contacts/${data.id}`); // Use Next.js router to redirect
     },
     onError: (error) => {
       console.error('Error creating contact:', error);

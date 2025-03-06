@@ -87,4 +87,21 @@ export const subscriptionRouter = router({
 
       return updatedSubscription;
     }),
+
+  getbyContactId: procedure.input(z.string()).query(async ({ ctx, input }) => {
+    const subscriptions = await ctx.db.subscription.findMany({
+      where: { contactId: parseInt(input) },
+      select: {
+        academy: {
+          select: {
+            name: true,
+          },
+        },
+        salesType: true,
+        planEndDate: true,
+      },
+    });
+
+    return subscriptions;
+  }),
 });

@@ -28,57 +28,50 @@ interface Location {
 
 export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [isAddLocationModalOpen, setIsAddLocationModalOpen] =
     useState<boolean>(false);
-  const [isLocationSelected, setIsLocationSelected] = useState<boolean>(false);
-  const [locationsData, setLocationsData] = useState<Location[] | undefined>(
-    undefined
-  );
+  const [isFocused, setIsFocused] = useState<boolean>(false); // Add focus state
 
+  const { data: locationsData, isLoading } =
+    trpc.location.getAllLocations.useQuery(searchTerm, {
+      enabled: isFocused && searchTerm.length > 0, // Fetch only when focused and search term exists
+    });
+
+  // Set initial city input only once on mount or when it changes
   const initialCityInput = form.watch('location.city');
-  form.setValue('cityInput', initialCityInput);
-
-  const { refetch, isLoading } = trpc.location.getAllLocations.useQuery(
-    searchTerm,
-    {
-      enabled: hasSearched,
-      onSuccess: (data) => setLocationsData(data),
-    }
-  );
   useEffect(() => {
-    if (hasSearched) {
-      refetch();
+    if (initialCityInput) {
+      form.setValue('cityInput', initialCityInput);
     }
-  }, [searchTerm, hasSearched, refetch]);
-  const onSearch = useCallback(
-    (search: string) => {
-      setSearchTerm(search);
-      setHasSearched(true);
-      refetch();
-    },
-    [refetch]
-  );
+  }, [initialCityInput, form]);
+
+  const onSearch = useCallback((search: string) => {
+    setSearchTerm(search);
+  }, []);
 
   const handleLocationSelect = useCallback(
     (selectedLocation: Location) => {
       const locationId = selectedLocation.id;
-
       form.setValue('locationId', locationId);
-      form.setValue('city', selectedLocation.city);
+      form.setValue('location.city', selectedLocation.city);
       form.setValue('cityInput', selectedLocation.city);
-      form.setValue('state', selectedLocation.state || '');
-      form.setValue('country', selectedLocation.country || '');
-      setIsLocationSelected(true);
-      setSearchTerm('');
-      setHasSearched(false);
-      setLocationsData(undefined);
+      form.setValue('location.state', selectedLocation.state || '');
+      form.setValue('location.country', selectedLocation.country || '');
     },
     [form]
   );
 
   const onClick = useCallback(() => {
     setIsAddLocationModalOpen(true);
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    setIsFocused(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setIsFocused(false);
+    setSearchTerm(''); // Reset search term on blur
   }, []);
 
   return (
@@ -116,6 +109,8 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
         showButton
         onClick={onClick}
         isLoading={isLoading}
+        onFocus={handleFocus} // Pass focus handler
+        onBlur={handleBlur} // Pass blur handler
       />
 
       <Dialog
@@ -153,7 +148,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected}
                 />
               </FormControl>
               <FormMessage />
@@ -174,7 +168,6 @@ export const Address: React.FC<{ form: UseFormReturn<any> }> = ({ form }) => {
                   {...field}
                   value={field.value || ''}
                   onChange={(e) => field.onChange(e.target.value)}
-                  disabled={isLocationSelected}
                 />
               </FormControl>
               <FormMessage />

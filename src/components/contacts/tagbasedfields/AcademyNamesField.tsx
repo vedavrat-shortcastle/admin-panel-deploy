@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { UseFormReturn, useWatch } from 'react-hook-form';
-
 import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
@@ -23,7 +22,8 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
   mode,
   initialIds,
 }) => {
-  const [searchTerm, setSearchTerm] = useState<string>(''); // State to track search term
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isFocused, setIsFocused] = useState(false);
 
   // Fetch academy names based on search term
   const {
@@ -31,7 +31,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     error,
     isLoading,
   } = trpc.academy.getAcademyNames.useQuery(searchTerm, {
-    enabled: searchTerm.length > 0, // Only fetch when there's a search term
+    enabled: isFocused,
   });
 
   // Fetch initial academy details using provided IDs
@@ -155,6 +155,14 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     }
   };
 
+  const handleFocus = () => {
+    setIsFocused(true);
+  };
+
+  const handleBlur = () => {
+    setSearchTerm('');
+  };
+
   return (
     <div>
       {/* Searchable dropdown component */}
@@ -168,7 +176,9 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
         selectionMode="multiple"
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
-        isLoading={isLoading} // Show loading indicator if needed
+        isLoading={isLoading}
+        onFocus={handleFocus} // Add focus handler
+        onBlur={handleBlur} // Add blur handler
       />
 
       {/* Display selected academy names (for multiple mode) */}

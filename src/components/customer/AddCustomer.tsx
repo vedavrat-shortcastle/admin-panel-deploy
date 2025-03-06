@@ -17,6 +17,7 @@ import {
 import { CustomerDetails } from '@/components/customer/CustomerDetails';
 import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
 import { subscriptionFormDefaults } from '@/utils/subscriptionFormDefaults';
+
 export default function AddCustomer() {
   const [step, setStep] = useState(1);
   const { toast } = useToast();

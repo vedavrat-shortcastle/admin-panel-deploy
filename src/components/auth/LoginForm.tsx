@@ -27,7 +27,6 @@ import {
 export default function LoginForm() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [loginError, setLoginError] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<LoginFormValues>({
@@ -40,7 +39,6 @@ export default function LoginForm() {
 
   const onSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
-    setLoginError(undefined);
 
     try {
       const result = await signIn('credentials', {
@@ -50,18 +48,16 @@ export default function LoginForm() {
       });
 
       if (result?.error) {
-        if (result.error === 'CredentialsSignin') {
-          setLoginError('Invalid email or password.');
-        } else {
-          setLoginError('Could not sign in. Please try again.');
-          console.error('Sign-in error:', result.error);
-        }
+        const error = JSON.parse(result.error);
+        form.setError(error.type, {
+          type: 'manual',
+          message: error.message,
+        });
         return;
       }
       router.push('/contacts');
     } catch (error) {
       console.error('Login error:', error);
-      setLoginError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -78,12 +74,6 @@ export default function LoginForm() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {loginError && (
-                <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                  {loginError}
-                </div>
-              )}
-
               <FormField
                 control={form.control}
                 name="email"

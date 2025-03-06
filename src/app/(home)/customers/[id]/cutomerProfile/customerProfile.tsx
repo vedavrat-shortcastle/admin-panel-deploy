@@ -11,7 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { subscriptionFormValues } from '@/types/customerSection';
 import { CustomerDetails } from '@/components/customer/CustomerDetails';
 import SubscriptionDetails from '@/components/customer/SubscriptionDetails';
-import { Subscription } from '@/types/d';
+import { Subscription } from '@/types/subscription';
 import { Form } from '@/components/ui/form';
 import { trpc } from '@/utils/trpc';
 import { createSubscriptionSchema } from '@/schemas/subscription';
