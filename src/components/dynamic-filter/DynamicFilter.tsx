@@ -30,6 +30,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   fields,
   initialFilters,
   onChange,
+  sectionName,
 }) => {
   const [filters, setFilters] = useState<FilterGroup>(
     () => initialFilters || emptyFilters
@@ -40,7 +41,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   const { toast } = useToast();
 
   const { data, isLoading, error } = trpc.filter.getFilters.useQuery({
-    sectionName: 'contacts',
+    sectionName: sectionName,
   });
 
   useEffect(() => {
@@ -67,18 +68,24 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   const createFilter = trpc.filter.createFilter.useMutation({
     onSuccess: (response) => {
       toast({ title: 'Success', description: 'Filter saved successfully' });
-      setFilterTabs((prev) => [
-        {
-          id: response.filter.id,
-          name: response.filter.name,
-          filter: { filter: response.filter.filter },
-          createdAt: response.filter.created_at
-            ? new Date(response.filter.created_at)
-            : new Date(),
-        },
-        ...prev,
-      ]);
-      setActiveTabId(response.filter.id);
+      const newFilter = {
+        id: response.filter.id,
+        name: response.filter.name,
+        filter: response.filter.filter ?? emptyFilters,
+        createdAt: response.filter.created_at
+          ? new Date(response.filter.created_at)
+          : new Date(),
+      } satisfies SavedFilter;
+
+      setFilterTabs((prev) => {
+        // Functional update for setFilterTabs
+        const updatedTabs = prev
+          .filter((tab) => tab.id !== 'new-tab')
+          .concat(newFilter);
+        setActiveTabId(newFilter.id); // Set activeTabId *within* the same state update
+        return updatedTabs;
+      });
+      // setActiveTabId(newFilter.id); // Remove this separate setActiveTabId call
       setIsDirty(false);
     },
     onError: (error) => {
@@ -90,11 +97,23 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     },
   });
 
+  const saveFilter = useCallback(
+    (name: string) => {
+      onChange(filters);
+      createFilter.mutate({
+        name,
+        filter: { filter: filters },
+        adminPanelSection: sectionName,
+      });
+    },
+    [createFilter, filters]
+  );
+
   const addFilterCondition = useCallback(() => {
     const newCondition: FilterCondition = {
       fieldId: fields[0].id,
       operator: 'equals' as FilterOperator,
-      value: null,
+      value: '',
     };
     setFilters((prev) => ({
       ...prev,
@@ -127,17 +146,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     setFilters((prev) => ({ ...prev, logic }));
     setIsDirty(true);
   }, []);
-
-  const saveFilter = useCallback(
-    (name: string) => {
-      createFilter.mutate({
-        name,
-        filter: filters,
-        adminPanelSection: 'contacts',
-      });
-    },
-    [createFilter, filters]
-  );
 
   const applyFilters = useCallback(() => {
     onChange(filters);
@@ -198,13 +206,13 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       const prevTabs = prev.filter((tab) => tab.id !== 'new-tab');
 
       return [
+        ...prevTabs,
         {
           id: newTabId,
           name: 'New Tab',
           filter: { filter: emptyFilters },
           createdAt: new Date(),
         },
-        ...prevTabs,
       ];
     });
 
@@ -229,7 +237,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     },
     [deleteFilterMutation]
   );
-
   const selectFilter = useCallback(
     (tabId: string) => {
       if (activeFilterId === tabId) return;
@@ -237,11 +244,11 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       const selectedTab = savedFilters.find((tab) => tab.id === tabId);
       if (!selectedTab) return;
 
-      setActiveTabId(tabId);
       const filterData = selectedTab.filter as { filter?: FilterGroup };
-      const newFilters = filterData?.filter ?? emptyFilters;
+      const newFilters = filterData.filter ?? emptyFilters;
       setFilters(newFilters);
       onChange(newFilters);
+      setActiveTabId(tabId);
       setIsDirty(false);
     },
     [activeFilterId, savedFilters, onChange]
@@ -294,7 +301,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
           <Button
             variant="secondary"
             onClick={handleClearFilters}
-            disabled={filters.conditions.length === 0}
+            disabled={(filters.conditions ?? []).length === 0}
           >
             Clear
           </Button>
@@ -302,16 +309,6 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
       </div>
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-1 overflow-x-auto whitespace-nowrap max-w-full">
-          {!savedFilters.some((tab) => tab.id === 'new-tab') && !isLoading && (
-            <Button
-              variant="ghost"
-              disabled={activeFilterId === null}
-              className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-sm"
-              onClick={createNewFilter}
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
-          )}
           {savedFilters.map((tab) => (
             <div
               key={tab.id}
@@ -336,6 +333,15 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
               </Button>
             </div>
           ))}
+          {!savedFilters.some((tab) => tab.id === 'new-tab') && !isLoading && (
+            <Button
+              variant="ghost"
+              className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-sm"
+              onClick={createNewFilter}
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+          )}
         </div>
         <div className="space-y-4 p-4 border rounded-lg">
           <div className="flex items-center space-x-2">

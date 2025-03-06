@@ -26,7 +26,6 @@ export const authOptions: AuthOptions = {
             },
           },
         });
-        console.log('this is user', user);
 
         if (!user) {
           throw new Error(

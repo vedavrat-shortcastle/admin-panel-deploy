@@ -1,5 +1,4 @@
 import { procedure, router } from '@/app/server/trpc';
-import { savedFilterSchema } from '@/schemas/savedFilterSchema';
 import { filterInputSchema } from '@/utils/Filter/filterBuilder';
 import { AdminPanelSection } from '@prisma/client';
 import { z } from 'zod';
@@ -7,7 +6,14 @@ import { z } from 'zod';
 export const filterRouter = router({
   // ✅ Create a new filter
   createFilter: procedure
-    .input(savedFilterSchema)
+
+    .input(
+      z.object({
+        name: z.string(),
+        adminPanelSection: z.nativeEnum(AdminPanelSection),
+        filter: filterInputSchema,
+      })
+    )
     .mutation(async ({ ctx, input }) => {
       const userDetails = ctx.userDetails;
       if (!userDetails) {

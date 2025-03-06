@@ -1,4 +1,5 @@
 import { savedFilterSchema } from '@/schemas/savedFilterSchema';
+import { AdminPanelSection } from '@prisma/client';
 
 export type FilterFieldType = 'string' | 'number' | 'date' | 'boolean';
 
@@ -36,6 +37,7 @@ export interface FilterBuilderProps {
   fields: FilterField[];
   initialFilters?: FilterGroup;
   onChange: (filters: FilterGroup) => void;
+  sectionName: AdminPanelSection;
 }
 
 export type EntityFilter = {

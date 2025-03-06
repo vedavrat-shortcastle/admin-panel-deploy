@@ -112,6 +112,7 @@ export default function ContactsLandingPage() {
             fields={contactFilterFields}
             onChange={handleFilterChange}
             initialFilters={filter.filter}
+            sectionName="contacts"
           />
         </div>
 
