@@ -23,7 +23,6 @@ export default function CustomersLandingPage() {
   const [open, setOpen] = useState(false); // Modal state
 
   const { data, isLoading, error } = trpc.subscription.getAll.useQuery();
-  console.log(data);
 
   return (
     <div className="container py-5 px-10">
