@@ -17,7 +17,6 @@ export default function ContactPage() {
   } = trpc.contacts.getById.useQuery(id!, {
     enabled: !!id,
   });
-
   if (!id) return <p>Invalid contact ID.</p>;
   if (isLoading) return <ContactProfileLoading />;
   if (error) return <p>Error fetching contact: {error.message}</p>;

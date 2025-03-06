@@ -1,5 +1,5 @@
 'use client';
-import { Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { trpc } from '@/hooks/trpc-provider';
 import { useParams } from 'next/navigation';
 import { CustomerProfile } from '@/app/(home)/customers/[id]/cutomerProfile/customerProfile';
@@ -17,6 +17,13 @@ export default function SubscriptionPage() {
     enabled: !!id,
   });
 
+  // Log when data is available
+  useEffect(() => {
+    if (subscription) {
+      console.log('Fetched Subscription Data:', subscription);
+    }
+  }, [subscription]);
+
   if (!id) return <p>Invalid subscription ID.</p>;
   if (isLoading) return <CustomerProfileLoading />;
   if (error) return <p>Error fetching subscription: {error.message}</p>;
@@ -28,6 +35,7 @@ export default function SubscriptionPage() {
     amount: subscription?.amount ?? undefined,
     salesPerson: subscription.salesPerson ?? undefined,
     notes: subscription.notes ?? undefined,
+    saleChannel: subscription.saleChannel ?? '',
   };
 
   return (

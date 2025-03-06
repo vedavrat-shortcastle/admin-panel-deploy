@@ -42,6 +42,7 @@ export const subscriptionRouter = router({
         amount: true,
         renewalType: true,
         planType: true,
+        saleChannel: true,
         academy: {
           select: {
             name: true,

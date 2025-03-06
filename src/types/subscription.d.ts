@@ -25,6 +25,7 @@ export interface Subscription {
   amount?: number;
   salesPerson?: string;
   notes?: string;
+  saleChannel: string;
   academy: {
     name: string;
   };

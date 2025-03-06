@@ -80,4 +80,5 @@ export const subscriptionUpdateSchema = z.object({
     .optional(),
   currency: z.enum(['CAD', 'EUR', 'INR', 'USD']).optional(),
   amount: z.number().int().optional(),
+  saleChannel: z.string().max(50).optional(),
 });
