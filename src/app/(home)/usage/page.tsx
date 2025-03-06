@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GaugeCircle, CalendarIcon } from 'lucide-react';
 import {
   Popover,
@@ -46,9 +46,12 @@ export default function UsageTable() {
   const data = dummyUsageDataArray;
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false); // Modal state
-  if (isLoading) {
-    setIsLoading(false);
-  }
+
+  useEffect(() => {
+    if (isLoading) {
+      setIsLoading(false);
+    }
+  }, [isLoading]);
 
   return (
     <div className="p-4 bg-white shadow-md rounded-lg relative min-h-screen">

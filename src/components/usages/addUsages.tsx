@@ -22,11 +22,10 @@ export default function UsageForm() {
     defaultValues: usageFormDefaults,
   });
 
-  const onSubmit = (data: any) => {
-    console.log('Form Data:', data);
+  const onSubmit = () => {
     toast({
-      title: 'succuessfull submited',
-      description: 'form  submited succuessfull',
+      title: 'successfully submitted',
+      description: 'form submitted successfully',
       variant: 'default',
     });
   };
