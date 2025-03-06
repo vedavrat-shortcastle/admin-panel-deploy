@@ -65,9 +65,6 @@ export const contactsRouter = router({
       throw new Error('Contact not found');
     }
 
-    const academyNames = contactTableData.academies.map(
-      (ca) => ca.academy.name
-    );
     const customTags = contactTableData.tags.map((t) => t.tag.name);
     const physicallyTaught = contactTableData.physicalLocationsTaught.map(
       (pl) => pl.locationId
@@ -75,7 +72,6 @@ export const contactsRouter = router({
 
     return {
       ...contactTableData,
-      academyNames,
       customTags,
       physicallyTaught,
       contactLocationData: contactTableData.location,

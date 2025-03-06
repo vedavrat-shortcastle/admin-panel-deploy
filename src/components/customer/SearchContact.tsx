@@ -1,6 +1,6 @@
 import { SearchableSelect } from '@/components/SearchableSelect';
 import { trpc } from '@/utils/trpc';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface GetContactsRes {
   id: number;
@@ -17,13 +17,41 @@ interface SearchContactProps {
 
 const SearchContact = ({ form }: SearchContactProps) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
-
+  const contactId = form.watch('contactId');
   const { data, isLoading, error } = trpc.contacts.getAll.useQuery(searchTerm, {
     enabled: searchTerm.length > 0,
   });
 
+  const {
+    data: selectedContact,
+    isLoading: isSelectedContactLoading,
+    error: selectedContactError,
+  } = trpc.contacts.getById.useQuery(String(contactId), {
+    enabled: !!contactId,
+  });
+
+  useEffect(() => {
+    if (selectedContact) {
+      form.setValue(
+        'contactInput',
+        selectedContact.firstName +
+          ' ' +
+          selectedContact.lastName +
+          ' (' +
+          selectedContact.email +
+          ')'
+      );
+    }
+  }, [selectedContact, form]);
+
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
+  }
+
+  if (selectedContactError) {
+    return (
+      <div>Error loading contact details: {selectedContactError.message}</div>
+    );
   }
 
   const handleOnSelect = (selectedContact: GetContactsRes) => {
@@ -37,6 +65,7 @@ const SearchContact = ({ form }: SearchContactProps) => {
         selectedContact.email +
         ')'
     );
+
     setSearchTerm('');
   };
 
@@ -54,6 +83,7 @@ const SearchContact = ({ form }: SearchContactProps) => {
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
       />
+      {isSelectedContactLoading && <div>Loading Contact Details...</div>}
     </div>
   );
 };

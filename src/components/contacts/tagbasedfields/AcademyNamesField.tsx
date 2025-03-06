@@ -4,15 +4,17 @@ import { trpc } from '@/utils/trpc';
 import { X } from 'lucide-react';
 import { SearchableSelect } from '@/components/SearchableSelect';
 
+// Define interface for academy data structure
 interface GetAcademyNamesRes {
   id: string;
   name: string;
 }
 
+// Define props for the AcademyNames component
 interface AcademyNamesProps {
-  form: UseFormReturn<any>;
-  mode: 'single' | 'multiple';
-  initialIds?: string[];
+  form: UseFormReturn<any>; // React Hook Form instance
+  mode: 'single' | 'multiple'; // Selection mode: single or multiple
+  initialIds?: string[]; // Optional initial selected academy IDs
 }
 
 export const AcademyNames: React.FC<AcademyNamesProps> = ({
@@ -23,6 +25,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [isFocused, setIsFocused] = useState(false);
 
+  // Fetch academy names based on search term
   const {
     data: academyNamesData,
     error,
@@ -31,37 +34,51 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     enabled: isFocused,
   });
 
+  // Fetch initial academy details using provided IDs
   const { data: initialAcademies } = trpc.academy.getAcademyByIds.useQuery(
     initialIds || [],
     {
-      enabled: Array.isArray(initialIds) && initialIds.length > 0,
+      enabled: Array.isArray(initialIds) && initialIds.length > 0, // Fetch only if IDs exist
       onSuccess: (data) => {
         const initialNames = data.map((academy) => academy.name);
-        form.setValue('academyNames', initialNames);
+        form.setValue('academyNames', initialNames); // Set initial academy names in the form
       },
     }
   );
 
+  // Effect to update form values when initial academies are loaded
   useEffect(() => {
     if (initialAcademies && initialAcademies.length > 0) {
       const validAcademies = initialAcademies.filter(
         (academy): academy is GetAcademyNamesRes => academy !== null
       );
-      form.setValue(
-        'academyIds',
-        validAcademies.map((academy) => academy.id)
-      );
-      form.setValue(
-        'academyNames',
-        validAcademies.map((academy) => academy.name)
-      );
-    }
-  }, [initialAcademies, form]);
 
+      if (mode === 'multiple') {
+        form.setValue(
+          'academyIds',
+          validAcademies.map((academy) => academy.id)
+        );
+        form.setValue(
+          'academyNames',
+          validAcademies.map((academy) => academy.name)
+        );
+      } else {
+        const firstAcademy = validAcademies[0]; // Get the first academy
+        if (firstAcademy) {
+          form.setValue('academyId', firstAcademy.id);
+          form.setValue('academyName', firstAcademy.name);
+          form.setValue('academyNameInput', firstAcademy.name);
+        }
+      }
+    }
+  }, [initialAcademies, form, mode]);
+
+  // Show error message if API call fails
   if (error) {
     return <div>Error loading academy names: {error.message}</div>;
   }
 
+  // Watch selected academy IDs and names from form state
   const selectedIds = useWatch({
     control: form.control,
     name: mode === 'multiple' ? 'academyIds' : 'academyId',
@@ -74,6 +91,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     defaultValue: mode === 'multiple' ? [] : '',
   });
 
+  // Effect to update academy names based on selected IDs
   useEffect(() => {
     if (academyNamesData && mode === 'multiple' && selectedIds.length > 0) {
       const currentNames = new Set(selectedNames as string[]);
@@ -91,6 +109,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
         ...new Set([...filteredNewNames, ...selectedNames]),
       ]);
 
+      // Ensure names are updated only if necessary
       if (
         newNames.length !== currentNames.size ||
         !newNames.every((name: string) => currentNames.has(name))
@@ -103,6 +122,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
     }
   }, [selectedIds, academyNamesData, form, mode]);
 
+  // Function to handle academy selection
   const handleOnSelect = (selectedAcademy: GetAcademyNamesRes) => {
     if (mode === 'multiple') {
       if (!selectedNames.includes(selectedAcademy.name)) {
@@ -114,9 +134,10 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
       form.setValue('academyName', selectedAcademy.name);
       form.setValue('academyNameInput', selectedAcademy.name);
     }
-    setSearchTerm('');
+    setSearchTerm(''); // Clear search term after selection
   };
 
+  // Function to handle removal of selected academy (for multiple mode)
   const handleRemoveTag = (index: number) => {
     if (mode === 'multiple') {
       const updatedIds = [...(selectedIds as string[])];
@@ -144,13 +165,14 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
 
   return (
     <div>
+      {/* Searchable dropdown component */}
       <SearchableSelect<GetAcademyNamesRes>
         form={form}
         fieldName={mode === 'multiple' ? 'academyNames' : 'academyName'}
         label="Academy Names"
         placeholder="Search Academy and Select"
-        data={academyNamesData || []}
-        displayKey="name"
+        data={academyNamesData || []} // Provide fetched data
+        displayKey="name" // Display name in dropdown
         selectionMode="multiple"
         onSelectItem={handleOnSelect}
         onSearch={setSearchTerm}
@@ -159,6 +181,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
         onBlur={handleBlur} // Add blur handler
       />
 
+      {/* Display selected academy names (for multiple mode) */}
       {mode === 'multiple' && selectedNames.length > 0 && (
         <div className="flex flex-wrap gap-2 mt-3">
           {selectedNames.map((academy: string, index: number) => (
@@ -179,6 +202,7 @@ export const AcademyNames: React.FC<AcademyNamesProps> = ({
         </div>
       )}
 
+      {/* Display message if no academies are selected */}
       {mode === 'multiple' && selectedNames.length === 0 && (
         <div className="text-gray-400 text-sm italic mt-2">
           No academies added yet.
