@@ -1,5 +1,5 @@
 // types/next-auth.d.ts
-import { Permission } from '@prisma/client';
+import { AdminRole, Permission } from '@prisma/client';
 import 'next-auth';
 
 declare module 'next-auth' {
@@ -10,7 +10,7 @@ declare module 'next-auth' {
       firstName?: string;
       lastName?: string;
       role?: AdminRole;
-      permissions?: any[];
+      permissions?: Permission[];
     } & DefaultSession['user'];
   }
 
@@ -19,7 +19,7 @@ declare module 'next-auth' {
     email?: string;
     firstName?: string;
     lastName?: string;
-    role?: string;
+    role?: AdminRole;
     permissions?: Permission[];
   }
 
@@ -28,7 +28,7 @@ declare module 'next-auth' {
     email?: string;
     firstName?: string;
     lastName?: string;
-    role?: string;
+    role?: AdminRole;
     permissions?: Permission[];
   }
 }
