@@ -994,6 +994,18 @@ model Subscription {
   @@map("subscription")
 }
 
+model SavedFilter {
+  id     String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name   String
+  filter Json
+
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  adminPanelSection AdminPanelSection? @map("admin_panel_section")
+  userId            String             @map("user_id")
+
+  @@map("saved_filter")
+}
+
 //
 //***************************************************   TYPES   ***************************************************
 //
@@ -1314,4 +1326,11 @@ enum PaymentMode {
   other
 
   @@map("payment_mode")
+}
+
+enum AdminPanelSection {
+  contacts
+  customers
+
+  @@map("admin_panel_section")
 }

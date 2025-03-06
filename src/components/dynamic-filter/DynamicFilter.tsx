@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
 import {
   FilterCondition,
-  FilterField,
   FilterGroup,
   FilterOperator,
+  FilterBuilderProps,
+  SavedFilter,
 } from '@/types/dynamicFilter';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Select,
   SelectContent,
@@ -15,12 +16,9 @@ import {
 } from '@/components/ui/select';
 import { SaveFilterDialog } from '@/components/dynamic-filter/SaveFilterDialog';
 import { FilterConditions } from '@/components/dynamic-filter/FilterCondition';
-
-interface FilterBuilderProps {
-  fields: FilterField[];
-  initialFilters?: FilterGroup;
-  onChange: (filters: FilterGroup) => void;
-}
+import { trpc } from '@/utils/trpc';
+import { useToast } from '@/hooks/use-toast';
+import { Plus } from 'lucide-react';
 
 const emptyFilters: FilterGroup = {
   logic: 'AND',
@@ -36,73 +34,263 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
   const [filters, setFilters] = useState<FilterGroup>(
     () => initialFilters || emptyFilters
   );
-
-  // Track if filters have been modified
   const [isDirty, setIsDirty] = useState(false);
+  const [savedFilters, setFilterTabs] = useState<SavedFilter[]>([]);
+  const [activeFilterId, setActiveTabId] = useState<string | null>('new-tab');
+  const { toast } = useToast();
 
-  const updateFilters = (newFilters: FilterGroup) => {
-    setFilters(newFilters);
-    setIsDirty(true);
-  };
+  const { data, isLoading, error } = trpc.filter.getFilters.useQuery({
+    sectionName: 'contacts',
+  });
 
-  const handleAddCondition = () => {
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to get filters',
+      });
+    }
+  }, [error, toast]);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      const combinedData: SavedFilter[] = data.map((item: any) => ({
+        ...item,
+        filter: item.filter ?? { filter: emptyFilters },
+        createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
+      }));
+      setFilterTabs(combinedData);
+    }
+  }, [data]);
+
+  const createFilter = trpc.filter.createFilter.useMutation({
+    onSuccess: (response) => {
+      toast({ title: 'Success', description: 'Filter saved successfully' });
+      setFilterTabs((prev) => [
+        {
+          id: response.filter.id,
+          name: response.filter.name,
+          filter: { filter: response.filter.filter },
+          createdAt: response.filter.created_at
+            ? new Date(response.filter.created_at)
+            : new Date(),
+        },
+        ...prev,
+      ]);
+      setActiveTabId(response.filter.id);
+      setIsDirty(false);
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to save filter',
+      });
+    },
+  });
+
+  const addFilterCondition = useCallback(() => {
     const newCondition: FilterCondition = {
       fieldId: fields[0].id,
       operator: 'equals' as FilterOperator,
       value: null,
     };
+    setFilters((prev) => ({
+      ...prev,
+      conditions: [...prev.conditions, newCondition],
+    }));
+    setIsDirty(true);
+  }, [fields]);
 
-    updateFilters({
-      ...filters,
-      conditions: [...filters.conditions, newCondition],
-    });
-  };
+  const updateFilterCondition = useCallback(
+    (index: number, field: string, value: any) => {
+      setFilters((prev) => {
+        const newConditions = [...prev.conditions];
+        newConditions[index] = { ...newConditions[index], [field]: value };
+        return { ...prev, conditions: newConditions };
+      });
+      setIsDirty(true);
+    },
+    []
+  );
 
-  const handleConditionChange = (index: number, field: string, value: any) => {
-    const newConditions = [...filters.conditions];
-    newConditions[index] = {
-      ...newConditions[index],
-      [field]: value,
-    };
-    updateFilters({ ...filters, conditions: newConditions });
-  };
+  const removeFilterCondition = useCallback((index: number) => {
+    setFilters((prev) => ({
+      ...prev,
+      conditions: prev.conditions.filter((_, i) => i !== index),
+    }));
+    setIsDirty(true);
+  }, []);
 
-  const handleRemoveCondition = (index: number) => {
-    updateFilters({
-      ...filters,
-      conditions: filters.conditions.filter((_, i) => i !== index),
-    });
-  };
+  const handleLogicChange = useCallback((logic: 'AND' | 'OR') => {
+    setFilters((prev) => ({ ...prev, logic }));
+    setIsDirty(true);
+  }, []);
 
-  const handleLogicChange = (logic: 'AND' | 'OR') => {
-    updateFilters({ ...filters, logic });
-  };
+  const saveFilter = useCallback(
+    (name: string) => {
+      createFilter.mutate({
+        name,
+        filter: filters,
+        adminPanelSection: 'contacts',
+      });
+    },
+    [createFilter, filters]
+  );
 
-  const handleSaveFilter = (name: string) => {
-    const savedFilters = JSON.parse(
-      localStorage.getItem('savedFilters') || '{}'
-    );
-    savedFilters[name] = filters;
-    localStorage.setItem('savedFilters', JSON.stringify(savedFilters));
-  };
-
-  const handleApplyFilters = () => {
+  const applyFilters = useCallback(() => {
     onChange(filters);
     setIsDirty(false);
-  };
+  }, [onChange, filters]);
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setFilters(emptyFilters);
     onChange(emptyFilters);
     setIsDirty(false);
-  };
+  }, [onChange]);
+
+  const updateFilterMutation = trpc.filter.updateFilter.useMutation({
+    onSuccess: () => {
+      toast({ title: 'Success', description: 'Filter updated successfully' });
+      onChange(filters);
+      setFilterTabs((prevTabs) =>
+        prevTabs.map((tab) =>
+          tab.id === activeFilterId
+            ? { ...tab, filter: { filter: filters } }
+            : tab
+        )
+      );
+      setIsDirty(false);
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update filter',
+      });
+    },
+  });
+
+  const deleteFilterMutation = trpc.filter.deleteFilter.useMutation({
+    onSuccess: (_, { id }) => {
+      toast({ title: 'Success', description: 'Filter deleted successfully' });
+      setFilterTabs((prevTabs) => prevTabs.filter((tab) => tab.id !== id));
+      if (activeFilterId === id) {
+        setActiveTabId(null);
+        setFilters(emptyFilters);
+        onChange(emptyFilters);
+      }
+    },
+    onError: (error) => {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message || 'Failed to update filter',
+      });
+    },
+  });
+
+  const createNewFilter = useCallback(() => {
+    const newTabId = 'new-tab';
+
+    setFilterTabs((prev) => {
+      const prevTabs = prev.filter((tab) => tab.id !== 'new-tab');
+
+      return [
+        {
+          id: newTabId,
+          name: 'New Tab',
+          filter: { filter: emptyFilters },
+          createdAt: new Date(),
+        },
+        ...prevTabs,
+      ];
+    });
+
+    setActiveTabId(newTabId);
+    setFilters(emptyFilters);
+  }, []);
+
+  const updateFilter = useCallback(() => {
+    const activeTab = savedFilters.find((tab) => tab.id === activeFilterId);
+    if (!activeTab || !activeFilterId) return;
+
+    updateFilterMutation.mutate({
+      id: activeFilterId,
+      name: activeTab.name,
+      filter: { filter: filters },
+    });
+  }, [activeFilterId, savedFilters, filters, updateFilterMutation]);
+
+  const deleteFilter = useCallback(
+    (tabId: string) => {
+      deleteFilterMutation.mutate({ id: tabId });
+    },
+    [deleteFilterMutation]
+  );
+
+  const selectFilter = useCallback(
+    (tabId: string) => {
+      if (activeFilterId === tabId) return;
+
+      const selectedTab = savedFilters.find((tab) => tab.id === tabId);
+      if (!selectedTab) return;
+
+      setActiveTabId(tabId);
+      const filterData = selectedTab.filter as { filter?: FilterGroup };
+      const newFilters = filterData?.filter ?? emptyFilters;
+      setFilters(newFilters);
+      onChange(newFilters);
+      setIsDirty(false);
+    },
+    [activeFilterId, savedFilters, onChange]
+  );
+
+  const filterConditions = useMemo(
+    () =>
+      filters?.conditions?.map((condition, index) => (
+        <FilterConditions
+          key={`${index}-${condition.fieldId}`}
+          fields={fields}
+          fieldId={condition.fieldId}
+          operator={condition.operator}
+          value={condition.value}
+          onFieldChange={(fieldId) =>
+            updateFilterCondition(index, 'fieldId', fieldId)
+          }
+          onOperatorChange={(operator) =>
+            updateFilterCondition(index, 'operator', operator)
+          }
+          onValueChange={(value) =>
+            updateFilterCondition(index, 'value', value)
+          }
+          onRemove={() => removeFilterCondition(index)}
+        />
+      )) || [],
+    [filters?.conditions, fields, updateFilterCondition, removeFilterCondition]
+  );
+
+  if (isLoading) {
+    return <div>Loading filters...</div>;
+  }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-lg font-semibold">Filter Builder</h2>
         <div className="flex space-x-2">
-          <SaveFilterDialog onSave={handleSaveFilter} />
+          {activeFilterId !== 'new-tab' ? (
+            <Button
+              variant="secondary"
+              disabled={!isDirty}
+              onClick={updateFilter}
+            >
+              Update Filter
+            </Button>
+          ) : (
+            <SaveFilterDialog onSave={saveFilter} />
+          )}
           <Button
             variant="secondary"
             onClick={handleClearFilters}
@@ -112,55 +300,72 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
           </Button>
         </div>
       </div>
-
-      <div className="space-y-4 p-4 border rounded-lg">
-        <div className="flex items-center space-x-2">
-          <span>Match</span>
-          <Select value={filters.logic} onValueChange={handleLogicChange}>
-            <SelectTrigger className="w-[100px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="AND">ALL</SelectItem>
-              <SelectItem value="OR">ANY</SelectItem>
-            </SelectContent>
-          </Select>
-          <span>of the following conditions:</span>
-        </div>
-
-        <div className="space-y-2">
-          {filters.conditions.map((condition, index) => (
-            <FilterConditions
-              key={index}
-              fields={fields}
-              fieldId={condition.fieldId}
-              operator={condition.operator}
-              value={condition.value}
-              onFieldChange={(fieldId) =>
-                handleConditionChange(index, 'fieldId', fieldId)
-              }
-              onOperatorChange={(operator) =>
-                handleConditionChange(index, 'operator', operator)
-              }
-              onValueChange={(value) =>
-                handleConditionChange(index, 'value', value)
-              }
-              onRemove={() => handleRemoveCondition(index)}
-            />
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto whitespace-nowrap max-w-full">
+          {!savedFilters.some((tab) => tab.id === 'new-tab') && !isLoading && (
+            <Button
+              variant="ghost"
+              disabled={activeFilterId === null}
+              className="w-9 h-9 flex items-center justify-center bg-gray-100 rounded-sm"
+              onClick={createNewFilter}
+            >
+              <Plus className="w-5 h-5" />
+            </Button>
+          )}
+          {savedFilters.map((tab) => (
+            <div
+              key={tab.id}
+              className={`flex items-center gap-3 h-9 pl-4 pr-1 rounded-sm cursor-pointer ${
+                activeFilterId === tab.id
+                  ? 'bg-primary text-white'
+                  : 'bg-gray-100'
+              }`}
+              onClick={() => selectFilter(tab.id)}
+            >
+              <span className="text-sm font-medium">{tab.name}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="p-0 m-0 hover:bg-transparent"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteFilter(tab.id);
+                }}
+              >
+                ✕
+              </Button>
+            </div>
           ))}
         </div>
-
-        <div className="flex justify-between items-center pt-4">
-          <Button onClick={handleAddCondition}>Add Condition</Button>
-          <Button
-            onClick={handleApplyFilters}
-            disabled={!isDirty}
-            variant="default"
-          >
-            Apply Filters
-          </Button>
+        <div className="space-y-4 p-4 border rounded-lg">
+          <div className="flex items-center space-x-2">
+            <span>Match</span>
+            <Select value={filters.logic} onValueChange={handleLogicChange}>
+              <SelectTrigger className="w-[100px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="AND">ALL</SelectItem>
+                <SelectItem value="OR">ANY</SelectItem>
+              </SelectContent>
+            </Select>
+            <span>of the following conditions:</span>
+          </div>
+          <div className="space-y-2">{filterConditions}</div>
+          <div className="flex justify-between items-center pt-4">
+            <Button onClick={addFilterCondition}>Add Condition</Button>
+            <Button
+              onClick={applyFilters}
+              disabled={!isDirty}
+              variant="default"
+            >
+              Apply Filters
+            </Button>
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+export default FilterBuilder;

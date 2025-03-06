@@ -1,3 +1,5 @@
+import { savedFilterSchema } from '@/schemas/savedFilterSchema';
+
 export type FilterFieldType = 'string' | 'number' | 'date' | 'boolean';
 
 export type FilterOperator =
@@ -30,6 +32,12 @@ export interface FilterGroup {
   groups?: FilterGroup[];
 }
 
+export interface FilterBuilderProps {
+  fields: FilterField[];
+  initialFilters?: FilterGroup;
+  onChange: (filters: FilterGroup) => void;
+}
+
 export type EntityFilter = {
   filter: FilterGroup;
   pagination?: {
@@ -43,3 +51,5 @@ export type EntityFilter = {
 };
 
 export type FieldType = 'string' | 'number' | 'date' | 'boolean';
+
+export type SavedFilter = z.infer<typeof savedFilterSchema>;
