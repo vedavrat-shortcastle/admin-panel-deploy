@@ -63,7 +63,6 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
     resolver: zodResolver(filterValueSchema),
     defaultValues: value,
   });
-  console.log('field', field);
   switch (field.type) {
     case 'date':
       return operator === 'between' ? (
@@ -162,6 +161,7 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
                 <FormControl>
                   <Input
                     {...field}
+                    value={value}
                     className="w-[240px]"
                     placeholder="Enter value"
                     onChange={(e) => {

@@ -7,6 +7,7 @@ import { subscriptionRouter } from '@/app/server/routers/subscription';
 import { superUserRouter } from '@/app/server/routers/superUser';
 import { usersRouter } from '@/app/server/routers/users';
 import { router } from '@/app/server/trpc';
+import { filterRouter } from '@/app/server/routers/savedFilters';
 
 export const appRouter = router({
   users: usersRouter,
@@ -14,9 +15,11 @@ export const appRouter = router({
   academy: academyRouter,
   location: locationRouter,
   tags: tagsRouter,
+
   subscription: subscriptionRouter,
   auth: authRouter,
   superUser: superUserRouter,
+  filter: filterRouter,
   // Add other routers here
 });
 

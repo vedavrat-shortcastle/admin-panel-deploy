@@ -1,5 +1,5 @@
+// lib/auth.ts
 import CredentialsProvider from 'next-auth/providers/credentials';
-
 import { db } from '@/lib/db';
 import { verifyPassword } from '@/utils/encoder';
 import { AuthOptions } from 'next-auth';
@@ -26,6 +26,7 @@ export const authOptions: AuthOptions = {
             },
           },
         });
+        console.log('this is user', user);
 
         if (!user) {
           throw new Error(
@@ -34,15 +35,15 @@ export const authOptions: AuthOptions = {
         }
 
         const isValid = await verifyPassword(password, user.password);
-
         if (!isValid) {
           throw new Error(
             JSON.stringify({ type: 'password', message: 'Invalid password' })
           );
         }
 
+        // Ensure all fields are returned
         return {
-          id: user.id.toString(), // NextAuth expects string id
+          id: user.id.toString(),
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
@@ -55,10 +56,12 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: 'jwt',
   },
-
   callbacks: {
     async jwt({ token, user }) {
+      // When user logs in, add all data to token
       if (user) {
+        token.id = user.id;
+        token.email = user.email;
         token.role = user.role;
         token.permissions = user.permissions;
         token.firstName = user.firstName;
@@ -67,7 +70,16 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      return { ...session, ...token, id: token.sub };
+      // Transfer all data from token to session
+      if (token && session.user) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.role = token.role as string;
+        session.user.permissions = token.permissions as any[];
+        session.user.firstName = token.firstName as string;
+        session.user.lastName = token.lastName as string;
+      }
+      return session;
     },
   },
 };
