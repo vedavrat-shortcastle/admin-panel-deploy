@@ -124,6 +124,19 @@ export function buildPrismaFilter(filter: FilterGroup): WhereInput {
 
       switch (operator) {
         case 'equals':
+          if (fieldId === 'createdAt' && value) {
+            const date = new Date(value);
+            if (isNaN(date.getTime())) {
+              console.error('Invalid date value:', value);
+              return null; // Prevents Prisma errors
+            }
+            return {
+              [fieldId]: {
+                gte: new Date(date.setHours(0, 0, 0, 0)),
+                lt: new Date(date.setHours(23, 59, 59, 999)),
+              },
+            };
+          }
           return { [fieldId]: { equals: value } };
         case 'contains':
           return { [fieldId]: { contains: value, mode: 'insensitive' } };
@@ -136,13 +149,22 @@ export function buildPrismaFilter(filter: FilterGroup): WhereInput {
         case 'lessThan':
           return { [fieldId]: { lt: value } };
         case 'between':
-          if (value?.min !== undefined && value?.max !== undefined) {
-            return {
-              AND: [
-                { [fieldId]: { gte: value.min } },
-                { [fieldId]: { lte: value.max } },
-              ],
-            };
+          if (value?.start !== undefined && value?.end !== undefined) {
+            if (fieldId === 'createdAt') {
+              return {
+                [fieldId]: {
+                  gte: new Date(value.start).toISOString(),
+                  lte: new Date(value.end).toISOString(),
+                },
+              };
+            } else {
+              return {
+                AND: [
+                  { [fieldId]: { gte: value.start } },
+                  { [fieldId]: { lte: value.end } },
+                ],
+              };
+            }
           }
           return null;
         case 'in':

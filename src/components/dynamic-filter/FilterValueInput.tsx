@@ -123,7 +123,10 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {value ? format(value, 'PPP') : 'Pick a date'}
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {value && !isNaN(new Date(value).getTime())
+                ? format(new Date(value), 'PPP')
+                : 'Pick a date'}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
