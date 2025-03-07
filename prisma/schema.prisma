@@ -1284,10 +1284,10 @@ enum ChessTitle {
 }
 
 enum ContactRole {
-  Founder
-  Headcoach
-  Subcoach
-  Admin
+  FOUNDER
+  HEAD_COACH
+  SUB_COACH
+  ADMIN
 
   @@map("contact_role")
 }
