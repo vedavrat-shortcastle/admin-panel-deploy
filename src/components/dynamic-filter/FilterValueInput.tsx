@@ -138,65 +138,134 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
           </PopoverContent>
         </Popover>
       );
-
     case 'string':
-      return operator === 'in' ? (
-        <Select value={value} onValueChange={onChange} defaultValue={value}>
-          <SelectTrigger className="w-[240px]">
-            <SelectValue placeholder="Select options" />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options?.map((opt) => (
-              <SelectItem key={opt} value={opt}>
-                {opt}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <Form {...form}>
-          <FormField
-            control={form.control}
-            name="string"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={value}
-                    className="w-[240px]"
-                    placeholder="Enter value"
-                    onChange={(e) => {
-                      field.onChange(e);
-                      onChange(e.target.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </Form>
-      );
+      if (field.options) {
+        if (
+          operator === 'in' ||
+          operator === 'equals' ||
+          operator === 'contains' ||
+          operator === 'startsWith' ||
+          operator === 'endsWith'
+        ) {
+          return (
+            <Select value={value} onValueChange={onChange} defaultValue={value}>
+              <SelectTrigger className="w-[240px]">
+                <SelectValue placeholder="Select options" />
+              </SelectTrigger>
+              <SelectContent>
+                {field.options?.map((opt) => (
+                  <SelectItem key={opt} value={opt}>
+                    {opt}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        } else {
+          return null;
+        }
+      } else {
+        return (
+          <Form {...form}>
+            <FormField
+              control={form.control}
+              name="string"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={value}
+                      className="w-[240px]"
+                      placeholder="Enter value"
+                      type="text"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onChange(e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </Form>
+        );
+      }
 
     case 'number':
-      return operator === 'between' ? (
-        <Form {...form}>
-          <div className="flex items-center space-x-2">
+      if (
+        operator === 'in' ||
+        operator === 'equals' ||
+        operator === 'contains' ||
+        operator === 'startsWith' ||
+        operator === 'endsWith'
+      ) {
+        return (
+          <Form {...form}>
+            <div className="flex items-center space-x-2">
+              <FormField
+                control={form.control}
+                name="numberRange.min"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        className="w-[120px]"
+                        placeholder="Min"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value));
+                          onChange({ ...value, min: Number(e.target.value) });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="numberRange.max"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="number"
+                        className="w-[120px]"
+                        placeholder="Max"
+                        onChange={(e) => {
+                          field.onChange(Number(e.target.value));
+                          onChange({ ...value, max: Number(e.target.value) });
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </Form>
+        );
+      } else {
+        return (
+          <Form {...form}>
             <FormField
               control={form.control}
-              name="numberRange.min"
+              name="number"
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
                     <Input
                       {...field}
                       type="number"
-                      className="w-[120px]"
-                      placeholder="Min"
+                      className="w-[240px]"
+                      placeholder="Enter number"
                       onChange={(e) => {
                         field.onChange(Number(e.target.value));
-                        onChange({ ...value, min: Number(e.target.value) });
+                        onChange(Number(e.target.value));
                       }}
                     />
                   </FormControl>
@@ -204,55 +273,9 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="numberRange.max"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="number"
-                      className="w-[120px]"
-                      placeholder="Max"
-                      onChange={(e) => {
-                        field.onChange(Number(e.target.value));
-                        onChange({ ...value, max: Number(e.target.value) });
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </Form>
-      ) : (
-        <Form {...form}>
-          <FormField
-            control={form.control}
-            name="number"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    type="number"
-                    className="w-[240px]"
-                    placeholder="Enter number"
-                    onChange={(e) => {
-                      field.onChange(Number(e.target.value));
-                      onChange(Number(e.target.value));
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </Form>
-      );
-
+          </Form>
+        );
+      }
     default:
       return null;
   }
