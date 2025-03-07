@@ -128,7 +128,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
         const newConditions = [...prev.conditions];
         newConditions[index] = { ...newConditions[index], [field]: value };
         if (field === 'fieldId') {
-          newConditions[index] = { ...newConditions[index], ['value']: value };
+          newConditions[index] = { ...newConditions[index], ['value']: '' };
         }
         return { ...prev, conditions: newConditions };
       });
