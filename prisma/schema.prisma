@@ -881,7 +881,7 @@ model Contact {
   rapidRating       Int?          @map("rapid_rating")
   blitzRating       Int?          @map("blitz_rating")
   fideId            String?       @map("fide_id") @db.VarChar(50)
-  currentStatus     ContactStatus @default(new) @map("current_status")
+  currentStatus     ContactStatus @default(NEW) @map("current_status")
   lastContacted     DateTime?     @map("last_contacted")
   notes             String?
   address           String?
@@ -1011,28 +1011,28 @@ model SavedFilter {
 //
 
 enum GenderType {
-  male
-  female
-  other
+  MALE
+  FEMALE
+  OTHER
 
   @@map("gender_type")
 }
 
 enum TeachingMode {
-  online
-  offline
-  hybrid
+  ONLINE
+  OFFLINE
+  HYBRID
 
   @@map("teaching_mode")
 }
 
 enum ContactStatus {
-  new
-  lead
-  prospect
-  customer
-  churned
-  high_prospect
+  NEW
+  LEAD
+  PROSPECT
+  CUSTOMER
+  CHURNED
+  HIGH_PROSPECT
 
   @@map("contact_status")
 }
@@ -1317,20 +1317,20 @@ enum SalesType {
 }
 
 enum PaymentMode {
-  stripeSingapore
-  stripeCanada
-  stripeUS
-  razorpayIndia
-  gPay
-  bankTransfer
+  STRIPE_SINGAPORE
+  STRIPE_CANADA
+  STRIPE_US
+  RAZORPAY_India
+  G_PAY
+  BANK_TRANSFER
   other
 
   @@map("payment_mode")
 }
 
 enum AdminPanelSection {
-  contacts
-  customers
+  CONTACTS
+  CUSTOMER
 
   @@map("admin_panel_section")
 }
