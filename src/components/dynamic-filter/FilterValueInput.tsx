@@ -138,46 +138,50 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
           </PopoverContent>
         </Popover>
       );
-
     case 'string':
-      return operator === 'in' ? (
-        <Select value={value} onValueChange={onChange} defaultValue={value}>
-          <SelectTrigger className="w-[240px]">
-            <SelectValue placeholder="Select options" />
-          </SelectTrigger>
-          <SelectContent>
-            {field.options?.map((opt) => (
-              <SelectItem key={opt} value={opt}>
-                {opt}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      ) : (
-        <Form {...form}>
-          <FormField
-            control={form.control}
-            name="string"
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    {...field}
-                    value={value}
-                    className="w-[240px]"
-                    placeholder="Enter value"
-                    onChange={(e) => {
-                      field.onChange(e);
-                      onChange(e.target.value);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </Form>
-      );
+      if (field.options) {
+        return (
+          <Select value={value} onValueChange={onChange} defaultValue={value}>
+            <SelectTrigger className="w-[240px]">
+              <SelectValue placeholder="Select options" />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options?.map((opt) => (
+                <SelectItem key={opt} value={opt}>
+                  {opt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        );
+      } else {
+        return (
+          <Form {...form}>
+            <FormField
+              control={form.control}
+              name="string"
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={value}
+                      className="w-[240px]"
+                      placeholder="Enter value"
+                      type="text"
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onChange(e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </Form>
+        );
+      }
 
     case 'number':
       return operator === 'between' ? (
@@ -252,7 +256,6 @@ export const FilterValueInput: React.FC<FilterValueInputProps> = ({
           />
         </Form>
       );
-
     default:
       return null;
   }
