@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { debounce } from 'lodash';
-import { Contact, UsersRoundIcon } from 'lucide-react';
+import { Contact, UsersRoundIcon, Filter, ArrowDownAZ } from 'lucide-react';
 
 import {
   Dialog,
@@ -24,8 +24,15 @@ import { contactFilterFields } from '@/utils/Filter/filterEntities';
 import { EntityFilter, FilterGroup } from '@/types/dynamicFilter';
 import { addSearchConditions } from '@/utils/Filter/searchUtils';
 import { ContactsTable } from '@/types/contactSection';
+import DynamicSort from '@/components/DynamicSort';
 
 export default function ContactsLandingPage() {
+  const [showSortContainer, setShowSortContainer] = useState(false);
+  const sortRef = useRef<HTMLDivElement | null>(null);
+  const sortButtonRef = useRef<HTMLDivElement | null>(null);
+  const [showFilterContainer, setShowFilterContainer] = useState(false);
+  const filterRef = useRef<HTMLDivElement | null>(null);
+  const filterButtonRef = useRef<HTMLDivElement | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [filter, setFilter] = useState<EntityFilter>({
     filter: {
@@ -90,17 +97,65 @@ export default function ContactsLandingPage() {
     router.push(`/contacts/${rowData.id}`);
   };
 
+  const toggleSortContainer = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevents event bubbling
+    setShowSortContainer((prev) => !prev);
+  };
+
+  const toggleFilterContainer = (event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevents event bubbling
+    setShowFilterContainer((prev) => !prev);
+  };
+  const handleClickOutside = useCallback((event: MouseEvent) => {
+    if (
+      filterRef.current &&
+      !filterRef.current.contains(event.target as Node) &&
+      filterButtonRef.current &&
+      !filterButtonRef.current.contains(event.target as Node) &&
+      sortRef.current &&
+      !sortRef.current.contains(event.target as Node) &&
+      sortButtonRef.current &&
+      !sortButtonRef.current.contains(event.target as Node)
+    ) {
+      setShowFilterContainer(false);
+      setShowSortContainer(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [handleClickOutside]);
+
   return (
-    <div className="container py-5 px-10">
+    <div className="container py-5 px-10 relative">
       {/* Header */}
-      <div className="flex items-center">
+      <div className="flex items-center gap-1">
         <UsersRoundIcon className="text-primary" size={35} strokeWidth={2} />
         <h1 className="text-3xl font-semibold px-2 py-1">Contacts</h1>
+        <div ref={filterButtonRef}>
+          <Filter
+            size={20}
+            className="ml-1 mr-2 cursor-pointer"
+            onClick={toggleFilterContainer}
+          />
+        </div>
+        <div ref={sortButtonRef}>
+          <ArrowDownAZ
+            size={22}
+            className="cursor-pointer"
+            onClick={toggleSortContainer}
+          />
+        </div>
       </div>
 
-      {/* Search & Add Contact */}
-      <div className="my-2 space-y-4">
-        <div className="bg-white rounded-lg shadow p-4">
+      {showFilterContainer && (
+        <div
+          ref={filterRef}
+          className="bg-white flex flex-col gap-2 shadow border border-gray-200 p-4 rounded-lg absolute top-16 left-4 right-4 h-auto z-50"
+        >
           <input
             type="text"
             value={searchTerm}
@@ -115,7 +170,24 @@ export default function ContactsLandingPage() {
             sectionName="contacts"
           />
         </div>
+      )}
+      {showSortContainer && (
+        <div
+          ref={sortRef}
+          className="bg-white flex flex-col gap-2 shadow border border-gray-200 p-4 rounded-lg absolute top-16 left-64 h-auto z-50"
+        >
+          <DynamicSort
+            onSortChange={(field, direction) =>
+              setFilter((prev) => ({
+                ...prev,
+                sort: { field, direction },
+              }))
+            }
+          />
+        </div>
+      )}
 
+      <div className="my-2 space-y-4">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button>Add Contact</Button>
