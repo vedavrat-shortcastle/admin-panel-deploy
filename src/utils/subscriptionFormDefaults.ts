@@ -13,7 +13,7 @@ export const subscriptionFormDefaults: subscriptionFormValues = {
   salesType: 'NEW',
   notes: '',
   salesPerson: '',
-  paymentMode: 'other',
+  paymentMode: 'OTHER',
   currency: 'USD',
   amount: 0,
 };

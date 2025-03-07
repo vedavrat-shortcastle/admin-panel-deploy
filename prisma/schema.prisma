@@ -971,7 +971,7 @@ model ContactPhysicalLocation {
 model Subscription {
   id            Int         @id @default(autoincrement())
   contactId     Int         @map("contactid")
-  academyId    String      @map("academyid")
+  academyId     String      @map("academyid")
   adminName     String?     @map("admin_name") @db.VarChar(100)
   paidSeats     Int         @map("paid_seats")
   freeSeats     Int         @map("free_seats")
@@ -1320,10 +1320,10 @@ enum PaymentMode {
   STRIPE_SINGAPORE
   STRIPE_CANADA
   STRIPE_US
-  RAZORPAY_India
+  RAZORPAY_INDIA
   G_PAY
   BANK_TRANSFER
-  other
+  OTHER
 
   @@map("payment_mode")
 }
