@@ -54,10 +54,10 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   </SelectTrigger>
 
                   <SelectContent>
-                    <SelectItem value="Founder">Founder</SelectItem>
-                    <SelectItem value="Headcoach">Headcoach</SelectItem>
-                    <SelectItem value="Subcoach">Subcoach</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
+                    <SelectItem value="FOUNDER">Founder</SelectItem>
+                    <SelectItem value="HEADCOACH">Headcoach</SelectItem>
+                    <SelectItem value="SUBCOACH">Subcoach</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -106,19 +106,19 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   className="flex space-x-6"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="online" id="online" />
+                    <RadioGroupItem value="ONLINE" id="online" />
                     <label className="font-medium" htmlFor="online">
                       Online
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="offline" id="offline" />
+                    <RadioGroupItem value="OFFLINE" id="offline" />
                     <label className="font-medium" htmlFor="offline">
                       Offline
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="hybrid" id="hybrid" />
+                    <RadioGroupItem value="HYBRID" id="hybrid" />
                     <label className="font-medium" htmlFor="hybrid">
                       Hybrid
                     </label>

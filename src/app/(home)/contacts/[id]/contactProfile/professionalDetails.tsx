@@ -52,7 +52,7 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
                   value={field.value}
                   className="flex flex-wrap gap-4"
                 >
-                  {['online', 'offline', 'hybrid'].map((mode) => (
+                  {['ONLINE', 'OFFFLINE', 'HYBRID'].map((mode) => (
                     <div key={mode} className="flex items-center space-x-2">
                       <RadioGroupItem value={mode} id={mode} />
                       <label className="font-medium capitalize" htmlFor={mode}>
