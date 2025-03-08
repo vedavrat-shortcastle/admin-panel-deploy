@@ -160,21 +160,21 @@ const SubscriptionDetails: React.FC<customerDetailsProps> = ({ form }) => {
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value="stripeUS">Stripe US</SelectItem>
-                      <SelectItem value="stripeCanada">
+                      <SelectItem value="STRIPE_US">Stripe US</SelectItem>
+                      <SelectItem value="STRIPE_CANADA">
                         Stripe Canada
                       </SelectItem>
-                      <SelectItem value="stripeSingapore">
+                      <SelectItem value="STRIPE_SINGAPORE">
                         Stripe Singapore
                       </SelectItem>
-                      <SelectItem value="razorpayIndia">
+                      <SelectItem value="RAZORPAY_INDIA">
                         Razorpay India
                       </SelectItem>
-                      <SelectItem value="gPay">GPAY</SelectItem>
-                      <SelectItem value="bankTransfer">
+                      <SelectItem value="G_PAY">GPAY</SelectItem>
+                      <SelectItem value="BANK_TRANSFER">
                         Bank Transfer
                       </SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
