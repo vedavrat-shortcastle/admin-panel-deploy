@@ -107,15 +107,15 @@ export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
                     className="flex space-x-4 mt-2"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="male" id="male" />
+                      <RadioGroupItem value="MALE" id="male" />
                       <label htmlFor="male">Male</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="female" id="female" />
+                      <RadioGroupItem value="FEMALE" id="female" />
                       <label htmlFor="female">Female</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="other" id="other" />
+                      <RadioGroupItem value="OTHER" id="other" />
                       <label htmlFor="other">Other</label>
                     </div>
                   </RadioGroup>

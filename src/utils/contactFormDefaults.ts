@@ -41,6 +41,6 @@ export const defaultFormValues = {
   customTags: [],
   yearsInOperation: 0, // Default to 0
   numberOfCoaches: 0, // Default to 0
-  status: 'new' as ContactStatus, // Default to 'active' with the Status type
+  status: 'NEW' as ContactStatus, // Default to 'active' with the Status type
   profilePhoto: undefined, // Default to null since this is optional
 };

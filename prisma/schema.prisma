@@ -971,7 +971,7 @@ model ContactPhysicalLocation {
 model Subscription {
   id            Int         @id @default(autoincrement())
   contactId     Int         @map("contactid")
-  academyId    String      @map("academyid")
+  academyId     String      @map("academyid")
   adminName     String?     @map("admin_name") @db.VarChar(100)
   paidSeats     Int         @map("paid_seats")
   freeSeats     Int         @map("free_seats")
@@ -1284,10 +1284,10 @@ enum ChessTitle {
 }
 
 enum ContactRole {
-  Founder
-  Headcoach
-  Subcoach
-  Admin
+  FOUNDER
+  HEADCOACH
+  SUBCOACH
+  ADMIN
 
   @@map("contact_role")
 }
