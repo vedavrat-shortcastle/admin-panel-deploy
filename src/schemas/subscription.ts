@@ -1,3 +1,4 @@
+import { PaymentMode } from '@prisma/client';
 import { z } from 'zod';
 
 export const createSubscriptionSchema = z.object({
@@ -16,13 +17,13 @@ export const createSubscriptionSchema = z.object({
   notes: z.string().optional(),
   salesPerson: z.string().max(100).optional(),
   paymentMode: z.enum([
-    'stripeSingapore',
-    'stripeCanada',
-    'stripeUS',
-    'razorpayIndia',
-    'gPay',
-    'bankTransfer',
-    'other',
+    PaymentMode.STRIPE_SINGAPORE,
+    PaymentMode.STRIPE_CANADA,
+    PaymentMode.STRIPE_US,
+    PaymentMode.RAZORPAY_INDIA,
+    PaymentMode.G_PAY,
+    PaymentMode.BANK_TRANSFER,
+    PaymentMode.OTHER,
   ]),
   currency: z.enum(['CAD', 'EUR', 'INR', 'USD']),
   amount: z.number().int().optional(),
@@ -69,13 +70,13 @@ export const subscriptionUpdateSchema = z.object({
   salesPerson: z.string().max(100).optional(),
   paymentMode: z
     .enum([
-      'stripeSingapore',
-      'stripeCanada',
-      'stripeUS',
-      'razorpayIndia',
-      'gPay',
-      'bankTransfer',
-      'other',
+      PaymentMode.STRIPE_SINGAPORE,
+      PaymentMode.STRIPE_CANADA,
+      PaymentMode.STRIPE_US,
+      PaymentMode.RAZORPAY_INDIA,
+      PaymentMode.G_PAY,
+      PaymentMode.BANK_TRANSFER,
+      PaymentMode.OTHER,
     ])
     .optional(),
   currency: z.enum(['CAD', 'EUR', 'INR', 'USD']).optional(),

@@ -1320,10 +1320,10 @@ enum PaymentMode {
   STRIPE_SINGAPORE
   STRIPE_CANADA
   STRIPE_US
-  RAZORPAY_India
+  RAZORPAY_INDIA
   G_PAY
   BANK_TRANSFER
-  other
+  OTHER
 
   @@map("payment_mode")
 }
