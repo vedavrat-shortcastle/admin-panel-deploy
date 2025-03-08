@@ -112,10 +112,10 @@ export const PersonalContactInfo: React.FC<PersonalContactProps> = ({
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Founder">Founder</SelectItem>
-                    <SelectItem value="Headcoach">Headcoach</SelectItem>
-                    <SelectItem value="Subcoach">Subcoach</SelectItem>
-                    <SelectItem value="Admin">Admin</SelectItem>
+                    <SelectItem value="FOUNDER">Founder</SelectItem>
+                    <SelectItem value="HEADCOACH">Headcoach</SelectItem>
+                    <SelectItem value="SUBCOACH">Subcoach</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>
               </FormControl>

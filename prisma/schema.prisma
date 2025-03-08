@@ -1285,8 +1285,8 @@ enum ChessTitle {
 
 enum ContactRole {
   FOUNDER
-  HEAD_COACH
-  SUB_COACH
+  HEADCOACH
+  SUBCOACH
   ADMIN
 
   @@map("contact_role")

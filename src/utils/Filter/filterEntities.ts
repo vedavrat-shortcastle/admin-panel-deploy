@@ -1,3 +1,4 @@
+'use server';
 import { FilterField } from '@/types/dynamicFilter';
 import { ContactRole, ContactStatus } from '@prisma/client';
 
