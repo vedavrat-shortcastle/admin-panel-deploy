@@ -66,6 +66,36 @@ export const ProfessionalChessInfo: React.FC<ProfessionalChessInfoProps> = ({
           )}
         />
       </div>
+      <div className="col-span-12 lg:col-span-6 space-y-2">
+        <FormField
+          control={form.control}
+          name="currentStatus"
+          render={({ field }) => (
+            <FormItem className="w-full">
+              <FormLabel className="font-medium">Current Status</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select Current Stutus" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="NEW">New</SelectItem>
+                    <SelectItem value="LEAD">Lead</SelectItem>
+                    <SelectItem value="PROSPECT">Prospect</SelectItem>
+                    <SelectItem value="HIGH_PROSPECT">Hugh Prospect</SelectItem>
+                    <SelectItem value="CUSTOMER">Customer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
       <div className="col-span-12">
         <AcademyNames mode="multiple" form={form} />
       </div>

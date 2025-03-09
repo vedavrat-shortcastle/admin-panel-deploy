@@ -131,9 +131,15 @@ export const contactsRouter = router({
           try {
             const inputAcademyIds = input.academyIds;
             const physicallyTaughtLocations = input.physicallyTaught;
+            const userDetails = ctx.userDetails;
+            if (!userDetails) {
+              throw new Error('Unauthorized: No user details found');
+            }
+            const userId = userDetails.user.id;
 
             const newContact = await tx.contact.create({
               data: {
+                userId: userId,
                 firstName: input.firstName,
                 lastName: input.lastName,
                 role: input.role as ContactRole,
@@ -160,7 +166,7 @@ export const contactsRouter = router({
                 notes: input.notes,
                 yearsInOperation: input.yearsInOperation,
                 numberOfCoaches: input.numberOfCoaches,
-                currentStatus: input.status as ContactStatus,
+                currentStatus: input.currentStatus as ContactStatus,
                 imageUrl: 'https://placehold.co/600x400',
                 lastContacted: input.lastContacted,
               },
