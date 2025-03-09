@@ -50,7 +50,7 @@ export const contactFormSchema = z.object({
   customTags: z.array(z.string()).optional(),
   yearsInOperation: z.number().min(0),
   numberOfCoaches: z.number().min(0),
-  status: z.nativeEnum(ContactStatus),
+  currentStatus: z.nativeEnum(ContactStatus),
   profilePhoto: z.instanceof(globalThis.File || Blob).optional(),
 });
 

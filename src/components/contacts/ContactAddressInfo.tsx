@@ -30,6 +30,45 @@ export const ContactAddressInfo: React.FC<ContactAddressProps> = ({ form }) => {
           />
         </div>
 
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="yearsInOperation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Years In Operation</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="numberOfCoaches"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>No. Of Coaches</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
         <FormField
           control={form.control}
           name="notes"
