@@ -789,6 +789,8 @@ model AdminUser {
   password    String
   role        AdminRole
   permissions AdminUserPermission[]
+  otpToken    String?               @map("otp_token") @db.VarChar(6)
+  otpExpiry   DateTime?             @map("otp_expiry")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @map("updated_at")

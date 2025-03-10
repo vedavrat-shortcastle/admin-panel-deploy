@@ -9,4 +9,9 @@ export const loginSchema = z.object({
   }),
 });
 
+export const otpSchema = z.object({
+  otp: z.string().length(6),
+});
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
+export type OTPFormValues = z.infer<typeof otpSchema>;

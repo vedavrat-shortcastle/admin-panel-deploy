@@ -3,6 +3,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from '@/lib/db';
 import { verifyPassword } from '@/utils/encoder';
 import { AuthOptions } from 'next-auth';
+import { generateOTP, sendOTPEmail } from '@/utils/otpHandler';
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -11,12 +12,13 @@ export const authOptions: AuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        otp: { label: 'OTP', type: 'text' },
       },
       async authorize(credentials) {
         if (!credentials) {
           throw new Error('No credentials provided');
         }
-        const { email, password } = credentials;
+        const { email, password, otp } = credentials;
 
         const user = await db.adminUser.findUnique({
           where: { email: email },
@@ -39,6 +41,44 @@ export const authOptions: AuthOptions = {
             JSON.stringify({ type: 'password', message: 'Invalid password' })
           );
         }
+
+        // Handle OTP verification
+        if (!otp) {
+          // Generate and send OTP
+          const newOTP = generateOTP();
+          const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+          await db.adminUser.update({
+            where: { id: user.id },
+            data: {
+              otpToken: newOTP,
+              otpExpiry,
+            },
+          });
+
+          await sendOTPEmail(user.email, newOTP);
+          throw new Error(JSON.stringify({ type: 'otp', message: 'OTP sent' }));
+        }
+
+        // Verify OTP
+        if (
+          user.otpToken !== otp ||
+          !user.otpExpiry ||
+          user.otpExpiry < new Date()
+        ) {
+          throw new Error(
+            JSON.stringify({ type: 'otp', message: 'Invalid or expired OTP' })
+          );
+        }
+
+        // Clear OTP after successful verification
+        await db.adminUser.update({
+          where: { id: user.id },
+          data: {
+            otpToken: null,
+            otpExpiry: null,
+          },
+        });
 
         // Ensure all fields are returned
         return {
