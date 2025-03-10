@@ -39,6 +39,7 @@
     "clsx": "^2.1.1",
     "cmdk": "1.0.0",
     "date-fns": "^4.1.0",
+    "input-otp": "^1.4.2",
     "jose": "^6.0.7",
     "libphonenumber-js": "^1.11.20",
     "lodash": "^4.17.21",

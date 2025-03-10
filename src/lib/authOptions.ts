@@ -41,13 +41,11 @@ export const authOptions: AuthOptions = {
             JSON.stringify({ type: 'password', message: 'Invalid password' })
           );
         }
-
         // Handle OTP verification
-        if (!otp) {
+        if (otp === 'undefined') {
           // Generate and send OTP
           const newOTP = generateOTP();
           const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
           await db.adminUser.update({
             where: { id: user.id },
             data: {

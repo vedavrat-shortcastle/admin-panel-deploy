@@ -7,15 +7,20 @@ export function generateOTP() {
 }
 
 export async function sendOTPEmail(email: string, otp: string) {
-  console.log('email', email);
-  console.log('otp', otp);
   const msg = {
-    to: 'vedavrat@shortcastle.com',
+    to: email,
     from: process.env.SENDGRID_FROM_EMAIL!,
     subject: 'Login Verification Code',
     text: `Your verification code is: ${otp}`,
     html: `<p>Your verification code is: <strong>${otp}</strong></p>`,
   };
+
+  // Check if we're in development environment
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Development mode: Skipping email send');
+    console.log('Email content:', msg);
+    return;
+  }
 
   try {
     await sgMail.send(msg);
